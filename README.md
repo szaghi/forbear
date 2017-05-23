@@ -23,6 +23,8 @@ A KISS pure Fortran Library for building and running fancy progress bar
 - forbear is TDD developed;
 - forbear is a Free, Open Source Project.
 
+![minimal screencast](media/minimal.gif)
+
 #### Issues
 
 [![GitHub issues](https://img.shields.io/github/issues/szaghi/forbear.svg)]()
