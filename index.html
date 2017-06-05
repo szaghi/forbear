@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	 
+	 <meta name="description" content="forbear, FOrtran RiEmann SolvErs EnviRonment">
+    
+    <meta name="author" content="Stefano Zaghi" >
+    <link rel="icon" href="./favicon.png">
+
+    <title> forbear </title>
+
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/pygments.css" rel="stylesheet">
+    <link href="./css/font-awesome.min.css" rel="stylesheet">
+    <link href="./css/local.css" rel="stylesheet">
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="./js/jquery-2.1.3.min.js"></script>
+    <script src="./js/svg-pan-zoom.min.js"></script>
+
+    
+    <script src="./tipuesearch/tipuesearch_content.js"></script>
+    <link  href="./tipuesearch/tipuesearch.css" rel="stylesheet">
+    <script src="./tipuesearch/tipuesearch_set.js"></script>
+    <script src="./tipuesearch/tipuesearch.js"></script>
+    
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="./index.html">forbear </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+				
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+		 aria-expanded="false">Contents <span class="caret"></span></a>
+	      <ul class="dropdown-menu">
+              
+            <li><a href="./lists/files.html">Source Files</a></li>
+				
+				
+            <li><a href="./lists/modules.html">Modules</a></li>
+				
+            
+                                
+            <li><a href="./lists/procedures.html">Procedures</a></li>
+				
+								
+            <li><a href="./lists/types.html">Derived Types</a></li>
+				
+				
+            <li><a href="./program/forbear_minimal.html">Program</a></li>
+	    
+            </ul>
+            </li>
+
+<li class="visible-xs hidden-sm visible-lg"><a href="./lists/files.html">Source Files</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="./lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="./lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="./lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="./program/forbear_minimal.html">Program</a></li>
+
+          </ul>
+        
+        <form action="./search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+      <!-- Main component for a primary marketing message or call to action -->
+      <div class="jumbotron">
+        <p>forbear, FOrtran RiEmann SolvErs EnviRonment</p>
+        	 
+	<p> Find us on&hellip;</p>
+        <p>
+        	 
+          <a class="btn btn-lg btn-primary" href="https://github.com/szaghi/forbear" role="button">GitHub</a>
+			 
+			 
+			 
+			 
+	         
+			 
+          <a class="btn btn-lg btn-danger" style="float:right" href="https://github.com/szaghi/forbear/releases/latest" role="button">Download the Source</a>
+			 
+        </p>
+      </div>
+
+      <div class="row" id='text'>
+		  
+        <div class="col-md-8">
+		  
+          <h1>forbear</h1>
+          <p><a name="top"></a></p>
+<h1 id="forbear"><a class="toclink" href="#forbear">forbear <a href=""><img alt="GitHub tag" src="https://img.shields.io/github/tag/szaghi/forbear.svg"></a> <a href="https://gitter.im/szaghi/forbear?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img alt="Join the chat at https://gitter.im/szaghi/forbear" src="https://badges.gitter.im/Join%20Chat.svg"></a></a></h1>
+<p><a href=""><img alt="License" src="https://img.shields.io/badge/license-GNU%20GeneraL%20Public%20License%20v3,%20GPLv3-blue.svg"></a>
+<a href=""><img alt="License" src="https://img.shields.io/badge/license-BSD2-red.svg"></a>
+<a href=""><img alt="License" src="https://img.shields.io/badge/license-BSD3-red.svg"></a>
+<a href=""><img alt="License" src="https://img.shields.io/badge/license-MIT-red.svg"></a></p>
+<p><a href=""><img alt="Status" src="https://img.shields.io/badge/status-stable-brightgreen.svg"></a>
+<a href="https://travis-ci.org/szaghi/forbear"><img alt="Build Status" src="https://travis-ci.org/szaghi/forbear.svg?branch=master"></a>
+<a href="http://codecov.io/github/szaghi/forbear?branch=master"><img alt="Coverage Status" src="https://img.shields.io/codecov/c/github/szaghi/forbear.svg"></a></p>
+<h3 id="forbear-fortran-progress-bear-environment"><a class="toclink" href="#forbear-fortran-progress-bear-environment">forbear, Fortran (progress) B(~~e~~)ar environment</a></h3>
+<blockquote>
+<p><em>forbear</em> has <code>e</code> mute, pronce it like <code>forbar</code>.</p>
+</blockquote>
+<p>A KISS pure Fortran Library for building and running fancy progress bar</p>
+<p><img alt="taste screencast" src="media/taste.gif"></p>
+<ul>
+<li>forbear is a pure Fortran (KISS) library for building and running fancy progress bar for modern Fortran projects;</li>
+<li>forbear is Fortran 2008+ standard compliant;</li>
+<li>forbear is OOP designed;</li>
+<li>forbear is TDD developed;</li>
+<li>forbear is a Free, Open Source Project.</li>
+</ul>
+<h4 id="issues"><a class="toclink" href="#issues">Issues</a></h4>
+<p><a href=""><img alt="GitHub issues" src="https://img.shields.io/github/issues/szaghi/forbear.svg"></a>
+<a href="https://waffle.io/szaghi/forbear"><img alt="Ready in backlog" src="https://badge.waffle.io/szaghi/forbear.png?label=ready&amp;title=Ready"></a>
+<a href="https://waffle.io/szaghi/forbear"><img alt="In Progress" src="https://badge.waffle.io/szaghi/forbear.png?label=in%20progress&amp;title=In%20Progress"></a>
+<a href="https://waffle.io/szaghi/forbear"><img alt="Open bugs" src="https://badge.waffle.io/szaghi/forbear.png?label=bug&amp;title=Open%20Bugs"></a></p>
+<h4 id="compiler-support"><a class="toclink" href="#compiler-support">Compiler Support</a></h4>
+<p><a href=""><img alt="Compiler" src="https://img.shields.io/badge/GNU-v4.9.2+-brightgreen.svg"></a>
+<a href=""><img alt="Compiler" src="https://img.shields.io/badge/Intel-v12.x+-brightgreen.svg"></a>
+<a href=""><img alt="Compiler" src="https://img.shields.io/badge/IBM%20XL-not%20tested-yellow.svg"></a>
+<a href=""><img alt="Compiler" src="https://img.shields.io/badge/g95-not%20tested-yellow.svg"></a>
+<a href=""><img alt="Compiler" src="https://img.shields.io/badge/NAG-not%20tested-yellow.svg"></a>
+<a href=""><img alt="Compiler" src="https://img.shields.io/badge/PGI-not%20tested-yellow.svg"></a></p>
+<hr>
+<p>| <a href="#what-is-forbear">What is forbear?</a> | <a href="#main-features">Main features</a> | <a href="#copyrights">Copyrights</a> | <a href="#documentation">Documentation</a> | <a href="#install">Install</a> |</p>
+<hr>
+<h2 id="what-is-forbear"><a class="toclink" href="#what-is-forbear">What is forbear?</a></h2>
+<p>In Executing long-time running programs it could be helpful to display a <em>progress bar</em> with some informative data. <strong>forbear</strong> is designed to perform just this task, handle the progress and display it as the user specifications:</p>
+<blockquote>
+<p>forbear handles data related to the progress of a (long) time run giving an informative, pretty-formatted ouput for each time step (or accordingly a given frequency) as the user specifications.</p>
+</blockquote>
+<p>Go to <a href="#top">Top</a></p>
+<h2 id="main-features"><a class="toclink" href="#main-features">Main features</a></h2>
+<ul class="checklist">
+<li><input type="checkbox" disabled checked> Bar Element-Based Structure:</li>
+<li>fully customizable elements:<ul>
+<li>foreground color;</li>
+<li>background color;</li>
+<li>style;</li>
+</ul>
+</li>
+<li><input type="checkbox" disabled checked> Bar</li>
+<li><input type="checkbox" disabled checked> Bar scale</li>
+<li><input type="checkbox" disabled checked> Progress Percentage</li>
+<li><input type="checkbox" disabled checked> Progress Speed</li>
+<li><input type="checkbox" disabled checked> Start-End Time</li>
+<li><input type="checkbox" disabled> ETA</li>
+<li><input type="checkbox" disabled> Adaptive ETA</li>
+<li><input type="checkbox" disabled> Reverse Bar</li>
+<li><input type="checkbox" disabled> Rotating Marker</li>
+<li><input type="checkbox" disabled checked> Static Prefix-Suffix Messages</li>
+<li><input type="checkbox" disabled> Dynamic Message</li>
+<li><input type="checkbox" disabled checked> Well Documented</li>
+<li><input type="checkbox" disabled checked> Test Driven Developed</li>
+<li><input type="checkbox" disabled checked> FOSS</li>
+</ul>
+<p>Any feature request is welcome.</p>
+<p>Go to <a href="#top">Top</a></p>
+<h2 id="copyrights"><a class="toclink" href="#copyrights">Copyrights</a></h2>
+<p>forbear is a Free and Open Source Software (FOSS), it is distributed under a <strong>very permissive</strong> multi-licensing system: selectable licenses are <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>, <a href="http://opensource.org/licenses/BSD-2-Clause">BSD2-Clause</a>, <a href="http://opensource.org/licenses/BSD-3-Clause">BSD3-Clause</a> and <a href="http://opensource.org/licenses/MIT">MIT</a>, feel free to select the license that best matches your workflow.</p>
+<blockquote>
+<p>Anyone is interest to use, to develop or to contribute to FORESEER is welcome.</p>
+</blockquote>
+<p>More details can be found on <a href="https://github.com/szaghi/forbear/wiki/Copyrights">wiki</a>.</p>
+<p>Go to <a href="#top">Top</a></p>
+<h2 id="documentation"><a class="toclink" href="#documentation">Documentation</a></h2>
+<p>Besides this README file the forbear documentation is contained into its own <a href="https://github.com/szaghi/forbear/wiki">wiki</a>. Detailed documentation of the API is contained into the <a href="http://szaghi.github.io/forbear/index.html">GitHub Pages</a> that can also be created locally by means of <a href="https://github.com/cmacmackin/ford">ford tool</a>.</p>
+<p>| <a href="#a_taste_of_forbear">A taster of forber</a> | <a href="#api_documentation">API documentation</a></p>
+<hr>
+<h3 id="a-taste-of-forbear"><a class="toclink" href="#a-taste-of-forbear">A Taste of forbear</a></h3>
+<p>A minimal <em>plate</em>:</p>
+<div class="codehilite"><pre><span></span><span class="k">program </span><span class="n">forbear_minimal</span>
+<span class="c">!&lt; **forbear** test.</span>
+<span class="k">use</span><span class="p">,</span> <span class="k">intrinsic</span> <span class="kd">::</span> <span class="n">iso_fortran_env</span><span class="p">,</span> <span class="n">only</span> <span class="p">:</span> <span class="n">I4P</span><span class="o">=&gt;</span><span class="n">int32</span><span class="p">,</span> <span class="n">R8P</span><span class="o">=&gt;</span><span class="n">real64</span>
+<span class="k">use </span><span class="n">forbear</span><span class="p">,</span> <span class="n">only</span> <span class="p">:</span> <span class="n">bar_object</span>
+<span class="k">implicit none</span>
+
+<span class="k">type</span><span class="p">(</span><span class="n">bar_object</span><span class="p">)</span> <span class="kd">::</span> <span class="n">bar</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">R8P</span><span class="p">)</span>        <span class="kd">::</span> <span class="n">x</span>
+<span class="kt">real</span><span class="p">(</span><span class="n">R8P</span><span class="p">)</span>        <span class="kd">::</span> <span class="n">y</span>
+<span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">)</span>     <span class="kd">::</span> <span class="n">i</span>
+<span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">)</span>     <span class="kd">::</span> <span class="n">j</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="mf">0._R8P</span>
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">filled_char_string</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">prefix_string</span><span class="o">=</span><span class="s1">&#39;progress |&#39;</span><span class="p">,</span> <span class="n">suffi_stringx</span><span class="o">=</span><span class="s1">&#39;| &#39;</span><span class="p">,</span> <span class="n">add_progress_percent</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.)</span>
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">start</span>
+<span class="k">do </span><span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span>
+   <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mf">0.05_R8P</span>
+   <span class="k">do </span><span class="n">j</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100000000</span>
+      <span class="n">y</span> <span class="o">=</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c">! just spend some times</span>
+   <span class="n">enddo</span>
+   <span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">update</span><span class="p">(</span><span class="n">current</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+<span class="n">enddo</span>
+<span class="n">endprogram</span> <span class="n">forbear_minimal</span>
+</pre></div>
+
+
+<p>That <em>built and run</em> provides:</p>
+<div class="codehilite"><pre><span></span>→ ./forbear_minimal
+progress <span class="p">|</span>++++++++++++++++++++++++++++    <span class="p">|</span> <span class="m">85</span>%
+</pre></div>
+
+
+<p>Go to <a href="#top">Top</a></p>
+<hr>
+<h3 id="api-documentation"><a class="toclink" href="#api-documentation">API documentation</a></h3>
+<p>forbear library exposes only one class, namely the <code>bar_object</code> class, that is used to handle the progress of your runs. The <code>bar_object</code> class has the following public methods</p>
+<ul>
+<li><a href="#destroy_method"><code>destroy</code></a></li>
+<li><a href="#initialize_method"><code>initialize</code></a></li>
+<li><a href="#is_stdout_locked_method"><code>is_stdout_locked</code></a></li>
+<li><a href="#start_method"><code>start</code></a></li>
+<li><a href="#update_method"><code>update</code></a></li>
+</ul>
+<h4 id="destroy-method"><a class="toclink" href="#destroy-method"><code>destroy</code> method</a></h4>
+<p>Signature</p>
+<div class="codehilite"><pre><span></span><span class="k">pure subroutine </span><span class="n">destroy</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
+</pre></div>
+
+
+<p>It has not dummy arguments (except the <code>bar_object self</code> bound-passed). It destroys the bar, namely reset it to the minimal (safe) status.</p>
+<p>Examples</p>
+<div class="codehilite"><pre><span></span><span class="k">use </span><span class="n">forbear</span>
+<span class="k">type</span><span class="p">(</span><span class="n">bar_obejct</span><span class="p">)</span> <span class="kd">::</span> <span class="n">bar</span>
+
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">destroy</span>
+</pre></div>
+
+
+<h4 id="initialize-method"><a class="toclink" href="#initialize-method"><code>initialize</code> method</a></h4>
+<p>Signature</p>
+<div class="codehilite"><pre><span></span><span class="k">subroutine </span><span class="n">initialize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span>                                                                                               <span class="p">&amp;</span>
+                      <span class="n">prefix_string</span><span class="p">,</span> <span class="n">prefix_color_fg</span><span class="p">,</span> <span class="n">prefix_color_bg</span><span class="p">,</span> <span class="n">prefix_style</span><span class="p">,</span>                                      <span class="p">&amp;</span>
+                      <span class="n">suffix_string</span><span class="p">,</span> <span class="n">suffix_color_fg</span><span class="p">,</span> <span class="n">suffix_color_bg</span><span class="p">,</span> <span class="n">suffix_style</span><span class="p">,</span>                                      <span class="p">&amp;</span>
+                      <span class="n">bracket_left_string</span><span class="p">,</span> <span class="n">bracket_left_color_fg</span><span class="p">,</span> <span class="n">bracket_left_color_bg</span><span class="p">,</span> <span class="n">bracket_left_style</span><span class="p">,</span>              <span class="p">&amp;</span>
+                      <span class="n">bracket_right_string</span><span class="p">,</span> <span class="n">bracket_right_color_fg</span><span class="p">,</span> <span class="n">bracket_right_color_bg</span><span class="p">,</span> <span class="n">bracket_right_style</span><span class="p">,</span>          <span class="p">&amp;</span>
+                      <span class="n">empty_char_string</span><span class="p">,</span> <span class="n">empty_char_color_fg</span><span class="p">,</span> <span class="n">empty_char_color_bg</span><span class="p">,</span> <span class="n">empty_char_style</span><span class="p">,</span>                      <span class="p">&amp;</span>
+                      <span class="n">filled_char_string</span><span class="p">,</span> <span class="n">filled_char_color_fg</span><span class="p">,</span> <span class="n">filled_char_color_bg</span><span class="p">,</span> <span class="n">filled_char_style</span><span class="p">,</span>                  <span class="p">&amp;</span>
+                      <span class="n">add_scale_bar</span><span class="p">,</span> <span class="n">scale_bar_color_fg</span><span class="p">,</span> <span class="n">scale_bar_color_bg</span><span class="p">,</span> <span class="n">scale_bar_style</span><span class="p">,</span>                             <span class="p">&amp;</span>
+                      <span class="n">add_progress_percent</span><span class="p">,</span> <span class="n">progress_percent_color_fg</span><span class="p">,</span> <span class="n">progress_percent_color_bg</span><span class="p">,</span> <span class="n">progress_percent_style</span><span class="p">,</span> <span class="p">&amp;</span>
+                      <span class="n">add_progress_speed</span><span class="p">,</span> <span class="n">progress_speed_color_fg</span><span class="p">,</span> <span class="n">progress_speed_color_bg</span><span class="p">,</span> <span class="n">progress_speed_style</span><span class="p">,</span>         <span class="p">&amp;</span>
+                      <span class="n">add_date_time</span><span class="p">,</span> <span class="n">date_time_color_fg</span><span class="p">,</span> <span class="n">date_time_color_bg</span><span class="p">,</span> <span class="n">date_time_style</span><span class="p">,</span>                             <span class="p">&amp;</span>
+                      <span class="n">width</span><span class="p">,</span> <span class="n">min_value</span><span class="p">,</span> <span class="n">max_value</span><span class="p">,</span> <span class="n">frequency</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This method initializes the bar accordingly to the user specifications. It has a huge list of dummy arguments because the bar is fully customizable. The meaning of the arguments (except the obvious passed <code>self</code>) are:</p>
+<div class="codehilite"><pre><span></span>   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_string</span>             <span class="c">! Prefix string.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_color_fg</span>           <span class="c">! Prefix foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_color_bg</span>           <span class="c">! Prefix background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_style</span>              <span class="c">! Prefix style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_string</span>             <span class="c">! Suffix string.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_color_fg</span>           <span class="c">! Suffix foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_color_bg</span>           <span class="c">! Suffix background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_style</span>              <span class="c">! Suffix style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_string</span>       <span class="c">! Left bracket string.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_color_fg</span>     <span class="c">! Left bracket foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_color_bg</span>     <span class="c">! Left bracket background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_style</span>        <span class="c">! Left bracket style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_string</span>      <span class="c">! Right bracket string</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_color_fg</span>    <span class="c">! Right bracket foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_color_bg</span>    <span class="c">! Right bracket background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_style</span>       <span class="c">! Right bracket style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_string</span>         <span class="c">! Empty char.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_color_fg</span>       <span class="c">! Empty char foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_color_bg</span>       <span class="c">! Empty char background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_style</span>          <span class="c">! Empty char style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_string</span>        <span class="c">! Filled char.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_color_fg</span>      <span class="c">! Filled char foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_color_bg</span>      <span class="c">! Filled char background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_style</span>         <span class="c">! Filled char style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_scale_bar</span>             <span class="c">! Add scale to the bar.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">scale_bar_color_fg</span>        <span class="c">! Scale bar foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">scale_bar_color_bg</span>        <span class="c">! Scale bar background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">scale_bar_style</span>           <span class="c">! Scale bar style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_progress_percent</span>      <span class="c">! Add progress in percent.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_percent_color_fg</span> <span class="c">! Progress percent foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_percent_color_bg</span> <span class="c">! Progress percent background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_percent_style</span>    <span class="c">! Progress percent style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_progress_speed</span>        <span class="c">! Add progress in percent.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_speed_color_fg</span>   <span class="c">! Progress speed foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_speed_color_bg</span>   <span class="c">! Progress speed background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_speed_style</span>      <span class="c">! Progress speed style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_date_time</span>             <span class="c">! Add date and time.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">date_time_color_fg</span>        <span class="c">! Date and time foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">date_time_color_bg</span>        <span class="c">! Date and time background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">date_time_style</span>           <span class="c">! Date and time style.</span>
+   <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">width</span>                     <span class="c">! With of the bar.</span>
+   <span class="kt">real</span><span class="p">(</span><span class="n">R8P</span><span class="p">),</span>         <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">min_value</span>                 <span class="c">! Minimum value.</span>
+   <span class="kt">real</span><span class="p">(</span><span class="n">R8P</span><span class="p">),</span>         <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">max_value</span>                 <span class="c">! Maximum value.</span>
+   <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">frequency</span>                 <span class="c">! Bar update frequency, in range `[1%,100%]`.</span>
+</pre></div>
+
+
+<p>Examples</p>
+<div class="codehilite"><pre><span></span><span class="k">use </span><span class="n">forbear</span>
+<span class="k">type</span><span class="p">(</span><span class="n">bar_obejct</span><span class="p">)</span> <span class="kd">::</span> <span class="n">bar</span>
+
+<span class="c">! initialize a bar that will have only the progress percentage counter</span>
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">add_progress_percent</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">progress_percent_color_fg</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+
+<span class="c">! initialize a very fancy bar with &quot;all batteries included&quot;</span>
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>                                                                       <span class="p">&amp;</span>
+                    <span class="n">bracket_left_string</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="n">bracket_left_color_fg</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>                          <span class="p">&amp;</span>
+                    <span class="n">empty_char_string</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">empty_char_color_fg</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">empty_char_color_bg</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="p">&amp;</span>
+                    <span class="n">filled_char_string</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">filled_char_color_bg</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>                            <span class="p">&amp;</span>
+                    <span class="n">bracket_right_string</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="n">bracket_right_color_fg</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>                        <span class="p">&amp;</span>
+                    <span class="n">prefix_string</span><span class="o">=</span><span class="s1">&#39;progress &#39;</span><span class="p">,</span> <span class="n">prefix_color_fg</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>                               <span class="p">&amp;</span>
+                    <span class="n">add_progress_percent</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">progress_percent_color_fg</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span>                <span class="p">&amp;</span>
+                    <span class="n">add_progress_speed</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">progress_speed_color_fg</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span>                     <span class="p">&amp;</span>
+                    <span class="n">add_date_time</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">date_time_color_fg</span><span class="o">=</span><span class="s1">&#39;magenta&#39;</span><span class="p">,</span>                             <span class="p">&amp;</span>
+                    <span class="n">add_scale_bar</span><span class="o">=</span><span class="p">.</span><span class="n">true</span><span class="p">.,</span> <span class="n">scale_bar_color_fg</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">scale_bar_style</span><span class="o">=</span><span class="s1">&#39;underline_on&#39;</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Note that if you initialize the bar to have also the scale over the progress bar the bar's length must be at least 22 characters.</p>
+<h4 id="is_stdout_locked-method"><a class="toclink" href="#is_stdout_locked-method"><code>is_stdout_locked</code> method</a></h4>
+<p>Signature</p>
+<div class="codehilite"><pre><span></span><span class="k">pure function </span><span class="n">is_stdout_locked</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="k">result</span><span class="p">(</span><span class="n">is_locked</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This functions return <code>.true.</code> if the bar had locked the standard output unit, namely if the bar had started to print progress data. As a matter of fact, forbear locks the standard output unit during its running because it <em>refreshes</em> the last terminal row where it has been started. The user should be use this function to check if printing on standard output is safe, otherwise the <code>look and feel</code> of the bar will be destroyed.</p>
+<p>Examples</p>
+<div class="codehilite"><pre><span></span><span class="k">use </span><span class="n">forbear</span>
+<span class="k">type</span><span class="p">(</span><span class="n">bar_obejct</span><span class="p">)</span> <span class="kd">::</span> <span class="n">bar</span>
+
+<span class="k">if</span> <span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="n">bar</span><span class="p">%</span><span class="n">is_stdout_locked</span><span class="p">)</span> <span class="k">then</span>
+   <span class="c">! you can safely print to stdout...</span>
+<span class="n">endif</span>
+</pre></div>
+
+
+<h4 id="start-method"><a class="toclink" href="#start-method"><code>start</code> method</a></h4>
+<p>Signature</p>
+<div class="codehilite"><pre><span></span><span class="k">subroutine </span><span class="n">start</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This method must be invoked just before the <em>time consuming work</em> starts. It locks the standard output unit and initialize the bar output, e.g. if the user selected to add the bar scale it is printed into this method.</p>
+<p>Note that there is not an equivalent <em>end</em> method: the bar is supposed to end when the progress reaches (or overcome) the 100%, that is handled directly into the <code>update</code> method.</p>
+<div class="codehilite"><pre><span></span><span class="k">use </span><span class="n">forbear</span>
+<span class="k">type</span><span class="p">(</span><span class="n">bar_obejct</span><span class="p">)</span> <span class="kd">::</span> <span class="n">bar</span>
+
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">initialize</span>
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">start</span>
+<span class="c">! in the following the long time consuming work</span>
+</pre></div>
+
+
+<h4 id="update-method"><a class="toclink" href="#update-method"><code>update</code> method</a></h4>
+<p>Signature</p>
+<div class="codehilite"><pre><span></span><span class="k">subroutine </span><span class="n">update</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">current</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This method updates the bar each time it is called (accordingly to the frequency set into the <code>initialize</code> method, 1 by default). It takes only one argument, namely <code>current</code>: it is the current progress expressed in <code>real(real64)</code> where <code>real64</code> is the kind constant provided by the <code>iso_fortran_env</code> intrinsic module. The current progress is evaluated with respect the minimum and maximum values set into the <code>initialize</code> method, that by default are <code>0</code> and <code>1</code> respectively. Essentially, the progress is computed as</p>
+<div class="codehilite"><pre><span></span><span class="n">progress</span> <span class="o">=</span> <span class="nb">nint</span><span class="p">(</span><span class="n">current</span> <span class="o">/</span> <span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">max_value</span> <span class="o">-</span> <span class="n">self</span><span class="p">%</span><span class="n">min_value</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The <code>update</code> method handles the bar update automatically: if it is the first call after the <code>start</code> method some useful data for the progress statistics are stored, while if the 100% progress is reached it automatically ends the bar smoothly.</p>
+<p>Examples</p>
+<div class="codehilite"><pre><span></span><span class="k">use</span><span class="p">,</span> <span class="k">intrinsic</span> <span class="kd">::</span> <span class="n">iso_fortran_env</span>
+<span class="k">use </span><span class="n">forbear</span>
+<span class="k">type</span><span class="p">(</span><span class="n">bar_obejct</span><span class="p">)</span> <span class="kd">::</span> <span class="n">bar</span>
+
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">max_value</span><span class="o">=</span><span class="mf">2.1_real64</span><span class="p">)</span>
+<span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">start</span>
+<span class="c">! in the following the long time consuming work, e.g. increase &quot;t&quot; up a limit</span>
+   <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">Dt</span>
+   <span class="k">call </span><span class="n">bar</span><span class="p">%</span><span class="n">update</span><span class="p">(</span><span class="n">current</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
+</pre></div>
+
+
+<h2 id="for-a-complete-examples-see-fobear_test"><a class="toclink" href="#for-a-complete-examples-see-fobear_test">For a complete examples see <a href="https://github.com/szaghi/forbear/blob/master/src/tests/forbear_test.f90">fobear_test</a></a></h2>
+<h2 id="install"><a class="toclink" href="#install">Install</a></h2>
+<p>forbear is a Fortran library composed by several modules.</p>
+<blockquote>
+<p>Before download and compile the library you must check the <a href="https://github.com/szaghi/forbear/wiki/Requirements">requirements</a>.</p>
+</blockquote>
+<p>To download and build the project two main ways are available:</p>
+<ul>
+<li>exploit the <a href="#install-script">install script</a> that can be downloaded <a href="https://github.com/szaghi/forbear/releases/latest">here</a></li>
+<li><a href="#manually-download-and-build">manually download and build</a>:</li>
+<li><a href="#download">download</a></li>
+<li><a href="#build">build</a></li>
+</ul>
+<hr>
+<h3 id="install-script"><a class="toclink" href="#install-script">install script</a></h3>
+<p>forbear ships a bash script (downloadable from <a href="https://github.com/szaghi/forbear/releases/latest">here</a>) that is able to automatize the download and build steps. The script <code>install.sh</code> has the following usage:</p>
+<div class="codehilite"><pre><span></span>→ ./install.sh
+Install script of forbear
+Usage:
+
+install.sh --help<span class="p">|</span>-?
+    Print this usage output and <span class="nb">exit</span>
+
+install.sh --download<span class="p">|</span>-d &lt;arg&gt; <span class="o">[</span>--verbose<span class="p">|</span>-v<span class="o">]</span>
+    Download the project
+
+    --download<span class="p">|</span>-d <span class="o">[</span>arg<span class="o">]</span>  Download the project, <span class="nv">arg</span><span class="o">=</span>git<span class="p">|</span>wget to download with git or wget respectively
+    --verbose<span class="p">|</span>-v         Output verbose mode activation
+
+install.sh --build<span class="p">|</span>-b &lt;arg&gt; <span class="o">[</span>--verbose<span class="p">|</span>-v<span class="o">]</span>
+    Build the project
+
+    --build<span class="p">|</span>-b <span class="o">[</span>arg<span class="o">]</span>  Build the project, <span class="nv">arg</span><span class="o">=</span>fobis<span class="p">|</span>make<span class="p">|</span>cmake to build with FoBiS.py, GNU Make or CMake respectively
+    --verbose<span class="p">|</span>-v      Output verbose mode activation
+
+Examples:
+
+install.sh --download git
+install.sh --build make
+install.sh --download wget --build cmake
+</pre></div>
+
+
+<blockquote>
+<p>The script does not cover all possibilities.</p>
+</blockquote>
+<p>The script operation modes are 2 (<em>collapsible</em> into one-single-mode):</p>
+<ul>
+<li>download a new fresh-clone of the latest master-release by means of:</li>
+<li><a href="https://git-scm.com/">git</a>;</li>
+<li><a href="https://www.gnu.org/software/wget/">wget</a> (also <a href="https://curl.haxx.se/">curl</a> is necessary);</li>
+<li>build a fresh-clone project as static-linked library by means of:</li>
+<li><a href="https://github.com/szaghi/FoBiS">FoBiS.py</a>;</li>
+<li><a href="https://www.gnu.org/software/make/">GNU Make</a>;</li>
+<li><a href="https://cmake.org/">CMake</a>;</li>
+</ul>
+<blockquote>
+<p>you can mix any of the above combinations accordingly to the tools available.</p>
+</blockquote>
+<p>Typical usages are:</p>
+<div class="codehilite"><pre><span></span><span class="c1"># download and prepare the project by means of git and build with GNU Make</span>
+install.sh --dowload git --build make
+<span class="c1"># download and prepare the project by means of wget (curl) and build with CMake</span>
+install.sh --dowload wget --build cmake
+<span class="c1"># download and prepare the project by means of git and build with FoBiS.py</span>
+install.sh --dowload git --build fobis
+</pre></div>
+
+
+<hr>
+<h3 id="manually-download-and-build"><a class="toclink" href="#manually-download-and-build">manually download and build</a></h3>
+<h4 id="download"><a class="toclink" href="#download">download</a></h4>
+<p>To download all the available releases and utilities (fobos, license, readme, etc&hellip;), it can be convenient to <em>clone</em> whole the project:</p>
+<div class="codehilite"><pre><span></span>git clone https://github.com/szaghi/forbear
+<span class="nb">cd</span> forbear
+git submodule update --init
+</pre></div>
+
+
+<p>Alternatively, you can directly download a release from GitHub server, see the <a href="https://github.com/szaghi/forbear/wiki/ChangeLog">ChangeLog</a>.</p>
+<h4 id="build"><a class="toclink" href="#build">build</a></h4>
+<p>The most easy way to compile forbear is to use <a href="https://github.com/szaghi/FoBiS">FoBiS.py</a> within the provided fobos file.</p>
+<p>Consequently, it is strongly encouraged to install <a href="https://github.com/szaghi/FoBiS#install">FoBiS.py</a>.</p>
+<p>| <a href="#build-by-means-of-fobis">Build by means of FoBiS</a> | <a href="#build-by-means-of-gnu-make">Build by means of GNU Make</a> | <a href="#build-by-means-of-cmake">Build by means of CMake</a> |</p>
+<hr>
+<h4 id="build-by-means-of-fobis"><a class="toclink" href="#build-by-means-of-fobis">build by means of FoBiS</a></h4>
+<p>FoBiS.py is a KISS tool for automatic building of modern Fortran projects. Providing very few options, FoBiS.py is able to build almost automatically complex Fortran projects with cumbersome inter-modules dependency. This removes the necessity to write complex makefile. Moreover, providing a very simple options file (in the FoBiS.py nomenclature indicated as <code>fobos</code> file) FoBiS.py can substitute the (ab)use of makefile for other project stuffs (build documentations, make project archive, etc&hellip;). forbear is shipped with a fobos file that can build the library in both <em>static</em> and <em>shared</em> forms and also build the <code>Test_Driver</code> program. The provided fobos file has several building modes.</p>
+<h5 id="listing-fobos-building-modes"><a class="toclink" href="#listing-fobos-building-modes">listing fobos building modes</a></h5>
+<p>Typing:</p>
+<div class="codehilite"><pre><span></span>FoBiS.py build -lmodes
+</pre></div>
+
+
+<p>the following message should be printed:</p>
+<div class="codehilite"><pre><span></span>The fobos file defines the following modes:
+ - <span class="s2">&quot;shared-gnu&quot;</span>
+  - <span class="s2">&quot;static-gnu&quot;</span>
+  - <span class="s2">&quot;test-driver-gnu&quot;</span>
+  - <span class="s2">&quot;shared-gnu-debug&quot;</span>
+  - <span class="s2">&quot;static-gnu-debug&quot;</span>
+  - <span class="s2">&quot;test-driver-gnu-debug&quot;</span>
+  - <span class="s2">&quot;shared-intel&quot;</span>
+  - <span class="s2">&quot;static-intel&quot;</span>
+  - <span class="s2">&quot;test-driver-intel&quot;</span>
+  - <span class="s2">&quot;shared-intel-debug&quot;</span>
+  - <span class="s2">&quot;static-intel-debug&quot;</span>
+  - <span class="s2">&quot;test-driver-intel-debug&quot;</span>
+</pre></div>
+
+
+<p>The modes should be self-explicative: <code>shared</code>, <code>static</code> and <code>test-driver</code> are the modes for building (in release, optimized form) the shared and static versions of the library and the Test Driver program, respectively. The other 3 modes are the same, but in debug form instead of release one. <code>-gnu</code> use the <code>GNU gfortran</code> compiler while <code>-intel</code> the Intel one.</p>
+<h5 id="building-the-library"><a class="toclink" href="#building-the-library">building the library</a></h5>
+<p>The <code>shared</code> or <code>static</code> directories are created accordingly to the form of the library built. The compiled objects and mod files are placed inside this directory, as well as the linked library.</p>
+<h6 id="release-shared-library"><a class="toclink" href="#release-shared-library">release shared library</a></h6>
+<div class="codehilite"><pre><span></span>FoBiS.py build -mode shared-gnu
+</pre></div>
+
+
+<h6 id="release-static-library"><a class="toclink" href="#release-static-library">release static library</a></h6>
+<div class="codehilite"><pre><span></span>FoBiS.py build -mode static-gnu
+</pre></div>
+
+
+<h6 id="debug-shared-library"><a class="toclink" href="#debug-shared-library">debug shared library</a></h6>
+<div class="codehilite"><pre><span></span>FoBiS.py build -mode shared-gnu-debug
+</pre></div>
+
+
+<h6 id="debug-static-library"><a class="toclink" href="#debug-static-library">debug static library</a></h6>
+<div class="codehilite"><pre><span></span>FoBiS.py build -mode static-gnu-debug
+</pre></div>
+
+
+<hr>
+<h4 id="build-by-means-of-gnu-make"><a class="toclink" href="#build-by-means-of-gnu-make">build by means of GNU Make</a></h4>
+<p>Not yet supported.</p>
+<h4 id="build-by-means-of-cmake"><a class="toclink" href="#build-by-means-of-cmake">Build by means of CMake</a></h4>
+<p>Not yet supported.</p>
+<h2 id="go-to-top"><a class="toclink" href="#go-to-top">Go to <a href="#top">Top</a></a></h2>
+        </div>
+		  
+        <div class="col-md-4">
+	  <div class="well">
+          <h2>Developer Info</h2>
+          <h4>Stefano Zaghi</h4>
+          
+          
+			   
+            <div class="text-center"><div class="btn-group" role="group">
+              
+              <a class="btn btn-lg btn-primary" href="mailto:stefano.zaghi@gmail.com"><i class="fa fa-envelope fa-lg"></i></a>
+              
+              
+              
+              <a class="btn btn-lg btn-primary" href="https://github.com/szaghi"><i class="fa fa-github fa-lg"></i></a>
+				  
+				  
+              
+              
+              
+              
+            </div></div>
+            
+       </div>
+       </div>
+       
+      </div>
+      
+      
+      
+      
+		
+      <div class="row">
+        <div class="col-xs-6 col-sm-3">
+              <h3>Source Files</h3>
+              <ul>
+                
+                  
+                    <li><a href='./sourcefile/forbear.f90.html'>forbear.f90</a></li>
+                  
+                
+                  
+                    <li><a href='./sourcefile/forbear_bar_object.f90.html'>forbear_bar_object.f90</a></li>
+                  
+                
+                  
+                    <li><a href='./sourcefile/forbear_element_object.f90.html'>forbear_element_object.f90</a></li>
+                  
+                
+                  
+                    <li><a href='./sourcefile/forbear_test.f90.html'>forbear_test.f90</a></li>
+                  
+                
+              </ul>
+          </div>
+          
+		  <div class="col-xs-6 col-sm-3">
+              <h3>Modules</h3>
+              <ul>
+                
+                  
+                    <li><a href='./module/forbear.html'>forbear</a></li>
+                  
+                
+                  
+                    <li><a href='./module/forbear_bar_object.html'>forbear_bar_object</a></li>
+                  
+                
+                  
+                    <li><a href='./module/forbear_element_object.html'>forbear_element_object</a></li>
+                  
+                
+              </ul>
+          </div>
+          
+          
+		  <div class="col-xs-6 col-sm-3">
+              <h3>Procedures</h3>
+              <ul>
+                
+                  
+                    <li><a href='./proc/assign_bar.html'>assign_bar</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/assign_element.html'>assign_element</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/destroy.html'>destroy</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/destroy%7E2.html'>destroy</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/initialize.html'>initialize</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/initialize%7E2.html'>initialize</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/is_stdout_locked.html'>is_stdout_locked</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/output.html'>output</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/start.html'>start</a></li>
+                  
+                
+                  
+                    <li><a href='./proc/update.html'>update</a></li>
+                  
+                
+                  
+                    <li><a href="./lists/procedures.html"><em>All procedures&hellip;</em></a></li>
+                  
+                
+              </ul>
+          </div>
+          
+          
+		  <div class="col-xs-6 col-sm-3">
+              <h3>Derived Types</h3>
+              <ul>
+                
+                  
+                    <li><a href='./type/bar_object.html'>bar_object</a></li>
+                  
+                
+                  
+                    <li><a href='./type/element_object.html'>element_object</a></li>
+                  
+                
+              </ul>
+          </div>
+          
+      </div>
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2017 </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+             on 2017-06-05 14:32  
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> forbear was developed by Stefano Zaghi</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="./js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="./js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js'],
+        'HTML-CSS': { 
+           styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: '#000000 ! important'} }
+        }
+      });
+    </script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  </body>
+</html>
