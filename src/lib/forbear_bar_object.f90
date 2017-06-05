@@ -3,7 +3,6 @@
 module forbear_bar_object
 !< **forbear** project, definition of [[bar_object]].
 use, intrinsic :: iso_fortran_env, only : I4P=>int32, I8P=>int64, R8P=>real64, stdout=>output_unit
-use face, only : colorize
 use forbear_element_object, only : element_object
 implicit none
 private
