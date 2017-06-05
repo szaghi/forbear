@@ -17,7 +17,7 @@
 
 A KISS pure Fortran Library for building and running fancy progress bar
 
-![minimal screencast](media/minimal.gif)
+![taste screencast](media/taste.gif)
 
 - forbear is a pure Fortran (KISS) library for building and running fancy progress bar for modern Fortran projects;
 - forbear is Fortran 2008+ standard compliant;

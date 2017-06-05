@@ -7,10 +7,8 @@ use forbear, only : bar_object
 implicit none
 
 type(bar_object) :: bar
-real(R8P)        :: x
-real(R8P)        :: y
-integer(I4P)     :: i
-integer(I4P)     :: j
+
+print*
 
 print '(A)', 'Minimal bar'
 call bar%initialize()
@@ -36,11 +34,15 @@ call worker
 contains
    subroutine worker
    !< The worker.
+   real(R8P)        :: x
+   real(R8P)        :: y
+   integer(I4P)     :: i
+   integer(I4P)     :: j
    call bar%start
    x = 0._R8P
    do i=1, 20
       x = x + 0.05_R8P
-      do j=1, 100000000
+      do j=1, 20000000
          y = sqrt(x) ! just spend some times
       enddo
       call bar%update(current=x)
