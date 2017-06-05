@@ -130,18 +130,18 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
 	  data-placement="bottom" data-html="true"
-	  title=" 6.5% of total for procedures.">16 statements</a>
+	  title="29.6% of total for procedures.">73 statements</a>
      </li> 
      
      
-    <li><i class="fa fa-code"></i><a href="../src/forbear_element_object.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/forbear_bar_object.f90"> Source File</a></li>
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
-     <li><a href='../sourcefile/forbear_element_object.f90.html'>forbear_element_object.f90</a></li>
+     <li><a href='../sourcefile/forbear_bar_object.f90.html'>forbear_bar_object.f90</a></li>
   
-     <li><a href='../module/forbear_element_object.html'>forbear_element_object</a></li>
+     <li><a href='../module/forbear_bar_object.html'>forbear_bar_object</a></li>
   
      <li class="active">initialize</li>
   </ol>
@@ -230,7 +230,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-private pure subroutine initialize(self, string, color_fg, color_bg, style)
+private subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, width, min_value, max_value, frequency)
     
     
 	 
@@ -240,7 +240,7 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
 
 
     
-    <p>Initialize element.</p>
+    <p>Initialize bar.</p>
     
 
     <h3>Arguments</h3>
@@ -261,12 +261,12 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
   
 <tr>
   
-  <td><span class="anchor" id="variable-self%7E3"></span>class(<a href='../type/element_object.html'>element_object</a>),</td>
+  <td><span class="anchor" id="variable-self%7E3"></span>class(<a href='../type/bar_object.html'>bar_object</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>self</strong></td><td><p>element.</p></td>
+  <td><strong>self</strong></td><td><p>Bar.</p></td>
   
 </tr>
 
@@ -276,12 +276,12 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
   
 <tr>
   
-  <td><span class="anchor" id="variable-string%7E2"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-prefix_string"></span>character(len=*),</td>
   <td>intent(in),</td>
   <td>optional</td>
   
   <td></td><td>::</td>
-  <td><strong>string</strong></td><td><p>Element string.</p></td>
+  <td><strong>prefix_string</strong></td><td><p>Prefix string.</p></td>
   
 </tr>
 
@@ -291,12 +291,12 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_fg%7E2"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-prefix_color_fg"></span>character(len=*),</td>
   <td>intent(in),</td>
   <td>optional</td>
   
   <td></td><td>::</td>
-  <td><strong>color_fg</strong></td><td><p>Foreground color.</p></td>
+  <td><strong>prefix_color_fg</strong></td><td><p>Prefix foreground color.</p></td>
   
 </tr>
 
@@ -306,12 +306,12 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
   
 <tr>
   
-  <td><span class="anchor" id="variable-color_bg%7E2"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-prefix_color_bg"></span>character(len=*),</td>
   <td>intent(in),</td>
   <td>optional</td>
   
   <td></td><td>::</td>
-  <td><strong>color_bg</strong></td><td><p>Background color.</p></td>
+  <td><strong>prefix_color_bg</strong></td><td><p>Prefix background color.</p></td>
   
 </tr>
 
@@ -321,12 +321,612 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
   
 <tr>
   
-  <td><span class="anchor" id="variable-style%7E2"></span>character(len=*),</td>
+  <td><span class="anchor" id="variable-prefix_style"></span>character(len=*),</td>
   <td>intent(in),</td>
   <td>optional</td>
   
   <td></td><td>::</td>
-  <td><strong>style</strong></td><td><p>Style.</p></td>
+  <td><strong>prefix_style</strong></td><td><p>Prefix style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-suffix_string"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>suffix_string</strong></td><td><p>Suffix string.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-suffix_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>suffix_color_fg</strong></td><td><p>Suffix foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-suffix_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>suffix_color_bg</strong></td><td><p>Suffix background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-suffix_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>suffix_style</strong></td><td><p>Suffix style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_left_string"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_left_string</strong></td><td><p>Left bracket string.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_left_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_left_color_fg</strong></td><td><p>Left bracket foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_left_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_left_color_bg</strong></td><td><p>Left bracket background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_left_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_left_style</strong></td><td><p>Left bracket style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_right_string"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_right_string</strong></td><td><p>Right bracket string</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_right_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_right_color_fg</strong></td><td><p>Right bracket foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_right_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_right_color_bg</strong></td><td><p>Right bracket background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bracket_right_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>bracket_right_style</strong></td><td><p>Right bracket style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-empty_char_string"></span>character(len=1),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>empty_char_string</strong></td><td><p>Empty char.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-empty_char_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>empty_char_color_fg</strong></td><td><p>Empty char foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-empty_char_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>empty_char_color_bg</strong></td><td><p>Empty char background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-empty_char_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>empty_char_style</strong></td><td><p>Empty char style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-filled_char_string"></span>character(len=1),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>filled_char_string</strong></td><td><p>Filled char.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-filled_char_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>filled_char_color_fg</strong></td><td><p>Filled char foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-filled_char_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>filled_char_color_bg</strong></td><td><p>Filled char background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-filled_char_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>filled_char_style</strong></td><td><p>Filled char style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-add_scale_bar%7E2"></span>logical,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>add_scale_bar</strong></td><td><p>Add scale to the bar.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-scale_bar_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>scale_bar_color_fg</strong></td><td><p>Scale bar foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-scale_bar_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>scale_bar_color_bg</strong></td><td><p>Scale bar background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-scale_bar_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>scale_bar_style</strong></td><td><p>Scale bar style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-add_progress_percent%7E2"></span>logical,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>add_progress_percent</strong></td><td><p>Add progress in percent.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-progress_percent_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>progress_percent_color_fg</strong></td><td><p>Progress percent foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-progress_percent_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>progress_percent_color_bg</strong></td><td><p>Progress percent background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-progress_percent_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>progress_percent_style</strong></td><td><p>Progress percent style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-add_progress_speed%7E2"></span>logical,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>add_progress_speed</strong></td><td><p>Add progress in percent.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-progress_speed_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>progress_speed_color_fg</strong></td><td><p>Progress speed foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-progress_speed_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>progress_speed_color_bg</strong></td><td><p>Progress speed background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-progress_speed_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>progress_speed_style</strong></td><td><p>Progress speed style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-add_date_time%7E2"></span>logical,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>add_date_time</strong></td><td><p>Add date and time.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-date_time_color_fg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>date_time_color_fg</strong></td><td><p>Date and time foreground color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-date_time_color_bg"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>date_time_color_bg</strong></td><td><p>Date and time background color.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-date_time_style"></span>character(len=*),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>date_time_style</strong></td><td><p>Date and time style.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-width%7E2"></span>integer(kind=I4P),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>width</strong></td><td><p>With of the bar.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-min_value%7E2"></span>real(kind=R8P),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>min_value</strong></td><td><p>Minimum value.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-max_value%7E2"></span>real(kind=R8P),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>max_value</strong></td><td><p>Maximum value.</p></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-frequency%7E2"></span>integer(kind=I4P),</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>frequency</strong></td><td><p>Bar update frequency, in range <code>[1%,100%]</code>.</p></td>
   
 </tr>
 
@@ -392,19 +992,96 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>   <span class="k">pure subroutine </span><span class="n">initialize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
-   <span class="c">!&lt; Initialize element.</span>
-   <span class="k">class</span><span class="p">(</span><span class="n">element_object</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>        <span class="kd">::</span> <span class="n">self</span>     <span class="c">!&lt; element.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">string</span>   <span class="c">!&lt; Element string.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">color_fg</span> <span class="c">!&lt; Foreground color.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">color_bg</span> <span class="c">!&lt; Background color.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">style</span>    <span class="c">!&lt; Style.</span>
+    <div class="highlight"><pre><span></span>   <span class="k">subroutine </span><span class="n">initialize</span><span class="p">(</span><span class="n">self</span><span class="p">,</span>                                                                                               <span class="p">&amp;</span>
+                         <span class="n">prefix_string</span><span class="p">,</span> <span class="n">prefix_color_fg</span><span class="p">,</span> <span class="n">prefix_color_bg</span><span class="p">,</span> <span class="n">prefix_style</span><span class="p">,</span>                                      <span class="p">&amp;</span>
+                         <span class="n">suffix_string</span><span class="p">,</span> <span class="n">suffix_color_fg</span><span class="p">,</span> <span class="n">suffix_color_bg</span><span class="p">,</span> <span class="n">suffix_style</span><span class="p">,</span>                                      <span class="p">&amp;</span>
+                         <span class="n">bracket_left_string</span><span class="p">,</span> <span class="n">bracket_left_color_fg</span><span class="p">,</span> <span class="n">bracket_left_color_bg</span><span class="p">,</span> <span class="n">bracket_left_style</span><span class="p">,</span>              <span class="p">&amp;</span>
+                         <span class="n">bracket_right_string</span><span class="p">,</span> <span class="n">bracket_right_color_fg</span><span class="p">,</span> <span class="n">bracket_right_color_bg</span><span class="p">,</span> <span class="n">bracket_right_style</span><span class="p">,</span>          <span class="p">&amp;</span>
+                         <span class="n">empty_char_string</span><span class="p">,</span> <span class="n">empty_char_color_fg</span><span class="p">,</span> <span class="n">empty_char_color_bg</span><span class="p">,</span> <span class="n">empty_char_style</span><span class="p">,</span>                      <span class="p">&amp;</span>
+                         <span class="n">filled_char_string</span><span class="p">,</span> <span class="n">filled_char_color_fg</span><span class="p">,</span> <span class="n">filled_char_color_bg</span><span class="p">,</span> <span class="n">filled_char_style</span><span class="p">,</span>                  <span class="p">&amp;</span>
+                         <span class="n">add_scale_bar</span><span class="p">,</span> <span class="n">scale_bar_color_fg</span><span class="p">,</span> <span class="n">scale_bar_color_bg</span><span class="p">,</span> <span class="n">scale_bar_style</span><span class="p">,</span>                             <span class="p">&amp;</span>
+                         <span class="n">add_progress_percent</span><span class="p">,</span> <span class="n">progress_percent_color_fg</span><span class="p">,</span> <span class="n">progress_percent_color_bg</span><span class="p">,</span> <span class="n">progress_percent_style</span><span class="p">,</span> <span class="p">&amp;</span>
+                         <span class="n">add_progress_speed</span><span class="p">,</span> <span class="n">progress_speed_color_fg</span><span class="p">,</span> <span class="n">progress_speed_color_bg</span><span class="p">,</span> <span class="n">progress_speed_style</span><span class="p">,</span>         <span class="p">&amp;</span>
+                         <span class="n">add_date_time</span><span class="p">,</span> <span class="n">date_time_color_fg</span><span class="p">,</span> <span class="n">date_time_color_bg</span><span class="p">,</span> <span class="n">date_time_style</span><span class="p">,</span>                             <span class="p">&amp;</span>
+                         <span class="n">width</span><span class="p">,</span> <span class="n">min_value</span><span class="p">,</span> <span class="n">max_value</span><span class="p">,</span> <span class="n">frequency</span><span class="p">)</span>
+   <span class="c">!&lt; Initialize bar.</span>
+   <span class="k">class</span><span class="p">(</span><span class="n">bar_object</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>        <span class="kd">::</span> <span class="n">self</span>                      <span class="c">!&lt; Bar.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_string</span>             <span class="c">!&lt; Prefix string.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_color_fg</span>           <span class="c">!&lt; Prefix foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_color_bg</span>           <span class="c">!&lt; Prefix background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">prefix_style</span>              <span class="c">!&lt; Prefix style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_string</span>             <span class="c">!&lt; Suffix string.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_color_fg</span>           <span class="c">!&lt; Suffix foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_color_bg</span>           <span class="c">!&lt; Suffix background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">suffix_style</span>              <span class="c">!&lt; Suffix style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_string</span>       <span class="c">!&lt; Left bracket string.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_color_fg</span>     <span class="c">!&lt; Left bracket foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_color_bg</span>     <span class="c">!&lt; Left bracket background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_left_style</span>        <span class="c">!&lt; Left bracket style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_string</span>      <span class="c">!&lt; Right bracket string</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_color_fg</span>    <span class="c">!&lt; Right bracket foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_color_bg</span>    <span class="c">!&lt; Right bracket background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">bracket_right_style</span>       <span class="c">!&lt; Right bracket style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_string</span>         <span class="c">!&lt; Empty char.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_color_fg</span>       <span class="c">!&lt; Empty char foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_color_bg</span>       <span class="c">!&lt; Empty char background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">empty_char_style</span>          <span class="c">!&lt; Empty char style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_string</span>        <span class="c">!&lt; Filled char.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_color_fg</span>      <span class="c">!&lt; Filled char foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_color_bg</span>      <span class="c">!&lt; Filled char background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">filled_char_style</span>         <span class="c">!&lt; Filled char style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_scale_bar</span>             <span class="c">!&lt; Add scale to the bar.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">scale_bar_color_fg</span>        <span class="c">!&lt; Scale bar foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">scale_bar_color_bg</span>        <span class="c">!&lt; Scale bar background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">scale_bar_style</span>           <span class="c">!&lt; Scale bar style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_progress_percent</span>      <span class="c">!&lt; Add progress in percent.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_percent_color_fg</span> <span class="c">!&lt; Progress percent foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_percent_color_bg</span> <span class="c">!&lt; Progress percent background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_percent_style</span>    <span class="c">!&lt; Progress percent style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_progress_speed</span>        <span class="c">!&lt; Add progress in percent.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_speed_color_fg</span>   <span class="c">!&lt; Progress speed foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_speed_color_bg</span>   <span class="c">!&lt; Progress speed background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">progress_speed_style</span>      <span class="c">!&lt; Progress speed style.</span>
+   <span class="kt">logical</span><span class="p">,</span>           <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">add_date_time</span>             <span class="c">!&lt; Add date and time.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">date_time_color_fg</span>        <span class="c">!&lt; Date and time foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">date_time_color_bg</span>        <span class="c">!&lt; Date and time background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=*</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">date_time_style</span>           <span class="c">!&lt; Date and time style.</span>
+   <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">width</span>                     <span class="c">!&lt; With of the bar.</span>
+   <span class="kt">real</span><span class="p">(</span><span class="n">R8P</span><span class="p">),</span>         <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">min_value</span>                 <span class="c">!&lt; Minimum value.</span>
+   <span class="kt">real</span><span class="p">(</span><span class="n">R8P</span><span class="p">),</span>         <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">max_value</span>                 <span class="c">!&lt; Maximum value.</span>
+   <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">),</span>      <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">),</span> <span class="k">optional</span> <span class="kd">::</span> <span class="n">frequency</span>                 <span class="c">!&lt; Bar update frequency, in range `[1%,100%]`.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>                        <span class="kd">::</span> <span class="n">empty_char_string_</span>        <span class="c">!&lt; Characters used for empty bar, local variable.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>                        <span class="kd">::</span> <span class="n">filled_char_string_</span>       <span class="c">!&lt; Characters used for filled bar, local variable.</span>
 
+   <span class="n">empty_char_string_</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">empty_char_string</span><span class="p">))</span> <span class="n">empty_char_string_</span> <span class="o">=</span> <span class="n">empty_char_string</span>
+   <span class="n">filled_char_string_</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span> <span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">filled_char_string</span><span class="p">))</span> <span class="n">filled_char_string_</span> <span class="o">=</span> <span class="n">filled_char_string</span>
    <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">destroy</span>
-   <span class="n">self</span><span class="p">%</span><span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">string</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">string</span> <span class="o">=</span> <span class="n">string</span>
-   <span class="n">self</span><span class="p">%</span><span class="n">color_fg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">color_fg</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">color_fg</span> <span class="o">=</span> <span class="n">color_fg</span>
-   <span class="n">self</span><span class="p">%</span><span class="n">color_bg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">color_bg</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">color_bg</span> <span class="o">=</span> <span class="n">color_bg</span>
-   <span class="n">self</span><span class="p">%</span><span class="n">style</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">style</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">style</span> <span class="o">=</span> <span class="n">style</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">prefix</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">prefix_string</span><span class="p">,</span> <span class="n">color_fg</span><span class="o">=</span><span class="n">prefix_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">prefix_color_bg</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">prefix_style</span><span class="p">)</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">suffix</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">suffix_string</span><span class="p">,</span> <span class="n">color_fg</span><span class="o">=</span><span class="n">suffix_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">suffix_color_bg</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">suffix_style</span><span class="p">)</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">bracket_left</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">bracket_left_string</span><span class="p">,</span> <span class="n">color_fg</span><span class="o">=</span><span class="n">bracket_left_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">bracket_left_color_bg</span><span class="p">,&amp;</span>
+                                     <span class="n">style</span><span class="o">=</span><span class="n">bracket_left_style</span><span class="p">)</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">bracket_right</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">bracket_right_string</span><span class="p">,</span> <span class="n">color_fg</span><span class="o">=</span><span class="n">bracket_right_color_fg</span><span class="p">,&amp;</span>
+                                      <span class="n">color_bg</span><span class="o">=</span><span class="n">bracket_right_color_bg</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">bracket_right_style</span><span class="p">)</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">empty_char</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">empty_char_string_</span><span class="p">,</span> <span class="n">color_fg</span><span class="o">=</span><span class="n">empty_char_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">empty_char_color_bg</span><span class="p">,&amp;</span>
+                                   <span class="n">style</span><span class="o">=</span><span class="n">empty_char_style</span><span class="p">)</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">filled_char</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">string</span><span class="o">=</span><span class="n">filled_char_string_</span><span class="p">,</span> <span class="n">color_fg</span><span class="o">=</span><span class="n">filled_char_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">filled_char_color_bg</span><span class="p">,&amp;</span>
+                                    <span class="n">style</span><span class="o">=</span><span class="n">filled_char_style</span><span class="p">)</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">add_scale_bar</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">add_scale_bar</span> <span class="o">=</span> <span class="n">add_scale_bar</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">scale_bar</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">color_fg</span><span class="o">=</span><span class="n">scale_bar_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">scale_bar_color_bg</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">scale_bar_style</span><span class="p">)</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">add_progress_percent</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">add_progress_percent</span> <span class="o">=</span> <span class="n">add_progress_percent</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">progress_percent</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">color_fg</span><span class="o">=</span><span class="n">progress_percent_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">progress_percent_color_bg</span><span class="p">,&amp;</span>
+                                         <span class="n">style</span><span class="o">=</span><span class="n">progress_percent_style</span><span class="p">)</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">add_progress_speed</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">add_progress_speed</span> <span class="o">=</span> <span class="n">add_progress_speed</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">progress_speed</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">color_fg</span><span class="o">=</span><span class="n">progress_speed_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">progress_speed_color_bg</span><span class="p">,&amp;</span>
+                                       <span class="n">style</span><span class="o">=</span><span class="n">progress_speed_style</span><span class="p">)</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">add_date_time</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">add_date_time</span> <span class="o">=</span> <span class="n">add_date_time</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">date_time</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">color_fg</span><span class="o">=</span><span class="n">date_time_color_fg</span><span class="p">,</span> <span class="n">color_bg</span><span class="o">=</span><span class="n">date_time_color_bg</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">date_time_style</span><span class="p">)</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">width</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">min_value</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">min_value</span> <span class="o">=</span> <span class="n">min_value</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">max_value</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">max_value</span> <span class="o">=</span> <span class="n">max_value</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">frequency</span><span class="p">))</span> <span class="n">self</span><span class="p">%</span><span class="n">frequency</span> <span class="o">=</span> <span class="n">frequency</span>
+
+   <span class="k">if</span> <span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">add_scale_bar</span> <span class="p">.</span><span class="nb">and</span><span class="p">.</span> <span class="n">self</span><span class="p">%</span><span class="n">width</span> <span class="o">&lt;</span> <span class="mi">22</span><span class="p">)</span> <span class="n">error</span> <span class="k">stop</span> <span class="s1">&#39;error: for adding scale bar the bar width must be at least 22 chars&#39;</span>
    <span class="n">endsubroutine</span> <span class="n">initialize</span>
 </pre></div>
 
@@ -463,7 +1140,7 @@ private pure subroutine initialize(self, string, color_fg, color_bg, style)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2017-06-05 14:32  
+             on 2017-06-05 12:52  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> forbear was developed by Stefano Zaghi</p></div>

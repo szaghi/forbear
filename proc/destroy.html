@@ -130,18 +130,18 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
 	  data-placement="bottom" data-html="true"
-	  title=" 2.8% of total for procedures.">7 statements</a>
+	  title=" 8.9% of total for procedures.">22 statements</a>
      </li> 
      
      
-    <li><i class="fa fa-code"></i><a href="../src/forbear_element_object.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/forbear_bar_object.f90"> Source File</a></li>
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
-     <li><a href='../sourcefile/forbear_element_object.f90.html'>forbear_element_object.f90</a></li>
+     <li><a href='../sourcefile/forbear_bar_object.f90.html'>forbear_bar_object.f90</a></li>
   
-     <li><a href='../module/forbear_element_object.html'>forbear_element_object</a></li>
+     <li><a href='../module/forbear_bar_object.html'>forbear_bar_object</a></li>
   
      <li class="active">destroy</li>
   </ol>
@@ -240,7 +240,7 @@ private pure subroutine destroy(self)
 
 
     
-    <p>Destroy element.</p>
+    <p>Destroy bar.</p>
     
 
     <h3>Arguments</h3>
@@ -261,12 +261,12 @@ private pure subroutine destroy(self)
   
 <tr>
   
-  <td><span class="anchor" id="variable-self%7E2"></span>class(<a href='../type/element_object.html'>element_object</a>),</td>
+  <td><span class="anchor" id="variable-self%7E2"></span>class(<a href='../type/bar_object.html'>bar_object</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>self</strong></td><td><p>element.</p></td>
+  <td><strong>self</strong></td><td><p>Bar.</p></td>
   
 </tr>
 
@@ -333,13 +333,28 @@ private pure subroutine destroy(self)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>   <span class="k">pure subroutine </span><span class="n">destroy</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
-   <span class="c">!&lt; Destroy element.</span>
-   <span class="k">class</span><span class="p">(</span><span class="n">element_object</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">self</span> <span class="c">!&lt; element.</span>
+   <span class="c">!&lt; Destroy bar.</span>
+   <span class="k">class</span><span class="p">(</span><span class="n">bar_object</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">self</span> <span class="c">!&lt; Bar.</span>
 
-   <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">string</span><span class="p">))</span> <span class="k">deallocate</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">string</span><span class="p">)</span>
-   <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">color_fg</span><span class="p">))</span> <span class="k">deallocate</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">color_fg</span><span class="p">)</span>
-   <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">color_bg</span><span class="p">))</span> <span class="k">deallocate</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">color_bg</span><span class="p">)</span>
-   <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">style</span><span class="p">))</span> <span class="k">deallocate</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">style</span><span class="p">)</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">prefix</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">suffix</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">bracket_left</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">bracket_right</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">empty_char</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">filled_char</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">progress_percent</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">progress_speed</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">scale_bar</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="k">call </span><span class="n">self</span><span class="p">%</span><span class="n">date_time</span><span class="p">%</span><span class="n">destroy</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">width</span> <span class="o">=</span> <span class="mi">32</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">min_value</span> <span class="o">=</span> <span class="mf">0._R8P</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">max_value</span> <span class="o">=</span> <span class="mf">1._R8P</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">frequency</span> <span class="o">=</span> <span class="mi">1_I4P</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">add_scale_bar</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">add_progress_percent</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">add_progress_speed</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">add_date_time</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
+   <span class="n">self</span><span class="p">%</span><span class="n">is_stdout_locked_</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
    <span class="n">endsubroutine</span> <span class="n">destroy</span>
 </pre></div>
 
@@ -398,7 +413,7 @@ private pure subroutine destroy(self)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2017-06-05 14:32  
+             on 2017-06-05 12:52  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> forbear was developed by Stefano Zaghi</p></div>
