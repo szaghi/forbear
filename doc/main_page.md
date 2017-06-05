@@ -2,7 +2,6 @@
 project: forbear
 src_dir: ../src/lib
 src_dir: ../src/tests
-
 output_dir: html/publish/
 project_github: https://github.com/szaghi/forbear
 project_download: https://github.com/szaghi/forbear/releases/latest
