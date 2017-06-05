@@ -55,23 +55,25 @@ Go to [Top](#top)
 
 ## Main features
 
-forbear is inspired by the python great module [python-progressbar](https://github.com/WoLpH/python-progressbar), thus many features are taken from it. Here the main features are listed.
-
-+ [ ] Timer
++ [x] Bar Element-Based Structure:
+  + fully customizable elements:
+    + foreground color;
+    + background color;
+    + style;
++ [x] Bar
++ [x] Bar scale
++ [x] Progress Percentage
++ [x] Progress Speed
++ [x] Start-End Time
 + [ ] ETA
-+ [ ] AdaptiveETA
-+ [ ] FileTransferSpeed
-+ [ ] AdaptiveTransferSpeed
-+ [ ] AnimatedMarker
-+ [ ] Counter
-+ [ ] Percentage
-+ [ ] FormatLabel
-+ [ ] SimpleProgress
-+ [ ] Bar
-+ [ ] ReverseBar
-+ [ ] BouncingBar
-+ [ ] RotatingMarker
-+ [ ] DynamicMessage
++ [ ] Adaptive ETA
++ [ ] Reverse Bar
++ [ ] Rotating Marker
++ [x] Static Prefix-Suffix Messages
++ [ ] Dynamic Message
++ [x] Well Documented
++ [x] Test Driven Developed
++ [x] FOSS
 
 Any feature request is welcome.
 
