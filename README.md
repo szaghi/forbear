@@ -34,8 +34,8 @@ A KISS pure Fortran Library for building and running fancy progress bar
 
 #### Compiler Support
 
-[![Compiler](https://img.shields.io/badge/GNU-v4.9.2+-brightgreen.svg)]()
-[![Compiler](https://img.shields.io/badge/Intel-v12.x+-brightgreen.svg)]()
+[![Compiler](https://img.shields.io/badge/GNU-v6.3.1+-brightgreen.svg)]()
+[![Compiler](https://img.shields.io/badge/Intel-v17.x+-brightgreen.svg)]()
 [![Compiler](https://img.shields.io/badge/IBM%20XL-not%20tested-yellow.svg)]()
 [![Compiler](https://img.shields.io/badge/g95-not%20tested-yellow.svg)]()
 [![Compiler](https://img.shields.io/badge/NAG-not%20tested-yellow.svg)]()
