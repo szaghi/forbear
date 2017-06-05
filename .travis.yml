@@ -61,14 +61,14 @@ before_deploy:
   - $MAKETAR
   - mv forbear.tar.gz forbear-$TRAVIS_TAG.tar.gz
 
-# deploy:
-#   provider: releases
-#   api_key:
-#     secure: QTsZ8jIN5/f15EW/L93u7Yn0fUlX1UaF6qCLfiWfo0jDiK0FGkIo4B+MeBYbZs+HphMxbhDv7v+A1dpcA8w9RlkMX47NsGT4Nu7bu5AzABsjnFPUKbUux4ktoYkPAxXujcvT1fTYrv2bgH0ualtPnvU9CDT3PRfUpZND+bM0UIMyo40ojOec2v3opYfGYvbksosAVKTg15cxzxGgGVrZb+DWfnILgrETieULL1Tvp8eZG9wY9Kja65JCzbUVBrcGIThz5iZqO8rAi6Opl7cgpP7W2qRotNRXQjQc1KsV+HH0w5eTCUwqUZOJKuucZrUjYiu762LYMYfLGxs4F2Wy2aXPqcTImVIG5W9tFN4xKsL46Ed7PZdCHWZJFCFx89znEosZnCFmSp445L88Q1/dbluk/oP+TxYi6z61QEstSB2T5r0Pv/rC2PGqoBlYyCGIZZdBzzXNSW2gaUEkhNgOU1Q/K6yFpjy+GUxvcGugroWsHBXvoSMswzC+IhYUvjSXkiFM5AkXbJrb8/mIc25QehUrvO5Fe/A67o2HuM6aHZDBbGyP8876k63o1H82JkW0fSfCrcWu302eqCu5YwrZJ3I20bepZEbj5Wh50Bz6n8c0ZsFQL1GUxAA+3KBtWp7wDHK9WYsKrdc2FFGtfZgQ7X5iiY01/i6ZCqiUO4vASWg=
-#   file: 
-#     - forbear-$TRAVIS_TAG.tar.gz
-#     - ./scripts/install.sh
-#   skip_cleanup: true
-#   overwrite: true
-#   on:
-#     tags: true
+deploy:
+  provider: releases
+  api_key:
+    secure: rbEvdtEoWjm+KvCKAPDwgWDpD8MMY3z8XZTfIOqjLN2qXYH+1m0hnDtANegOKLjtg4+tdg143iF5D0FE2skmdgpp0PU9vLo4ivENAvCsP4Mt6dwb5h9AhlWoS1JkkL+5MHVL/MqoX3/IsyKVTjujOwbny2ENCFkd7uiNGiA18+CYDlC0/KxSmwVcOJmVnhjqisf15GXc8+Df+vJcMIYRkDMdAZtkuJ1gXRbajOHF/gmU0E89dqTVqnoJkDSMM7pFPNAiD+lAAmLsPm5AWYispDe5toZ1vVLxobJW+PRO9XLBBc1NV4Uz6GTeauWi1TTzR/Ej5D7TQL3QN4EpaMkPh4kSoVGGo2miBZc0e8B/TYeihdc9z7QCDStoychGrprCrE15aXs6B74qHBqjEa+/MXhEOpXZt7JqW9J8D9AS6VoFQnz8ipsLQ+/7cugYtP4KLwPvk+fW8yNy1UbNCcZQiIUQfrrxdl5EtRxylJcqiriS/UNN1gHA/fRwoif36UsBvlDirPKAHUCRZgEe4sGVCv2KuQRUEImiaLM5B098q7GWx29SyZ4/ocOD8dxrN0xh7LBo69KwOx2mwGkWBbWg0tZ/OG0UvHAN4zdFGOomnb7sLqqVNcEIU5nMuTHJwisI+GKFooJe+x+EgAbW2DLN07sEPucGktiSVlWl9/grkME=
+  file: 
+    - forbear-$TRAVIS_TAG.tar.gz
+    - ./scripts/install.sh
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
