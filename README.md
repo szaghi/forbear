@@ -49,7 +49,9 @@ A KISS pure Fortran Library for building and running fancy progress bar
 
 ## What is forbear?
 
-In Executing long-time running programs it could be helpful to display a *progress bar* with some informative data. **forbear** is designed to perform just this task, handle the progress and display it as the user specifications.
+In Executing long-time running programs it could be helpful to display a *progress bar* with some informative data. **forbear** is designed to perform just this task, handle the progress and display it as the user specifications:
+
+> forbear handles data related to the progress of a (long) time run giving an informative, pretty-formatted ouput for each time step (or accordingly a given frequency) as the user specifications.
 
 Go to [Top](#top)
 
@@ -93,6 +95,10 @@ Go to [Top](#top)
 
 Besides this README file the forbear documentation is contained into its own [wiki](https://github.com/szaghi/forbear/wiki). Detailed documentation of the API is contained into the [GitHub Pages](http://szaghi.github.io/forbear/index.html) that can also be created locally by means of [ford tool](https://github.com/cmacmackin/ford).
 
+| [A taster of forber](#a_taste_of_forbear) | [API documentation](#api_documentation)
+
+---
+
 ### A Taste of forbear
 
 A minimal *plate*:
@@ -100,7 +106,7 @@ A minimal *plate*:
 ```fortran
 program forbear_minimal
 !< **forbear** test.
-use, intrinsic :: iso_fortran_env, only : I4P=>int32, R8P=>real32
+use, intrinsic :: iso_fortran_env, only : I4P=>int32, R8P=>real64
 use forbear, only : bar_object
 implicit none
 
@@ -111,7 +117,7 @@ integer(I4P)     :: i
 integer(I4P)     :: j
 
 x = 0._R8P
-call bar%initialize(filled_char='+', prefix='progress |', suffix='| ', add_progress_percent=.true.)
+call bar%initialize(filled_char_string='+', prefix_string='progress |', suffi_stringx='| ', add_progress_percent=.true.)
 call bar%start
 do i=1, 20
    x = x + 0.05_R8P
@@ -132,6 +138,202 @@ progress |++++++++++++++++++++++++++++    | 85%
 
 Go to [Top](#top)
 
+---
+
+### API documentation
+
+forbear library exposes only one class, namely the `bar_object` class, that is used to handle the progress of your runs. The `bar_object` class has the following public methods
+
++ [`destroy`](#destroy_method)
++ [`initialize`](#initialize_method)
++ [`is_stdout_locked`](#is_stdout_locked_method)
++ [`start`](#start_method)
++ [`update`](#update_method)
+
+#### `destroy` method
+
+Signature
+
+```fortran
+pure subroutine destroy(self)
+```
+
+It has not dummy arguments (except the `bar_object self` bound-passed). It destroys the bar, namely reset it to the minimal (safe) status.
+
+Examples
+
+```fortran
+use forbear
+type(bar_obejct) :: bar
+
+call bar%destroy
+```
+
+#### `initialize` method
+
+Signature
+
+```fortran
+subroutine initialize(self,                                                                                               &
+                      prefix_string, prefix_color_fg, prefix_color_bg, prefix_style,                                      &
+                      suffix_string, suffix_color_fg, suffix_color_bg, suffix_style,                                      &
+                      bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style,              &
+                      bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style,          &
+                      empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style,                      &
+                      filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style,                  &
+                      add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style,                             &
+                      add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, &
+                      add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style,         &
+                      add_date_time, date_time_color_fg, date_time_color_bg, date_time_style,                             &
+                      width, min_value, max_value, frequency)
+```
+
+This method initializes the bar accordingly to the user specifications. It has a huge list of dummy arguments because the bar is fully customizable. The meaning of the arguments (except the obvious passed `self`) are:
+
+```fortran
+   character(len=*),  intent(in), optional :: prefix_string             ! Prefix string.
+   character(len=*),  intent(in), optional :: prefix_color_fg           ! Prefix foreground color.
+   character(len=*),  intent(in), optional :: prefix_color_bg           ! Prefix background color.
+   character(len=*),  intent(in), optional :: prefix_style              ! Prefix style.
+   character(len=*),  intent(in), optional :: suffix_string             ! Suffix string.
+   character(len=*),  intent(in), optional :: suffix_color_fg           ! Suffix foreground color.
+   character(len=*),  intent(in), optional :: suffix_color_bg           ! Suffix background color.
+   character(len=*),  intent(in), optional :: suffix_style              ! Suffix style.
+   character(len=*),  intent(in), optional :: bracket_left_string       ! Left bracket string.
+   character(len=*),  intent(in), optional :: bracket_left_color_fg     ! Left bracket foreground color.
+   character(len=*),  intent(in), optional :: bracket_left_color_bg     ! Left bracket background color.
+   character(len=*),  intent(in), optional :: bracket_left_style        ! Left bracket style.
+   character(len=*),  intent(in), optional :: bracket_right_string      ! Right bracket string
+   character(len=*),  intent(in), optional :: bracket_right_color_fg    ! Right bracket foreground color.
+   character(len=*),  intent(in), optional :: bracket_right_color_bg    ! Right bracket background color.
+   character(len=*),  intent(in), optional :: bracket_right_style       ! Right bracket style.
+   character(len=1),  intent(in), optional :: empty_char_string         ! Empty char.
+   character(len=*),  intent(in), optional :: empty_char_color_fg       ! Empty char foreground color.
+   character(len=*),  intent(in), optional :: empty_char_color_bg       ! Empty char background color.
+   character(len=*),  intent(in), optional :: empty_char_style          ! Empty char style.
+   character(len=1),  intent(in), optional :: filled_char_string        ! Filled char.
+   character(len=*),  intent(in), optional :: filled_char_color_fg      ! Filled char foreground color.
+   character(len=*),  intent(in), optional :: filled_char_color_bg      ! Filled char background color.
+   character(len=*),  intent(in), optional :: filled_char_style         ! Filled char style.
+   logical,           intent(in), optional :: add_scale_bar             ! Add scale to the bar.
+   character(len=*),  intent(in), optional :: scale_bar_color_fg        ! Scale bar foreground color.
+   character(len=*),  intent(in), optional :: scale_bar_color_bg        ! Scale bar background color.
+   character(len=*),  intent(in), optional :: scale_bar_style           ! Scale bar style.
+   logical,           intent(in), optional :: add_progress_percent      ! Add progress in percent.
+   character(len=*),  intent(in), optional :: progress_percent_color_fg ! Progress percent foreground color.
+   character(len=*),  intent(in), optional :: progress_percent_color_bg ! Progress percent background color.
+   character(len=*),  intent(in), optional :: progress_percent_style    ! Progress percent style.
+   logical,           intent(in), optional :: add_progress_speed        ! Add progress in percent.
+   character(len=*),  intent(in), optional :: progress_speed_color_fg   ! Progress speed foreground color.
+   character(len=*),  intent(in), optional :: progress_speed_color_bg   ! Progress speed background color.
+   character(len=*),  intent(in), optional :: progress_speed_style      ! Progress speed style.
+   logical,           intent(in), optional :: add_date_time             ! Add date and time.
+   character(len=*),  intent(in), optional :: date_time_color_fg        ! Date and time foreground color.
+   character(len=*),  intent(in), optional :: date_time_color_bg        ! Date and time background color.
+   character(len=*),  intent(in), optional :: date_time_style           ! Date and time style.
+   integer(I4P),      intent(in), optional :: width                     ! With of the bar.
+   real(R8P),         intent(in), optional :: min_value                 ! Minimum value.
+   real(R8P),         intent(in), optional :: max_value                 ! Maximum value.
+   integer(I4P),      intent(in), optional :: frequency                 ! Bar update frequency, in range `[1%,100%]`.
+```
+
+Examples
+
+```fortran
+use forbear
+type(bar_obejct) :: bar
+
+! initialize a bar that will have only the progress percentage counter
+call bar%initialize(width=0, add_progress_percent=.true., progress_percent_color_fg='yellow')
+
+! initialize a very fancy bar with "all batteries included"
+call bar%initialize(width=32,                                                                       &
+                    bracket_left_string='|', bracket_left_color_fg='blue',                          &
+                    empty_char_string='o', empty_char_color_fg='blue', empty_char_color_bg='white', &
+                    filled_char_string=' ', filled_char_color_bg='blue',                            &
+                    bracket_right_string='|', bracket_right_color_fg='blue',                        &
+                    prefix_string='progress ', prefix_color_fg='red',                               &
+                    add_progress_percent=.true., progress_percent_color_fg='yellow',                &
+                    add_progress_speed=.true., progress_speed_color_fg='green',                     &
+                    add_date_time=.true., date_time_color_fg='magenta',                             &
+                    add_scale_bar=.true., scale_bar_color_fg='blue', scale_bar_style='underline_on')
+```
+
+Note that if you initialize the bar to have also the scale over the progress bar the bar's length must be at least 22 characters.
+
+#### `is_stdout_locked` method
+
+Signature
+
+```fortran
+pure function is_stdout_locked(self) result(is_locked)
+```
+
+This functions return `.true.` if the bar had locked the standard output unit, namely if the bar had started to print progress data. As a matter of fact, forbear locks the standard output unit during its running because it *refreshes* the last terminal row where it has been started. The user should be use this function to check if printing on standard output is safe, otherwise the `look and feel` of the bar will be destroyed.
+
+Examples
+
+```fortran
+use forbear
+type(bar_obejct) :: bar
+
+if (.not.bar%is_stdout_locked) then
+   ! you can safely print to stdout...
+endif
+```
+
+#### `start` method
+
+Signature
+
+```fortran
+subroutine start(self)
+```
+
+This method must be invoked just before the *time consuming work* starts. It locks the standard output unit and initialize the bar output, e.g. if the user selected to add the bar scale it is printed into this method.
+
+Note that there is not an equivalent *end* method: the bar is supposed to end when the progress reaches (or overcome) the 100%, that is handled directly into the `update` method.
+
+```fortran
+use forbear
+type(bar_obejct) :: bar
+
+call bar%initialize
+call bar%start
+! in the following the long time consuming work
+```
+
+#### `update` method
+
+Signature
+
+```fortran
+subroutine update(self, current)
+```
+
+This method updates the bar each time it is called (accordingly to the frequency set into the `initialize` method, 1 by default). It takes only one argument, namely `current`: it is the current progress expressed in `real(real64)` where `real64` is the kind constant provided by the `iso_fortran_env` intrinsic module. The current progress is evaluated with respect the minimum and maximum values set into the `initialize` method, that by default are `0` and `1` respectively. Essentially, the progress is computed as
+
+```fortran
+progress = nint(current / (self%max_value - self%min_value) * 100)
+```
+
+The `update` method handles the bar update automatically: if it is the first call after the `start` method some useful data for the progress statistics are stored, while if the 100% progress is reached it automatically ends the bar smoothly.
+
+Examples
+
+```fortran
+use, intrinsic :: iso_fortran_env
+use forbear
+type(bar_obejct) :: bar
+
+call bar%initialize(max_value=2.1_real64)
+call bar%start
+! in the following the long time consuming work, e.g. increase "t" up a limit
+   t = t + Dt
+   call bar%update(current=t)
+```
+
+For a complete examples see [fobear_test](https://github.com/szaghi/forbear/blob/master/src/tests/forbear_test.f90)
 ---
 
 ## Install
