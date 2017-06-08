@@ -4,16 +4,17 @@ module forbear_element_object
 !< **forbear** project, definition of [[element_object]].
 use, intrinsic :: iso_fortran_env, only : I4P=>int32, R8P=>real32, stdout=>output_unit
 use face, only : colorize
+use forbear_kinds, only : ASCII, UCS4
 implicit none
 private
 public :: element_object
 
 type :: element_object
    !< Bar element class.
-   character(len=:), allocatable :: string   !< Element string.
-   character(len=:), allocatable :: color_fg !< Foreground color.
-   character(len=:), allocatable :: color_bg !< Background color.
-   character(len=:), allocatable :: style    !< Style.
+   character(len=:, kind=UCS4), allocatable :: string   !< Element string.
+   character(len=:),            allocatable :: color_fg !< Foreground color.
+   character(len=:),            allocatable :: color_bg !< Background color.
+   character(len=:),            allocatable :: style    !< Style.
    contains
       ! public methods
       procedure, pass(self) :: destroy    !< Destroy element.
@@ -40,13 +41,27 @@ contains
    pure subroutine initialize(self, string, color_fg, color_bg, style)
    !< Initialize element.
    class(element_object), intent(inout)        :: self     !< element.
-   character(len=*),      intent(in), optional :: string   !< Element string.
+   class(*),              intent(in), optional :: string   !< Element string.
    character(len=*),      intent(in), optional :: color_fg !< Foreground color.
    character(len=*),      intent(in), optional :: color_bg !< Background color.
    character(len=*),      intent(in), optional :: style    !< Style.
 
    call self%destroy
-   self%string = '' ; if (present(string)) self%string = string
+   self%string = UCS4_''
+   if (present(string)) then
+      select type(string)
+#ifdef ASCII_SUPPORTED
+      type is(character(len=*, kind=ASCII))
+         self%string = string
+#endif
+#ifdef UCS4_SUPPORTED
+      type is(character(len=*, kind=UCS4))
+         self%string = string
+#endif
+      type is(character(len=*))
+         self%string = string
+      endselect
+   endif
    self%color_fg = '' ; if (present(color_fg)) self%color_fg = color_fg
    self%color_bg = '' ; if (present(color_bg)) self%color_bg = color_bg
    self%style = '' ; if (present(style)) self%style = style
@@ -72,4 +87,3 @@ contains
    if (allocated(rhs%style)) lhs%style = rhs%style
    endsubroutine assign_element
 endmodule forbear_element_object
-

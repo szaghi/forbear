@@ -4,6 +4,7 @@ module forbear_bar_object
 !< **forbear** project, definition of [[bar_object]].
 use, intrinsic :: iso_fortran_env, only : I4P=>int32, I8P=>int64, R8P=>real64, stdout=>output_unit
 use forbear_element_object, only : element_object
+use forbear_kinds, only : ASCII, UCS4
 implicit none
 private
 public :: bar_object
