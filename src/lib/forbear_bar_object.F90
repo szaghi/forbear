@@ -83,56 +83,56 @@ contains
                          add_date_time, date_time_color_fg, date_time_color_bg, date_time_style,                             &
                          width, min_value, max_value, frequency)
    !< Initialize bar.
-   class(bar_object), intent(inout)        :: self                      !< Bar.
-   character(len=*),  intent(in), optional :: prefix_string             !< Prefix string.
-   character(len=*),  intent(in), optional :: prefix_color_fg           !< Prefix foreground color.
-   character(len=*),  intent(in), optional :: prefix_color_bg           !< Prefix background color.
-   character(len=*),  intent(in), optional :: prefix_style              !< Prefix style.
-   character(len=*),  intent(in), optional :: suffix_string             !< Suffix string.
-   character(len=*),  intent(in), optional :: suffix_color_fg           !< Suffix foreground color.
-   character(len=*),  intent(in), optional :: suffix_color_bg           !< Suffix background color.
-   character(len=*),  intent(in), optional :: suffix_style              !< Suffix style.
-   character(len=*),  intent(in), optional :: bracket_left_string       !< Left bracket string.
-   character(len=*),  intent(in), optional :: bracket_left_color_fg     !< Left bracket foreground color.
-   character(len=*),  intent(in), optional :: bracket_left_color_bg     !< Left bracket background color.
-   character(len=*),  intent(in), optional :: bracket_left_style        !< Left bracket style.
-   character(len=*),  intent(in), optional :: bracket_right_string      !< Right bracket string
-   character(len=*),  intent(in), optional :: bracket_right_color_fg    !< Right bracket foreground color.
-   character(len=*),  intent(in), optional :: bracket_right_color_bg    !< Right bracket background color.
-   character(len=*),  intent(in), optional :: bracket_right_style       !< Right bracket style.
-   character(len=1),  intent(in), optional :: empty_char_string         !< Empty char.
-   character(len=*),  intent(in), optional :: empty_char_color_fg       !< Empty char foreground color.
-   character(len=*),  intent(in), optional :: empty_char_color_bg       !< Empty char background color.
-   character(len=*),  intent(in), optional :: empty_char_style          !< Empty char style.
-   character(len=1),  intent(in), optional :: filled_char_string        !< Filled char.
-   character(len=*),  intent(in), optional :: filled_char_color_fg      !< Filled char foreground color.
-   character(len=*),  intent(in), optional :: filled_char_color_bg      !< Filled char background color.
-   character(len=*),  intent(in), optional :: filled_char_style         !< Filled char style.
-   logical,           intent(in), optional :: add_scale_bar             !< Add scale to the bar.
-   character(len=*),  intent(in), optional :: scale_bar_color_fg        !< Scale bar foreground color.
-   character(len=*),  intent(in), optional :: scale_bar_color_bg        !< Scale bar background color.
-   character(len=*),  intent(in), optional :: scale_bar_style           !< Scale bar style.
-   logical,           intent(in), optional :: add_progress_percent      !< Add progress in percent.
-   character(len=*),  intent(in), optional :: progress_percent_color_fg !< Progress percent foreground color.
-   character(len=*),  intent(in), optional :: progress_percent_color_bg !< Progress percent background color.
-   character(len=*),  intent(in), optional :: progress_percent_style    !< Progress percent style.
-   logical,           intent(in), optional :: add_progress_speed        !< Add progress in percent.
-   character(len=*),  intent(in), optional :: progress_speed_color_fg   !< Progress speed foreground color.
-   character(len=*),  intent(in), optional :: progress_speed_color_bg   !< Progress speed background color.
-   character(len=*),  intent(in), optional :: progress_speed_style      !< Progress speed style.
-   logical,           intent(in), optional :: add_date_time             !< Add date and time.
-   character(len=*),  intent(in), optional :: date_time_color_fg        !< Date and time foreground color.
-   character(len=*),  intent(in), optional :: date_time_color_bg        !< Date and time background color.
-   character(len=*),  intent(in), optional :: date_time_style           !< Date and time style.
-   integer(I4P),      intent(in), optional :: width                     !< With of the bar.
-   real(R8P),         intent(in), optional :: min_value                 !< Minimum value.
-   real(R8P),         intent(in), optional :: max_value                 !< Maximum value.
-   integer(I4P),      intent(in), optional :: frequency                 !< Bar update frequency, in range `[1%,100%]`.
-   character(len=1)                        :: empty_char_string_        !< Characters used for empty bar, local variable.
-   character(len=1)                        :: filled_char_string_       !< Characters used for filled bar, local variable.
+   class(bar_object), intent(inout)         :: self                      !< Bar.
+   class(*),          intent(in), optional  :: prefix_string             !< Prefix string.
+   character(len=*),  intent(in), optional  :: prefix_color_fg           !< Prefix foreground color.
+   character(len=*),  intent(in), optional  :: prefix_color_bg           !< Prefix background color.
+   character(len=*),  intent(in), optional  :: prefix_style              !< Prefix style.
+   class(*),          intent(in), optional  :: suffix_string             !< Suffix string.
+   character(len=*),  intent(in), optional  :: suffix_color_fg           !< Suffix foreground color.
+   character(len=*),  intent(in), optional  :: suffix_color_bg           !< Suffix background color.
+   character(len=*),  intent(in), optional  :: suffix_style              !< Suffix style.
+   class(*),          intent(in), optional  :: bracket_left_string       !< Left bracket string.
+   character(len=*),  intent(in), optional  :: bracket_left_color_fg     !< Left bracket foreground color.
+   character(len=*),  intent(in), optional  :: bracket_left_color_bg     !< Left bracket background color.
+   character(len=*),  intent(in), optional  :: bracket_left_style        !< Left bracket style.
+   class(*),          intent(in), optional  :: bracket_right_string      !< Right bracket string
+   character(len=*),  intent(in), optional  :: bracket_right_color_fg    !< Right bracket foreground color.
+   character(len=*),  intent(in), optional  :: bracket_right_color_bg    !< Right bracket background color.
+   character(len=*),  intent(in), optional  :: bracket_right_style       !< Right bracket style.
+   class(*),          intent(in), optional  :: empty_char_string         !< Empty char.
+   character(len=*),  intent(in), optional  :: empty_char_color_fg       !< Empty char foreground color.
+   character(len=*),  intent(in), optional  :: empty_char_color_bg       !< Empty char background color.
+   character(len=*),  intent(in), optional  :: empty_char_style          !< Empty char style.
+   class(*),          intent(in), optional  :: filled_char_string        !< Filled char.
+   character(len=*),  intent(in), optional  :: filled_char_color_fg      !< Filled char foreground color.
+   character(len=*),  intent(in), optional  :: filled_char_color_bg      !< Filled char background color.
+   character(len=*),  intent(in), optional  :: filled_char_style         !< Filled char style.
+   logical,           intent(in), optional  :: add_scale_bar             !< Add scale to the bar.
+   character(len=*),  intent(in), optional  :: scale_bar_color_fg        !< Scale bar foreground color.
+   character(len=*),  intent(in), optional  :: scale_bar_color_bg        !< Scale bar background color.
+   character(len=*),  intent(in), optional  :: scale_bar_style           !< Scale bar style.
+   logical,           intent(in), optional  :: add_progress_percent      !< Add progress in percent.
+   character(len=*),  intent(in), optional  :: progress_percent_color_fg !< Progress percent foreground color.
+   character(len=*),  intent(in), optional  :: progress_percent_color_bg !< Progress percent background color.
+   character(len=*),  intent(in), optional  :: progress_percent_style    !< Progress percent style.
+   logical,           intent(in), optional  :: add_progress_speed        !< Add progress in percent.
+   character(len=*),  intent(in), optional  :: progress_speed_color_fg   !< Progress speed foreground color.
+   character(len=*),  intent(in), optional  :: progress_speed_color_bg   !< Progress speed background color.
+   character(len=*),  intent(in), optional  :: progress_speed_style      !< Progress speed style.
+   logical,           intent(in), optional  :: add_date_time             !< Add date and time.
+   character(len=*),  intent(in), optional  :: date_time_color_fg        !< Date and time foreground color.
+   character(len=*),  intent(in), optional  :: date_time_color_bg        !< Date and time background color.
+   character(len=*),  intent(in), optional  :: date_time_style           !< Date and time style.
+   integer(I4P),      intent(in), optional  :: width                     !< With of the bar.
+   real(R8P),         intent(in), optional  :: min_value                 !< Minimum value.
+   real(R8P),         intent(in), optional  :: max_value                 !< Maximum value.
+   integer(I4P),      intent(in), optional  :: frequency                 !< Bar update frequency, in range `[1%,100%]`.
+   character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
+   character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
 
-   empty_char_string_ = ' ' ; if (present(empty_char_string)) empty_char_string_ = empty_char_string
-   filled_char_string_ = '*' ; if (present(filled_char_string)) filled_char_string_ = filled_char_string
+   empty_char_string_ = '-' ; call set_char(char_string_=empty_char_string_, char_string=empty_char_string)
+   filled_char_string_ = '=' ; call set_char(char_string_=filled_char_string_, char_string=filled_char_string)
    call self%destroy
    call self%prefix%initialize(string=prefix_string, color_fg=prefix_color_fg, color_bg=prefix_color_bg, style=prefix_style)
    call self%suffix%initialize(string=suffix_string, color_fg=suffix_color_fg, color_bg=suffix_color_bg, style=suffix_style)
@@ -160,6 +160,27 @@ contains
    if (present(frequency)) self%frequency = frequency
 
    if (self%add_scale_bar .and. self%width < 22) error stop 'error: for adding scale bar the bar width must be at least 22 chars'
+   contains
+      subroutine set_char(char_string_, char_string)
+      !< Set character accordingly to given `char_string`.
+      character(len=:, kind=UCS4), allocatable, intent(inout)        :: char_string_ !< Character to be set.
+      class(*),                                 intent(in), optional :: char_string  !< Given character.
+
+      if (present(char_string)) then
+         select type(char_string)
+#if defined ASCII_SUPPORTED && defined ASCII_NEQ_DEFAULT
+         type is(character(len=*, kind=ASCII))
+            char_string_ = char_string
+#endif
+#ifdef UCS4_SUPPORTED
+         type is(character(len=*, kind=UCS4))
+            char_string_ = char_string
+#endif
+         type is(character(len=*))
+            char_string_ = char_string
+         endselect
+      endif
+      endsubroutine set_char
    endsubroutine initialize
 
    pure function is_stdout_locked(self) result(is_locked)
@@ -187,35 +208,36 @@ contains
       write(min_value, '(F5.2)') self%min_value ; min_value = trim(min_value)//' (min)'
       write(max_value, '(F5.2)') self%max_value ; max_value = '(max) '//trim(max_value)
       self%scale_bar%string = min_value//repeat(' ', self%width - len(min_value) - len(max_value))//max_value
-      bar = repeat(' ', len(self%prefix%string))//self%bracket_left%output()//self%scale_bar%output()//self%bracket_right%output()
+      bar = repeat(UCS4_' ', len(self%prefix%string))//self%bracket_left%output()//self%scale_bar%output()//&
+            self%bracket_right%output()
       write(stdout, '(A)') bar
       endsubroutine add_scale_bar
    endsubroutine start
 
    subroutine update(self, current)
    !< Update bar.
-   class(bar_object), intent(inout) :: self              !< Bar.
-   real(R8P),         intent(in)    :: current           !< Current value.
-   integer(I4P)                     :: progress          !< Progress, in percent.
-   integer(I4P), save               :: progress_previous !< Previous progress, in percent.
-   integer(I8P), save               :: tic_toc(1:2)      !< Tic-toc timer.
-   character(len=18), save          :: date_time_start   !< Start date/time.
-   character(len=18)                :: date_time         !< Current date/time.
-   integer(I8P)                     :: count_rate        !< Timer count rate.
-   integer(I4P)                     :: f_chars           !< Number of filled characters of bar.
-   character(len=4)                 :: progress_percent  !< Progress in percent.
-   character(len=12)                :: progress_speed    !< Progress speed in percent.
-   character(len=:), allocatable    :: bar               !< Bar line.
+   class(bar_object), intent(inout)          :: self              !< Bar.
+   real(R8P),         intent(in)             :: current           !< Current value.
+   integer(I4P)                              :: progress          !< Progress, in percent.
+   integer(I4P), save                        :: progress_previous !< Previous progress, in percent.
+   integer(I8P), save                        :: tic_toc(1:2)      !< Tic-toc timer.
+   character(len=18), save                   :: date_time_start   !< Start date/time.
+   character(len=18)                         :: date_time         !< Current date/time.
+   integer(I8P)                              :: count_rate        !< Timer count rate.
+   integer(I4P)                              :: f_chars           !< Number of filled characters of bar.
+   character(len=4,  kind=UCS4)              :: progress_percent  !< Progress in percent.
+   character(len=12, kind=UCS4)              :: progress_speed    !< Progress speed in percent.
+   character(len=1,  kind=UCS4), parameter   :: bar_end=char(13)  !< Last bar char, carriage return.
+   character(len=:,  kind=UCS4), allocatable :: bar               !< Bar line.
 
    progress = nint(current / (self%max_value - self%min_value) * 100)
    if (progress == 0) then
       progress_previous = 0
       call system_clock(tic_toc(1), count_rate)
-      call date_and_time(date=date_time_start(1:8), time=date_time_start(9:))
+      if (self%add_date_time) call date_and_time(date=date_time_start(1:8), time=date_time_start(9:))
    endif
    if (mod(progress, self%frequency) == 0 .or. progress == 100) then
       call system_clock(tic_toc(2), count_rate)
-      call date_and_time(date=date_time(1:8), time=date_time(9:))
       f_chars = nint(progress / 100._R8P * self%width)
       bar = self%prefix%output()
       bar = bar//self%bracket_left%output()
@@ -234,22 +256,25 @@ contains
          self%progress_speed%string = progress_speed
          bar = bar//self%progress_speed%output()
       endif
-      if (self%add_date_time) then
-         self%date_time%string = ' ['//date_time_start(1:4)//'/'//date_time_start(5:6)//'/'//date_time_start(7:8)//      &
-                                  ' '//date_time_start(9:10)//':'//date_time_start(11:12)//':'//date_time_start(13:14)// &
-                                ' - '//date_time(1:4)//'/'//date_time(5:6)//'/'//date_time(7:8)//                        &
-                                  ' '//date_time(9:10)//':'//date_time(11:12)//':'//date_time(13:14)//']'
-         bar = bar//self%date_time%output()
-      endif
-      bar = bar//char(13)
+      bar = bar//bar_end
       write(stdout, '(A)', advance='no') bar
       flush(stdout)
       progress_previous = progress
       tic_toc(1) = tic_toc(2)
    endif
-   if (progress == 100) then
+   if (progress >= 100) then
+      if (self%add_date_time) then
+         call date_and_time(date=date_time(1:8), time=date_time(9:))
+         self%date_time%string = '['//date_time_start(1:4)//'/'//date_time_start(5:6)//'/'//date_time_start(7:8)//      &
+                                 ' '//date_time_start(9:10)//':'//date_time_start(11:12)//':'//date_time_start(13:14)// &
+                               ' - '//date_time(1:4)//'/'//date_time(5:6)//'/'//date_time(7:8)//                        &
+                                 ' '//date_time(9:10)//':'//date_time(11:12)//':'//date_time(13:14)//']'
+         write(stdout, '(A)')
+         write(stdout, '(A)') self%date_time%output()
+      else
+         write(stdout, '(A)')
+      endif
       self%is_stdout_locked_ = .false.
-      write(stdout, '(A)')
    endif
    endsubroutine update
 

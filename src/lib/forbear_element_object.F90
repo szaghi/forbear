@@ -50,7 +50,7 @@ contains
    self%string = UCS4_''
    if (present(string)) then
       select type(string)
-#ifdef ASCII_SUPPORTED
+#if defined ASCII_SUPPORTED && defined ASCII_NEQ_DEFAULT
       type is(character(len=*, kind=ASCII))
          self%string = string
 #endif
@@ -69,8 +69,8 @@ contains
 
    pure function output(self)
    !< Return formatted output of element.
-   class(element_object), intent(in) :: self   !< element.
-   character(len=:), allocatable     :: output !< Formatted output.
+   class(element_object), intent(in)        :: self   !< element.
+   character(len=:, kind=UCS4), allocatable :: output !< Formatted output.
 
    output = colorize(self%string, color_fg=self%color_fg, color_bg=self%color_bg, style=self%style)
    endfunction output
