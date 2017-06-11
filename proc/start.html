@@ -130,16 +130,16 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
 	  data-placement="bottom" data-html="true"
-	  title=" 7.7% of total for procedures.">19 statements</a>
+	  title=" 7.1% of total for procedures.">19 statements</a>
      </li> 
      
      
-    <li><i class="fa fa-code"></i><a href="../src/forbear_bar_object.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/forbear_bar_object.F90"> Source File</a></li>
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
-     <li><a href='../sourcefile/forbear_bar_object.f90.html'>forbear_bar_object.f90</a></li>
+     <li><a href='../sourcefile/forbear_bar_object.f90.html'>forbear_bar_object.F90</a></li>
   
      <li><a href='../module/forbear_bar_object.html'>forbear_bar_object</a></li>
   
@@ -349,7 +349,8 @@ private subroutine start(self)
       <span class="k">write</span><span class="p">(</span><span class="n">min_value</span><span class="p">,</span> <span class="s1">&#39;(F5.2)&#39;</span><span class="p">)</span> <span class="n">self</span><span class="p">%</span><span class="n">min_value</span> <span class="p">;</span> <span class="n">min_value</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="n">min_value</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39; (min)&#39;</span>
       <span class="k">write</span><span class="p">(</span><span class="n">max_value</span><span class="p">,</span> <span class="s1">&#39;(F5.2)&#39;</span><span class="p">)</span> <span class="n">self</span><span class="p">%</span><span class="n">max_value</span> <span class="p">;</span> <span class="n">max_value</span> <span class="o">=</span> <span class="s1">&#39;(max) &#39;</span><span class="o">//</span><span class="nb">trim</span><span class="p">(</span><span class="n">max_value</span><span class="p">)</span>
       <span class="n">self</span><span class="p">%</span><span class="n">scale_bar</span><span class="p">%</span><span class="n">string</span> <span class="o">=</span> <span class="n">min_value</span><span class="o">//</span><span class="nb">repeat</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">self</span><span class="p">%</span><span class="n">width</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">min_value</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">max_value</span><span class="p">))</span><span class="o">//</span><span class="n">max_value</span>
-      <span class="n">bar</span> <span class="o">=</span> <span class="nb">repeat</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">prefix</span><span class="p">%</span><span class="n">string</span><span class="p">))</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">bracket_left</span><span class="p">%</span><span class="n">output</span><span class="p">()</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">scale_bar</span><span class="p">%</span><span class="n">output</span><span class="p">()</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">bracket_right</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
+      <span class="n">bar</span> <span class="o">=</span> <span class="nb">repeat</span><span class="p">(</span><span class="n">UCS4_</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">prefix</span><span class="p">%</span><span class="n">string</span><span class="p">))</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">bracket_left</span><span class="p">%</span><span class="n">output</span><span class="p">()</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">scale_bar</span><span class="p">%</span><span class="n">output</span><span class="p">()</span><span class="o">//</span><span class="p">&amp;</span>
+            <span class="n">self</span><span class="p">%</span><span class="n">bracket_right</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
       <span class="k">write</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;(A)&#39;</span><span class="p">)</span> <span class="n">bar</span>
       <span class="n">endsubroutine</span> <span class="n">add_scale_bar</span>
    <span class="n">endsubroutine</span> <span class="n">start</span>
@@ -410,7 +411,7 @@ private subroutine start(self)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2017-06-05 13:08  
+             on 2017-06-11 06:41  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> forbear was developed by Stefano Zaghi</p></div>

@@ -130,16 +130,16 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
 	  data-placement="bottom" data-html="true"
-	  title="<p>29.3% of total for derived types.</p>Including implementation: 56 statements, 18.4% of total for derived types.">12 statements</a>
+	  title="<p>29.3% of total for derived types.</p>Including implementation: 61 statements, 18.9% of total for derived types.">12 statements</a>
      </li> 
      
      
-    <li><i class="fa fa-code"></i><a href="../src/forbear_element_object.f90"> Source File</a></li>
+    <li><i class="fa fa-code"></i><a href="../src/forbear_element_object.F90"> Source File</a></li>
      
   </ul>
   <ol class="breadcrumb in-well text-right">
   
-     <li><a href='../sourcefile/forbear_element_object.f90.html'>forbear_element_object.f90</a></li>
+     <li><a href='../sourcefile/forbear_element_object.f90.html'>forbear_element_object.F90</a></li>
   
      <li><a href='../module/forbear_element_object.html'>forbear_element_object</a></li>
   
@@ -457,7 +457,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-string"></span>character(len=:),</td>
+  <td><span class="anchor" id="variable-string"></span>character(kind=len=:,UCS4),</td>
   
   <td>public,</td>
   <td>allocatable</td><td>::</td>
@@ -826,7 +826,7 @@ private pure subroutine <a href='../proc/initialize%7E2.html'>initialize</a>(sel
   
 <tr>
   
-  <td><span class="anchor" ></span>character(len=*),</td>
+  <td><span class="anchor" ></span>class(*),</td>
   <td>intent(in),</td>
   <td>optional</td>
   
@@ -968,7 +968,7 @@ private pure function <a href='../proc/output.html'>output</a>(self)
   
   
   
-     <h4>Return Value <small>character(len=:),
+     <h4>Return Value <small>character(kind=len=:,UCS4),
   allocatable</small></h4>
   <p>Formatted output.</p>
     
@@ -988,10 +988,10 @@ private pure function <a href='../proc/output.html'>output</a>(self)
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span><span class="k">type</span> <span class="kd">::</span> <span class="n">element_object</span>
    <span class="c">!&lt; Bar element class.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">string</span>   <span class="c">!&lt; Element string.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">color_fg</span> <span class="c">!&lt; Foreground color.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">color_bg</span> <span class="c">!&lt; Background color.</span>
-   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">style</span>    <span class="c">!&lt; Style.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:,</span> <span class="nb">kind</span><span class="o">=</span><span class="n">UCS4</span><span class="p">),</span> <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">string</span>   <span class="c">!&lt; Element string.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span>            <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">color_fg</span> <span class="c">!&lt; Foreground color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span>            <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">color_bg</span> <span class="c">!&lt; Background color.</span>
+   <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="p">:),</span>            <span class="k">allocatable</span> <span class="kd">::</span> <span class="n">style</span>    <span class="c">!&lt; Style.</span>
    <span class="k">contains</span>
       <span class="c">! public methods</span>
       <span class="k">procedure</span><span class="p">,</span> <span class="k">pass</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="kd">::</span> <span class="n">destroy</span>    <span class="c">!&lt; Destroy element.</span>
@@ -1040,7 +1040,7 @@ private pure function <a href='../proc/output.html'>output</a>(self)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2017-06-05 13:08  
+             on 2017-06-11 06:41  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> forbear was developed by Stefano Zaghi</p></div>
