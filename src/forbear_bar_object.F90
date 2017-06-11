@@ -4,32 +4,33 @@ module forbear_bar_object
 !< **forbear** project, definition of [[bar_object]].
 use, intrinsic :: iso_fortran_env, only : I4P=>int32, I8P=>int64, R8P=>real64, stdout=>output_unit
 use forbear_element_object, only : element_object
-use forbear_kinds, only : ASCII, UCS4
+use forbear_kinds, only : ASCII, UCS4, ucs4_string
 implicit none
 private
 public :: bar_object
 
 type :: bar_object
    !< Progress **bar** class.
-   type(element_object) :: prefix               !< Message prefixing the bar.
-   type(element_object) :: suffix               !< Message suffixing the bar.
-   type(element_object) :: bracket_left         !< Left bracket surrounding the bar.
-   type(element_object) :: bracket_right        !< Right bracket surrounding the bar.
-   type(element_object) :: empty_char           !< Characters used for empty bar.
-   type(element_object) :: filled_char          !< Characters used for filled bar.
-   type(element_object) :: progress_percent     !< Progress in percent.
-   type(element_object) :: progress_speed       !< Progress speed in percent.
-   type(element_object) :: scale_bar            !< Scale bar.
-   type(element_object) :: date_time            !< Date and time.
-   integer(I4P)         :: width                !< With of the bar.
-   real(R8P)            :: min_value            !< Minimum value.
-   real(R8P)            :: max_value            !< Maximum value.
-   integer(I4P)         :: frequency            !< Bar update frequency, in range `[1%,100%]`.
-   logical              :: add_scale_bar        !< Add scale to the bar.
-   logical              :: add_progress_percent !< Add progress in percent.
-   logical              :: add_progress_speed   !< Add progress speed in percent.
-   logical              :: add_date_time        !< Add date and time.
-   logical              :: is_stdout_locked_    !< Flag to store standard output status.
+   type(element_object)              :: prefix               !< Message prefixing the bar.
+   type(element_object)              :: suffix               !< Message suffixing the bar.
+   type(element_object)              :: bracket_left         !< Left bracket surrounding the bar.
+   type(element_object)              :: bracket_right        !< Right bracket surrounding the bar.
+   type(element_object)              :: empty_char           !< Characters used for empty bar.
+   type(element_object)              :: filled_char          !< Characters used for filled bar.
+   type(element_object)              :: progress_percent     !< Progress in percent.
+   type(element_object)              :: progress_speed       !< Progress speed in percent.
+   type(element_object)              :: scale_bar            !< Scale bar.
+   type(element_object)              :: date_time            !< Date and time.
+   type(element_object), allocatable :: spinner(:)           !< Spinner.
+   integer(I4P)                      :: width                !< With of the bar.
+   real(R8P)                         :: min_value            !< Minimum value.
+   real(R8P)                         :: max_value            !< Maximum value.
+   integer(I4P)                      :: frequency            !< Bar update frequency, in range `[1%,100%]`.
+   logical                           :: add_scale_bar        !< Add scale to the bar.
+   logical                           :: add_progress_percent !< Add progress in percent.
+   logical                           :: add_progress_speed   !< Add progress speed in percent.
+   logical                           :: add_date_time        !< Add date and time.
+   logical                           :: is_stdout_locked_    !< Flag to store standard output status.
    contains
       ! public methods
       procedure, pass(self) :: destroy          !< Destroy bar.
@@ -40,7 +41,8 @@ type :: bar_object
       ! public operators
       generic :: assignment(=) => assign_bar !< Overload `=` operator.
       ! private methods
-      procedure, pass(lhs),  private :: assign_bar !< Operator `=`.
+      procedure, pass(lhs),  private :: assign_bar     !< Operator `=`.
+      procedure, pass(self), private :: create_spinner !< Create spinner.
 endtype bar_object
 
 contains
@@ -48,6 +50,7 @@ contains
    pure subroutine destroy(self)
    !< Destroy bar.
    class(bar_object), intent(inout) :: self !< Bar.
+   integer(I4P)                     :: s    !< Counter.
 
    call self%prefix%destroy
    call self%suffix%destroy
@@ -59,6 +62,12 @@ contains
    call self%progress_speed%destroy
    call self%scale_bar%destroy
    call self%date_time%destroy
+   if (allocated(self%spinner)) then
+      do s=1, size(self%spinner, dim=1)
+         call self%spinner(s)%destroy
+      enddo
+      deallocate (self%spinner)
+   endif
    self%width = 32
    self%min_value = 0._R8P
    self%max_value = 1._R8P
@@ -77,6 +86,7 @@ contains
                          bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style,          &
                          empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style,                      &
                          filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style,                  &
+                         spinner_string, spinner_color_fg, spinner_color_bg, spinner_style,                                  &
                          add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style,                             &
                          add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, &
                          add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style,         &
@@ -108,6 +118,10 @@ contains
    character(len=*),  intent(in), optional  :: filled_char_color_fg      !< Filled char foreground color.
    character(len=*),  intent(in), optional  :: filled_char_color_bg      !< Filled char background color.
    character(len=*),  intent(in), optional  :: filled_char_style         !< Filled char style.
+   class(*),          intent(in), optional  :: spinner_string            !< Spinner char.
+   character(len=*),  intent(in), optional  :: spinner_color_fg          !< Spinner char foreground color.
+   character(len=*),  intent(in), optional  :: spinner_color_bg          !< Spinner char background color.
+   character(len=*),  intent(in), optional  :: spinner_style             !< Spinner char style.
    logical,           intent(in), optional  :: add_scale_bar             !< Add scale to the bar.
    character(len=*),  intent(in), optional  :: scale_bar_color_fg        !< Scale bar foreground color.
    character(len=*),  intent(in), optional  :: scale_bar_color_bg        !< Scale bar background color.
@@ -131,8 +145,17 @@ contains
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
 
-   empty_char_string_ = '-' ; call set_char(char_string_=empty_char_string_, char_string=empty_char_string)
-   filled_char_string_ = '=' ; call set_char(char_string_=filled_char_string_, char_string=filled_char_string)
+   if (present(empty_char_string)) then
+      empty_char_string_ = ucs4_string(input=empty_char_string)
+   else
+      empty_char_string_ = UCS4_'-'
+   endif
+   if (present(filled_char_string)) then
+      filled_char_string_ = ucs4_string(input=filled_char_string)
+   else
+      filled_char_string_ = UCS4_'*'
+   endif
+
    call self%destroy
    call self%prefix%initialize(string=prefix_string, color_fg=prefix_color_fg, color_bg=prefix_color_bg, style=prefix_style)
    call self%suffix%initialize(string=suffix_string, color_fg=suffix_color_fg, color_bg=suffix_color_bg, style=suffix_style)
@@ -144,6 +167,7 @@ contains
                                    style=empty_char_style)
    call self%filled_char%initialize(string=filled_char_string_, color_fg=filled_char_color_fg, color_bg=filled_char_color_bg,&
                                     style=filled_char_style)
+   call self%create_spinner(string=spinner_string, color_fg=spinner_color_fg, color_bg=spinner_color_bg, style=spinner_style)
    if (present(add_scale_bar)) self%add_scale_bar = add_scale_bar
    call self%scale_bar%initialize(color_fg=scale_bar_color_fg, color_bg=scale_bar_color_bg, style=scale_bar_style)
    if (present(add_progress_percent)) self%add_progress_percent = add_progress_percent
@@ -160,27 +184,6 @@ contains
    if (present(frequency)) self%frequency = frequency
 
    if (self%add_scale_bar .and. self%width < 22) error stop 'error: for adding scale bar the bar width must be at least 22 chars'
-   contains
-      subroutine set_char(char_string_, char_string)
-      !< Set character accordingly to given `char_string`.
-      character(len=:, kind=UCS4), allocatable, intent(inout)        :: char_string_ !< Character to be set.
-      class(*),                                 intent(in), optional :: char_string  !< Given character.
-
-      if (present(char_string)) then
-         select type(char_string)
-#if defined ASCII_SUPPORTED && defined ASCII_NEQ_DEFAULT
-         type is(character(len=*, kind=ASCII))
-            char_string_ = char_string
-#endif
-#ifdef UCS4_SUPPORTED
-         type is(character(len=*, kind=UCS4))
-            char_string_ = char_string
-#endif
-         type is(character(len=*))
-            char_string_ = char_string
-         endselect
-      endif
-      endsubroutine set_char
    endsubroutine initialize
 
    pure function is_stdout_locked(self) result(is_locked)
@@ -221,6 +224,7 @@ contains
    integer(I4P)                              :: progress          !< Progress, in percent.
    integer(I4P), save                        :: progress_previous !< Previous progress, in percent.
    integer(I8P), save                        :: tic_toc(1:2)      !< Tic-toc timer.
+   integer(I4P), save                        :: spinner_count     !< Spinner count.
    character(len=18), save                   :: date_time_start   !< Start date/time.
    character(len=18)                         :: date_time         !< Current date/time.
    integer(I8P)                              :: count_rate        !< Timer count rate.
@@ -233,18 +237,25 @@ contains
    progress = nint(current / (self%max_value - self%min_value) * 100)
    if (progress == 0) then
       progress_previous = 0
+      spinner_count = 0
       call system_clock(tic_toc(1), count_rate)
       if (self%add_date_time) call date_and_time(date=date_time_start(1:8), time=date_time_start(9:))
    endif
    if (mod(progress, self%frequency) == 0 .or. progress == 100) then
       call system_clock(tic_toc(2), count_rate)
       f_chars = nint(progress / 100._R8P * self%width)
-      bar = self%prefix%output()
+      bar = achar(27)//'[?25l' ! hide cursor
+      bar = bar//self%prefix%output()
       bar = bar//self%bracket_left%output()
       bar = bar//repeat(self%filled_char%output(), f_chars)
       bar = bar//repeat(self%empty_char%output(), self%width - f_chars)
       bar = bar//self%bracket_right%output()
       bar = bar//self%suffix%output()
+      if (allocated(self%spinner)) then
+         spinner_count = spinner_count + 1
+         if (spinner_count > size(self%spinner, dim=1)) spinner_count = 1
+         bar = bar//self%spinner(spinner_count)%output()
+      endif
       if (self%add_progress_percent) then
          write(progress_percent, '(I3,A)') progress, '%'
          self%progress_percent%string = progress_percent
@@ -269,10 +280,10 @@ contains
                                  ' '//date_time_start(9:10)//':'//date_time_start(11:12)//':'//date_time_start(13:14)// &
                                ' - '//date_time(1:4)//'/'//date_time(5:6)//'/'//date_time(7:8)//                        &
                                  ' '//date_time(9:10)//':'//date_time(11:12)//':'//date_time(13:14)//']'
-         write(stdout, '(A)')
+         write(stdout, '(A)') achar(27)//'[?25h' ! restore cursor
          write(stdout, '(A)') self%date_time%output()
       else
-         write(stdout, '(A)')
+         write(stdout, '(A)') achar(27)//'[?25h'! restore cursor
       endif
       self%is_stdout_locked_ = .false.
    endif
@@ -283,6 +294,7 @@ contains
    !< Initialize bar.
    class(bar_object), intent(inout) :: lhs !< Left hand side.
    type(bar_object),  intent(in)    :: rhs !< Right hand side.
+   integer(I4P)                     :: s   !< Counter.
 
    lhs%prefix = rhs%prefix
    lhs%suffix = rhs%suffix
@@ -294,6 +306,18 @@ contains
    lhs%progress_speed = rhs%progress_speed
    lhs%scale_bar = rhs%scale_bar
    lhs%date_time = rhs%date_time
+   if (allocated(lhs%spinner)) then
+      do s=1, size(lhs%spinner, dim=1)
+         call lhs%spinner(s)%destroy
+      enddo
+      deallocate (lhs%spinner)
+   endif
+   if (allocated(rhs%spinner)) then
+      allocate(lhs%spinner(1:size(rhs%spinner, dim=1)))
+      do s=1, size(rhs%spinner, dim=1)
+         lhs%spinner(s) = rhs%spinner(s)
+      enddo
+   endif
    lhs%width = rhs%width
    lhs%min_value = rhs%min_value
    lhs%max_value = rhs%max_value
@@ -304,4 +328,435 @@ contains
    lhs%add_date_time = rhs%add_date_time
    lhs%is_stdout_locked_ = rhs%is_stdout_locked_
    endsubroutine assign_bar
+
+   subroutine create_spinner(self, string, color_fg, color_bg, style)
+   !< Create spinner.
+   class(bar_object), intent(inout)         :: self     !< Bar.
+   class(*),          intent(in), optional  :: string   !< Spinner char.
+   character(len=*),  intent(in), optional  :: color_fg !< Spinner char foreground color.
+   character(len=*),  intent(in), optional  :: color_bg !< Spinner char background color.
+   character(len=*),  intent(in), optional  :: style    !< Spinner char style.
+   character(len=:, kind=UCS4), allocatable :: string_  !< Spinner char, local variable
+   ! integer(I4P)                             :: s        !< Counter.
+
+   if (present(string)) then
+      string_ = ucs4_string(input=string)
+      select case(string_)
+      case(UCS4_'|')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='|', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='/', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='-', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='\', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⠋')
+         allocate(self%spinner(1:10))
+         call self%spinner(1 )%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='⠹', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='⠸', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='⠼', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='⠴', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='⠦', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='⠧', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='⠇', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='⠏', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⣾')
+         allocate(self%spinner(1:8))
+         call self%spinner(1)%initialize(string='⣾', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⣽', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='⣻', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='⢿', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='⡿', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='⣟', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string='⣯', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8)%initialize(string='⣷', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⠓')
+         allocate(self%spinner(1:10))
+         call self%spinner(1 )%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='⠚', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='⠞', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='⠖', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='⠦', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='⠴', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='⠲', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='⠳', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='⠓', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⠄')
+         allocate(self%spinner(1:14))
+         call self%spinner(1 )%initialize(string='⠄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='⠆', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='⠇', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='⠸', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='⠰', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='⠰', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='⠸', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(11)%initialize(string='⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(12)%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(13)%initialize(string='⠇', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(14)%initialize(string='⠆', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⠐')
+         allocate(self%spinner(1:17))
+         call self%spinner(1 )%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='⠚', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='⠂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='⠂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='⠲', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='⠴', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='⠦', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(11)%initialize(string='⠖', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(12)%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(13)%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(14)%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(15)%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(16)%initialize(string='⠓', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(17)%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⠒')
+         allocate(self%spinner(1:24))
+         call self%spinner(1 )%initialize(string='⠈', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='⠓', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='⠖', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='⠦', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(11)%initialize(string='⠤', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(12)%initialize(string='⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(13)%initialize(string='⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(14)%initialize(string='⠤', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(15)%initialize(string='⠦', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(16)%initialize(string='⠖', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(17)%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(18)%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(19)%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(20)%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(21)%initialize(string='⠓', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(22)%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(23)%initialize(string='⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(24)%initialize(string='⠈', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⠁')
+         allocate(self%spinner(1:29))
+         call self%spinner(1 )%initialize(string='⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='⠚', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='⠂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='⠂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='⠲', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(11)%initialize(string='⠴', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(12)%initialize(string='⠤', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(13)%initialize(string='⠄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(14)%initialize(string='⠄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(15)%initialize(string='⠤', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(16)%initialize(string='⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(17)%initialize(string='⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(18)%initialize(string='⠤', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(19)%initialize(string='⠦', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(20)%initialize(string='⠖', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(21)%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(22)%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(23)%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(24)%initialize(string='⠒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(25)%initialize(string='⠓', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(26)%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(27)%initialize(string='⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(28)%initialize(string='⠈', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(29)%initialize(string='⠈', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⣸')
+         allocate(self%spinner(1:8))
+         call self%spinner(1)%initialize(string='⢹', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⢺', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='⢼', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='⣸', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='⣇', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='⡧', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string='⡗', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8)%initialize(string='⡏', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⡐')
+         allocate(self%spinner(1:7))
+         call self%spinner(1)%initialize(string='⢄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⢂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='⢁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='⡁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='⡈', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='⡐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string='⡠', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⡀')
+         allocate(self%spinner(1:8))
+         call self%spinner(1)%initialize(string='⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⠂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='⠄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='⡀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='⢀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string='⠐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8)%initialize(string='⠈', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⡃⢐')
+         allocate(self%spinner(1:56))
+         call self%spinner(1 )%initialize(string='⢀⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='⡀⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='⠄⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='⢂⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='⡂⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='⠅⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='⢃⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='⡃⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='⠍⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='⢋⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(11)%initialize(string='⡋⠀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(12)%initialize(string='⠍⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(13)%initialize(string='⢋⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(14)%initialize(string='⡋⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(15)%initialize(string='⠍⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(16)%initialize(string='⠋⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(17)%initialize(string='⠋⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(18)%initialize(string='⠉⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(19)%initialize(string='⠉⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(20)%initialize(string='⠉⠩', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(21)%initialize(string='⠈⢙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(22)%initialize(string='⠈⡙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(23)%initialize(string='⢈⠩', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(24)%initialize(string='⡀⢙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(25)%initialize(string='⠄⡙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(26)%initialize(string='⢂⠩', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(27)%initialize(string='⡂⢘', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(28)%initialize(string='⠅⡘', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(29)%initialize(string='⢃⠨', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(30)%initialize(string='⡃⢐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(31)%initialize(string='⠍⡐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(32)%initialize(string='⢋⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(33)%initialize(string='⡋⢀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(34)%initialize(string='⠍⡁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(35)%initialize(string='⢋⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(36)%initialize(string='⡋⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(37)%initialize(string='⠍⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(38)%initialize(string='⠋⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(39)%initialize(string='⠋⠉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(40)%initialize(string='⠉⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(41)%initialize(string='⠉⠙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(42)%initialize(string='⠉⠩', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(43)%initialize(string='⠈⢙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(44)%initialize(string='⠈⡙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(45)%initialize(string='⠈⠩', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(46)%initialize(string='⠀⢙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(47)%initialize(string='⠀⡙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(48)%initialize(string='⠀⠩', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(49)%initialize(string='⠀⢘', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(50)%initialize(string='⠀⡘', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(51)%initialize(string='⠀⠨', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(52)%initialize(string='⠀⢐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(53)%initialize(string='⠀⡐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(54)%initialize(string='⠀⠠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(55)%initialize(string='⠀⢀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(56)%initialize(string='⠀⡀', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'┤')
+         allocate(self%spinner(1:8))
+         call self%spinner(1)%initialize(string='┤', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='┘', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='┴', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='└', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='├', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='┌', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string='┬', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8)%initialize(string='┐', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'✶')
+         allocate(self%spinner(1:6))
+         call self%spinner(1)%initialize(string='✶', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='✸', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='✹', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='✺', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='✹', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='✷', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'_')
+         allocate(self%spinner(1:12))
+         call self%spinner(1 )%initialize(string='_', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='_', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='_', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='-', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='`', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='`', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string="'", color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='´', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='-', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='_', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(11)%initialize(string='_', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(12)%initialize(string='_', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'▃')
+         allocate(self%spinner(1:10))
+         call self%spinner(1 )%initialize(string='▁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='▃', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='▄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='▅', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='▆', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='▇', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='▆', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='▅', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='▄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='▃', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'▉')
+         allocate(self%spinner(1:12))
+         call self%spinner(1 )%initialize(string='▏', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='▎', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='▍', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='▌', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='▋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='▊', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='▉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='▊', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='▋', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='▌', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(11)%initialize(string='▍', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(12)%initialize(string='▎', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'@')
+         allocate(self%spinner(1:7))
+         call self%spinner(1)%initialize(string=' ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='.', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='o', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='O', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='@', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='*', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string=' ', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'°')
+         allocate(self%spinner(1:7))
+         call self%spinner(1)%initialize(string='.', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='o', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='O', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='°', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='O', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='o', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string='.', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'▒')
+         allocate(self%spinner(1:3))
+         call self%spinner(1)%initialize(string='▓', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='▒', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='░', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⠂')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='⠁', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⠂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='⠄', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='⠂', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'▖')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='▖', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='▘', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='▝', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='▗', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'◢')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='◢', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='◣', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='◤', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='◥', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'◜')
+         allocate(self%spinner(1:6))
+         call self%spinner(1)%initialize(string='◜', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='◠', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='◝', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='◞', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='◡', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='◟', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⊙')
+         allocate(self%spinner(1:3))
+         call self%spinner(1)%initialize(string='◡', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⊙', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='◠', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'◰')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='◰', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='◳', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='◲', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='◱', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'◴')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='◴', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='◷', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='◶', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='◵', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'◐')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='◐', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='◓', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='◑', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='◒', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⊶')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='⊶', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⊷', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'▫')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='▫', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='▪', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'□')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='□', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='■', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'▪')
+         allocate(self%spinner(1:4))
+         call self%spinner(1)%initialize(string='■', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='□', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='▪', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='▫', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'▯')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='▮', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='▯', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'⦿')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='⦾', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='⦿', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'◍')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='◍', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='◌', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'◉')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='◉', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='◎', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'㊂')
+         allocate(self%spinner(1:3))
+         call self%spinner(1)%initialize(string='㊂', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='㊀', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='㊁', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'(  ●   )')
+         allocate(self%spinner(1:10))
+         call self%spinner(1 )%initialize(string='( ●    )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2 )%initialize(string='(  ●   )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3 )%initialize(string='(   ●  )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4 )%initialize(string='(    ● )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5 )%initialize(string='(     ●)', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6 )%initialize(string='(    ● )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7 )%initialize(string='(   ●  )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8 )%initialize(string='(  ●   )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(9 )%initialize(string='( ●    )', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(10)%initialize(string='(●     )', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'🌔 ')
+         allocate(self%spinner(1:8))
+         call self%spinner(1)%initialize(string='🌑 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='🌒 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(3)%initialize(string='🌓 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(4)%initialize(string='🌔 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(5)%initialize(string='🌕 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(6)%initialize(string='🌖 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(7)%initialize(string='🌗 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(8)%initialize(string='🌘 ', color_fg=color_fg, color_bg=color_bg, style=style)
+      case(UCS4_'🚶 ')
+         allocate(self%spinner(1:2))
+         call self%spinner(1)%initialize(string='🚶 ', color_fg=color_fg, color_bg=color_bg, style=style)
+         call self%spinner(2)%initialize(string='🏃 ', color_fg=color_fg, color_bg=color_bg, style=style)
+      endselect
+   endif
+   endsubroutine create_spinner
 endmodule forbear_bar_object

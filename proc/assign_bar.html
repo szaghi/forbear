@@ -130,7 +130,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
 	  data-placement="bottom" data-html="true"
-	  title=" 8.6% of total for procedures.">23 statements</a>
+	  title=" 4.9% of total for procedures.">36 statements</a>
      </li> 
      
      
@@ -201,6 +201,8 @@
       
       <a class="list-group-item" href="../proc/assign_element.html">assign_element</a>
       
+      <a class="list-group-item" href="../proc/create_spinner.html">create_spinner</a>
+      
       <a class="list-group-item" href="../proc/destroy.html">destroy</a>
       
       <a class="list-group-item" href="../proc/destroy%7E2.html">destroy</a>
@@ -214,6 +216,8 @@
       <a class="list-group-item" href="../proc/output.html">output</a>
       
       <a class="list-group-item" href="../proc/start.html">start</a>
+      
+      <a class="list-group-item" href="../proc/ucs4_string.html">ucs4_string</a>
       
       <a class="list-group-item" href="../proc/update.html">update</a>
       
@@ -351,6 +355,7 @@ private pure subroutine assign_bar(lhs, rhs)
    <span class="c">!&lt; Initialize bar.</span>
    <span class="k">class</span><span class="p">(</span><span class="n">bar_object</span><span class="p">),</span> <span class="k">intent</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">lhs</span> <span class="c">!&lt; Left hand side.</span>
    <span class="k">type</span><span class="p">(</span><span class="n">bar_object</span><span class="p">),</span>  <span class="k">intent</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">rhs</span> <span class="c">!&lt; Right hand side.</span>
+   <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">)</span>                     <span class="kd">::</span> <span class="n">s</span>   <span class="c">!&lt; Counter.</span>
 
    <span class="n">lhs</span><span class="p">%</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">prefix</span>
    <span class="n">lhs</span><span class="p">%</span><span class="n">suffix</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">suffix</span>
@@ -362,6 +367,18 @@ private pure subroutine assign_bar(lhs, rhs)
    <span class="n">lhs</span><span class="p">%</span><span class="n">progress_speed</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">progress_speed</span>
    <span class="n">lhs</span><span class="p">%</span><span class="n">scale_bar</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">scale_bar</span>
    <span class="n">lhs</span><span class="p">%</span><span class="n">date_time</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">date_time</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">lhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">))</span> <span class="k">then</span>
+<span class="k">      do </span><span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="p">(</span><span class="n">lhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+         <span class="k">call </span><span class="n">lhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">(</span><span class="n">s</span><span class="p">)%</span><span class="n">destroy</span>
+      <span class="n">enddo</span>
+      <span class="k">deallocate</span> <span class="p">(</span><span class="n">lhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">)</span>
+   <span class="n">endif</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">rhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">))</span> <span class="k">then</span>
+<span class="k">      allocate</span><span class="p">(</span><span class="n">lhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">size</span><span class="p">(</span><span class="n">rhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+      <span class="k">do </span><span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="p">(</span><span class="n">rhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+         <span class="n">lhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">spinner</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+      <span class="n">enddo</span>
+   <span class="n">endif</span>
    <span class="n">lhs</span><span class="p">%</span><span class="n">width</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">width</span>
    <span class="n">lhs</span><span class="p">%</span><span class="n">min_value</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">min_value</span>
    <span class="n">lhs</span><span class="p">%</span><span class="n">max_value</span> <span class="o">=</span> <span class="n">rhs</span><span class="p">%</span><span class="n">max_value</span>
@@ -394,6 +411,8 @@ private pure subroutine assign_bar(lhs, rhs)
       
       <a class="list-group-item" href="../proc/assign_element.html">assign_element</a>
       
+      <a class="list-group-item" href="../proc/create_spinner.html">create_spinner</a>
+      
       <a class="list-group-item" href="../proc/destroy.html">destroy</a>
       
       <a class="list-group-item" href="../proc/destroy%7E2.html">destroy</a>
@@ -407,6 +426,8 @@ private pure subroutine assign_bar(lhs, rhs)
       <a class="list-group-item" href="../proc/output.html">output</a>
       
       <a class="list-group-item" href="../proc/start.html">start</a>
+      
+      <a class="list-group-item" href="../proc/ucs4_string.html">ucs4_string</a>
       
       <a class="list-group-item" href="../proc/update.html">update</a>
       
@@ -429,7 +450,7 @@ private pure subroutine assign_bar(lhs, rhs)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2017-06-11 06:42  
+             on 2017-06-11 12:58  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> forbear was developed by Stefano Zaghi</p></div>

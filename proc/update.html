@@ -130,7 +130,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
 	  data-placement="bottom" data-html="true"
-	  title="21.4% of total for procedures.">57 statements</a>
+	  title=" 8.9% of total for procedures.">65 statements</a>
      </li> 
      
      
@@ -201,6 +201,8 @@
       
       <a class="list-group-item" href="../proc/assign_element.html">assign_element</a>
       
+      <a class="list-group-item" href="../proc/create_spinner.html">create_spinner</a>
+      
       <a class="list-group-item" href="../proc/destroy.html">destroy</a>
       
       <a class="list-group-item" href="../proc/destroy%7E2.html">destroy</a>
@@ -214,6 +216,8 @@
       <a class="list-group-item" href="../proc/output.html">output</a>
       
       <a class="list-group-item" href="../proc/start.html">start</a>
+      
+      <a class="list-group-item" href="../proc/ucs4_string.html">ucs4_string</a>
       
       <a class="list-group-item" href="../proc/update.html">update</a>
       
@@ -261,7 +265,7 @@ private subroutine update(self, current)
   
 <tr>
   
-  <td><span class="anchor" id="variable-self%7E5"></span>class(<a href='../type/bar_object.html'>bar_object</a>),</td>
+  <td><span class="anchor" id="variable-self%7E6"></span>class(<a href='../type/bar_object.html'>bar_object</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -354,6 +358,7 @@ private subroutine update(self, current)
    <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">)</span>                              <span class="kd">::</span> <span class="n">progress</span>          <span class="c">!&lt; Progress, in percent.</span>
    <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">),</span> <span class="k">save</span>                        <span class="kd">::</span> <span class="n">progress_previous</span> <span class="c">!&lt; Previous progress, in percent.</span>
    <span class="kt">integer</span><span class="p">(</span><span class="n">I8P</span><span class="p">),</span> <span class="k">save</span>                        <span class="kd">::</span> <span class="n">tic_toc</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span>      <span class="c">!&lt; Tic-toc timer.</span>
+   <span class="kt">integer</span><span class="p">(</span><span class="n">I4P</span><span class="p">),</span> <span class="k">save</span>                        <span class="kd">::</span> <span class="n">spinner_count</span>     <span class="c">!&lt; Spinner count.</span>
    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">18</span><span class="p">),</span> <span class="k">save</span>                   <span class="kd">::</span> <span class="n">date_time_start</span>   <span class="c">!&lt; Start date/time.</span>
    <span class="kt">character</span><span class="p">(</span><span class="nb">len</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>                         <span class="kd">::</span> <span class="n">date_time</span>         <span class="c">!&lt; Current date/time.</span>
    <span class="kt">integer</span><span class="p">(</span><span class="n">I8P</span><span class="p">)</span>                              <span class="kd">::</span> <span class="n">count_rate</span>        <span class="c">!&lt; Timer count rate.</span>
@@ -366,18 +371,25 @@ private subroutine update(self, current)
    <span class="n">progress</span> <span class="o">=</span> <span class="nb">nint</span><span class="p">(</span><span class="n">current</span> <span class="o">/</span> <span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">max_value</span> <span class="o">-</span> <span class="n">self</span><span class="p">%</span><span class="n">min_value</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
    <span class="k">if</span> <span class="p">(</span><span class="n">progress</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">      </span><span class="n">progress_previous</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">spinner_count</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="k">call </span><span class="nb">system_clock</span><span class="p">(</span><span class="n">tic_toc</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">count_rate</span><span class="p">)</span>
       <span class="k">if</span> <span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">add_date_time</span><span class="p">)</span> <span class="k">call </span><span class="nb">date_and_time</span><span class="p">(</span><span class="n">date</span><span class="o">=</span><span class="n">date_time_start</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">8</span><span class="p">),</span> <span class="nb">time</span><span class="o">=</span><span class="n">date_time_start</span><span class="p">(</span><span class="mi">9</span><span class="p">:))</span>
    <span class="n">endif</span>
    <span class="k">if</span> <span class="p">(</span><span class="nb">mod</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="n">self</span><span class="p">%</span><span class="n">frequency</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">.</span><span class="nb">or</span><span class="p">.</span> <span class="n">progress</span> <span class="o">==</span> <span class="mi">100</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">      call </span><span class="nb">system_clock</span><span class="p">(</span><span class="n">tic_toc</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">count_rate</span><span class="p">)</span>
       <span class="n">f_chars</span> <span class="o">=</span> <span class="nb">nint</span><span class="p">(</span><span class="n">progress</span> <span class="o">/</span> <span class="mi">10</span><span class="mf">0._R8P</span> <span class="o">*</span> <span class="n">self</span><span class="p">%</span><span class="n">width</span><span class="p">)</span>
-      <span class="n">bar</span> <span class="o">=</span> <span class="n">self</span><span class="p">%</span><span class="n">prefix</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
+      <span class="n">bar</span> <span class="o">=</span> <span class="nb">achar</span><span class="p">(</span><span class="mi">27</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;[?25l&#39;</span> <span class="c">! hide cursor</span>
+      <span class="n">bar</span> <span class="o">=</span> <span class="n">bar</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">prefix</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
       <span class="n">bar</span> <span class="o">=</span> <span class="n">bar</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">bracket_left</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
       <span class="n">bar</span> <span class="o">=</span> <span class="n">bar</span><span class="o">//</span><span class="nb">repeat</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">filled_char</span><span class="p">%</span><span class="n">output</span><span class="p">(),</span> <span class="n">f_chars</span><span class="p">)</span>
       <span class="n">bar</span> <span class="o">=</span> <span class="n">bar</span><span class="o">//</span><span class="nb">repeat</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">empty_char</span><span class="p">%</span><span class="n">output</span><span class="p">(),</span> <span class="n">self</span><span class="p">%</span><span class="n">width</span> <span class="o">-</span> <span class="n">f_chars</span><span class="p">)</span>
       <span class="n">bar</span> <span class="o">=</span> <span class="n">bar</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">bracket_right</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
       <span class="n">bar</span> <span class="o">=</span> <span class="n">bar</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">suffix</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nb">allocated</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">spinner</span><span class="p">))</span> <span class="k">then</span>
+<span class="k">         </span><span class="n">spinner_count</span> <span class="o">=</span> <span class="n">spinner_count</span> <span class="o">+</span> <span class="mi">1</span>
+         <span class="k">if</span> <span class="p">(</span><span class="n">spinner_count</span> <span class="o">&gt;</span> <span class="n">size</span><span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">spinner</span><span class="p">,</span> <span class="nb">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="n">spinner_count</span> <span class="o">=</span> <span class="mi">1</span>
+         <span class="n">bar</span> <span class="o">=</span> <span class="n">bar</span><span class="o">//</span><span class="n">self</span><span class="p">%</span><span class="n">spinner</span><span class="p">(</span><span class="n">spinner_count</span><span class="p">)%</span><span class="n">output</span><span class="p">()</span>
+      <span class="n">endif</span>
       <span class="k">if</span> <span class="p">(</span><span class="n">self</span><span class="p">%</span><span class="n">add_progress_percent</span><span class="p">)</span> <span class="k">then</span>
 <span class="k">         write</span><span class="p">(</span><span class="n">progress_percent</span><span class="p">,</span> <span class="s1">&#39;(I3,A)&#39;</span><span class="p">)</span> <span class="n">progress</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span>
          <span class="n">self</span><span class="p">%</span><span class="n">progress_percent</span><span class="p">%</span><span class="n">string</span> <span class="o">=</span> <span class="n">progress_percent</span>
@@ -402,10 +414,10 @@ private subroutine update(self, current)
                                  <span class="s1">&#39; &#39;</span><span class="o">//</span><span class="n">date_time_start</span><span class="p">(</span><span class="mi">9</span><span class="p">:</span><span class="mi">10</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;:&#39;</span><span class="o">//</span><span class="n">date_time_start</span><span class="p">(</span><span class="mi">11</span><span class="p">:</span><span class="mi">12</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;:&#39;</span><span class="o">//</span><span class="n">date_time_start</span><span class="p">(</span><span class="mi">13</span><span class="p">:</span><span class="mi">14</span><span class="p">)</span><span class="o">//</span> <span class="p">&amp;</span>
                                <span class="s1">&#39; - &#39;</span><span class="o">//</span><span class="n">date_time</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;/&#39;</span><span class="o">//</span><span class="n">date_time</span><span class="p">(</span><span class="mi">5</span><span class="p">:</span><span class="mi">6</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;/&#39;</span><span class="o">//</span><span class="n">date_time</span><span class="p">(</span><span class="mi">7</span><span class="p">:</span><span class="mi">8</span><span class="p">)</span><span class="o">//</span>                        <span class="p">&amp;</span>
                                  <span class="s1">&#39; &#39;</span><span class="o">//</span><span class="n">date_time</span><span class="p">(</span><span class="mi">9</span><span class="p">:</span><span class="mi">10</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;:&#39;</span><span class="o">//</span><span class="n">date_time</span><span class="p">(</span><span class="mi">11</span><span class="p">:</span><span class="mi">12</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;:&#39;</span><span class="o">//</span><span class="n">date_time</span><span class="p">(</span><span class="mi">13</span><span class="p">:</span><span class="mi">14</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;]&#39;</span>
-         <span class="k">write</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;(A)&#39;</span><span class="p">)</span>
+         <span class="k">write</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;(A)&#39;</span><span class="p">)</span> <span class="nb">achar</span><span class="p">(</span><span class="mi">27</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;[?25h&#39;</span> <span class="c">! restore cursor</span>
          <span class="k">write</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;(A)&#39;</span><span class="p">)</span> <span class="n">self</span><span class="p">%</span><span class="n">date_time</span><span class="p">%</span><span class="n">output</span><span class="p">()</span>
       <span class="k">else</span>
-<span class="k">         write</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;(A)&#39;</span><span class="p">)</span>
+<span class="k">         write</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;(A)&#39;</span><span class="p">)</span> <span class="nb">achar</span><span class="p">(</span><span class="mi">27</span><span class="p">)</span><span class="o">//</span><span class="s1">&#39;[?25h&#39;</span><span class="c">! restore cursor</span>
       <span class="n">endif</span>
       <span class="n">self</span><span class="p">%</span><span class="n">is_stdout_locked_</span> <span class="o">=</span> <span class="p">.</span><span class="n">false</span><span class="p">.</span>
    <span class="n">endif</span>
@@ -432,6 +444,8 @@ private subroutine update(self, current)
       
       <a class="list-group-item" href="../proc/assign_element.html">assign_element</a>
       
+      <a class="list-group-item" href="../proc/create_spinner.html">create_spinner</a>
+      
       <a class="list-group-item" href="../proc/destroy.html">destroy</a>
       
       <a class="list-group-item" href="../proc/destroy%7E2.html">destroy</a>
@@ -445,6 +459,8 @@ private subroutine update(self, current)
       <a class="list-group-item" href="../proc/output.html">output</a>
       
       <a class="list-group-item" href="../proc/start.html">start</a>
+      
+      <a class="list-group-item" href="../proc/ucs4_string.html">ucs4_string</a>
       
       <a class="list-group-item" href="../proc/update.html">update</a>
       
@@ -467,7 +483,7 @@ private subroutine update(self, current)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2017-06-11 06:42  
+             on 2017-06-11 12:58  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> forbear was developed by Stefano Zaghi</p></div>
