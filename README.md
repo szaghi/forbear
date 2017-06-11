@@ -70,7 +70,7 @@ Go to [Top](#top)
 + [ ] ETA
 + [ ] Adaptive ETA
 + [ ] Reverse Bar
-+ [ ] Rotating Marker
++ [x] Spinners
 + [x] Static Prefix-Suffix Messages
 + [ ] Dynamic Message
 + [x] Well Documented
