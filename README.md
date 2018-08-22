@@ -117,7 +117,7 @@ integer(I4P)     :: i
 integer(I4P)     :: j
 
 x = 0._R8P
-call bar%initialize(filled_char_string='+', prefix_string='progress |', suffi_stringx='| ', add_progress_percent=.true.)
+call bar%initialize(filled_char_string='+', prefix_string='progress |', suffix_string='| ', add_progress_percent=.true.)
 call bar%start
 do i=1, 20
    x = x + 0.05_R8P
