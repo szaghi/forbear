@@ -31,6 +31,7 @@ type :: bar_object
    logical                           :: add_progress_speed   !< Add progress speed in percent.
    logical                           :: add_date_time        !< Add date and time.
    logical                           :: is_stdout_locked_    !< Flag to store standard output status.
+   integer(I4P)                      :: output_unit = stdout !< Output unit to display bar
    contains
       ! public methods
       procedure, pass(self) :: destroy          !< Destroy bar.
@@ -72,6 +73,7 @@ contains
    self%min_value = 0._R8P
    self%max_value = 1._R8P
    self%frequency = 1_I4P
+   self%output_unit = stdout
    self%add_scale_bar = .false.
    self%add_progress_percent = .false.
    self%add_progress_speed = .false.
@@ -91,7 +93,7 @@ contains
                          add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, &
                          add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style,         &
                          add_date_time, date_time_color_fg, date_time_color_bg, date_time_style,                             &
-                         width, min_value, max_value, frequency)
+                         width, min_value, max_value, frequency, output_unit)
    !< Initialize bar.
    class(bar_object), intent(inout)         :: self                      !< Bar.
    class(*),          intent(in), optional  :: prefix_string             !< Prefix string.
@@ -142,6 +144,7 @@ contains
    real(R8P),         intent(in), optional  :: min_value                 !< Minimum value.
    real(R8P),         intent(in), optional  :: max_value                 !< Maximum value.
    integer(I4P),      intent(in), optional  :: frequency                 !< Bar update frequency, in range `[1%,100%]`.
+   integer(I4P),      intent(in), optional  :: output_unit               !< Output unit to display bar
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
 
@@ -179,9 +182,10 @@ contains
    if (present(add_date_time)) self%add_date_time = add_date_time
    call self%date_time%initialize(color_fg=date_time_color_fg, color_bg=date_time_color_bg, style=date_time_style)
    if (present(width)) self%width = width
-   if (present(min_value)) self%min_value = min_value
-   if (present(max_value)) self%max_value = max_value
-   if (present(frequency)) self%frequency = frequency
+   if (present(min_value))    self%min_value = min_value
+   if (present(max_value))    self%max_value = max_value
+   if (present(frequency))    self%frequency = frequency
+   if (present(output_unit))  self%output_unit = output_unit
 
    if (self%add_scale_bar .and. self%width < 22) error stop 'error: for adding scale bar the bar width must be at least 22 chars'
    endsubroutine initialize
@@ -213,7 +217,7 @@ contains
       self%scale_bar%string = min_value//repeat(' ', self%width - len(min_value) - len(max_value))//max_value
       bar = repeat(UCS4_' ', len(self%prefix%string))//self%bracket_left%output()//self%scale_bar%output()//&
             self%bracket_right%output()
-      write(stdout, '(A)') bar
+      write(self%output_unit, '(A)') bar
       endsubroutine add_scale_bar
    endsubroutine start
 
@@ -268,8 +272,8 @@ contains
          bar = bar//self%progress_speed%output()
       endif
       bar = bar//bar_end
-      write(stdout, '(A)', advance='no') bar
-      flush(stdout)
+      write(self%output_unit, '(A)', advance='no') bar
+      flush(self%output_unit)
       progress_previous = progress
       tic_toc(1) = tic_toc(2)
    endif
@@ -280,10 +284,10 @@ contains
                                  ' '//date_time_start(9:10)//':'//date_time_start(11:12)//':'//date_time_start(13:14)// &
                                ' - '//date_time(1:4)//'/'//date_time(5:6)//'/'//date_time(7:8)//                        &
                                  ' '//date_time(9:10)//':'//date_time(11:12)//':'//date_time(13:14)//']'
-         write(stdout, '(A)') achar(27)//'[?25h' ! restore cursor
-         write(stdout, '(A)') self%date_time%output()
+         write(self%output_unit, '(A)') achar(27)//'[?25h' ! restore cursor
+         write(self%output_unit, '(A)') self%date_time%output()
       else
-         write(stdout, '(A)') achar(27)//'[?25h'! restore cursor
+         write(self%output_unit, '(A)') achar(27)//'[?25h'! restore cursor
       endif
       self%is_stdout_locked_ = .false.
    endif
