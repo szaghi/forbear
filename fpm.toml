@@ -1,0 +1,25 @@
+name = "forbear"
+author = "Stefano Zaghi"
+copyright  = "Copyright (c) 2017 Stefano Zaghi"
+license = "multi-licensing system: GPLv3, BSD2, BSD3, and MIT"
+description = "Fortran (progress) B(e)ar envinronment"
+homepage = "https://github.com/szaghi/forbear"
+
+[dependencies]
+FACE = { git="https://github.com/szaghi/FACE.git" }
+
+[build]
+auto-executables = false
+auto-examples = false
+auto-tests = false
+
+[library]
+source-dir = "src/lib"
+
+[install]
+library = true
+
+[[test]]
+name = "forbear_test"
+source-dir = "src/tests"
+main = "forbear_test.F90"
