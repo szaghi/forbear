@@ -28,8 +28,11 @@ graph LR
 - [initialize](#initialize)
 - [start](#start)
 - [update](#update)
+- [suspend](#suspend)
+- [resume](#resume)
 - [finish](#finish)
 - [write_message](#write-message)
+- [draw_progress](#draw-progress)
 - [build_frame](#build-frame)
 - [measure](#measure)
 - [add_field](#add-field)
@@ -129,6 +132,7 @@ graph LR
 | `max_value` | real(kind=R8P) |  |  |
 | `frequency` | integer(kind=I4P) |  |  |
 | `min_interval` | real(kind=R8P) |  |  |
+| `log_interval` | real(kind=R8P) |  |  |
 | `smoothing` | real(kind=R8P) |  |  |
 | `position` | integer(kind=I4P) |  |  |
 | `add_scale_bar` | logical |  |  |
@@ -156,6 +160,7 @@ graph LR
 | `is_complete_` | logical |  |  |
 | `current_` | real(kind=R8P) |  |  |
 | `pulse_` | integer(kind=I4P) |  |  |
+| `is_suspended_` | logical |  |  |
 | `frame_` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:) | allocatable |  |
 | `tokens_` | type([token_object](/api/src/lib/forbear_bar_object#token-object)) | allocatable |  |
 | `fields_` | type([field_entry](/api/src/lib/forbear_bar_object#field-entry)) | allocatable |  |
@@ -171,7 +176,9 @@ graph LR
 | `finish` | pass(self) |  |
 | `initialize` | pass(self) |  |
 | `is_stdout_locked` | pass(self) |  |
+| `resume` | pass(self) |  |
 | `start` | pass(self) |  |
+| `suspend` | pass(self) |  |
 | `update` | pass(self) |  |
 | `write` | pass(self) |  |
 | `add_token` | pass(self) |  |
@@ -186,6 +193,7 @@ graph LR
 | `complete` | pass(self) |  |
 | `create_spinner` | pass(self) |  |
 | `draw` | pass(self) |  |
+| `draw_progress` | pass(self) |  |
 | `update_rate` | pass(self) |  |
 
 ## Interfaces
@@ -222,7 +230,7 @@ flowchart TD
 ### initialize
 
 ```fortran
-subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, hide_cursor, template, indeterminate, output_unit)
+subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit)
 ```
 
 **Arguments**
@@ -302,6 +310,7 @@ subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, pre
 | `hide_cursor` | logical | in | optional |  |
 | `template` | character(len=*) | in | optional |  |
 | `indeterminate` | logical | in | optional |  |
+| `log_interval` | real(kind=R8P) | in | optional |  |
 | `output_unit` | integer(kind=I4P) | in | optional |  |
 
 **Call graph**
@@ -363,13 +372,41 @@ subroutine update(self, current, message)
 ```mermaid
 flowchart TD
   start["start"] --> update["update"]
-  update["update"] --> build_frame["build_frame"]
-  update["update"] --> complete["complete"]
-  update["update"] --> draw["draw"]
-  update["update"] --> measure["measure"]
+  update["update"] --> draw_progress["draw_progress"]
   update["update"] --> ucs4_string["ucs4_string"]
-  update["update"] --> update_rate["update_rate"]
   style update fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
+### suspend
+
+```fortran
+subroutine suspend(self)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | inout |  |  |
+
+### resume
+
+```fortran
+subroutine resume(self)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | inout |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  resume["resume"] --> draw_progress["draw_progress"]
+  style resume fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
 ### finish
@@ -420,6 +457,33 @@ flowchart TD
   style write_message fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
+### draw_progress
+
+```fortran
+subroutine draw_progress(self, force)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | inout |  |  |
+| `force` | logical | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  resume["resume"] --> draw_progress["draw_progress"]
+  update["update"] --> draw_progress["draw_progress"]
+  draw_progress["draw_progress"] --> build_frame["build_frame"]
+  draw_progress["draw_progress"] --> complete["complete"]
+  draw_progress["draw_progress"] --> draw["draw"]
+  draw_progress["draw_progress"] --> measure["measure"]
+  draw_progress["draw_progress"] --> update_rate["update_rate"]
+  style draw_progress fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
 ### build_frame
 
 ```fortran
@@ -439,8 +503,8 @@ subroutine build_frame(self, progress, fraction, elapsed)
 
 ```mermaid
 flowchart TD
+  draw_progress["draw_progress"] --> build_frame["build_frame"]
   finish["finish"] --> build_frame["build_frame"]
-  update["update"] --> build_frame["build_frame"]
   build_frame["build_frame"] --> bar_body["bar_body"]
   build_frame["build_frame"] --> compact_real["compact_real"]
   build_frame["build_frame"] --> count_text["count_text"]
@@ -473,8 +537,8 @@ subroutine measure(self, current, fraction, progress)
 
 ```mermaid
 flowchart TD
+  draw_progress["draw_progress"] --> measure["measure"]
   finish["finish"] --> measure["measure"]
-  update["update"] --> measure["measure"]
   style measure fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
@@ -612,8 +676,8 @@ subroutine complete(self, tic, count_rate)
 
 ```mermaid
 flowchart TD
+  draw_progress["draw_progress"] --> complete["complete"]
   finish["finish"] --> complete["complete"]
-  update["update"] --> complete["complete"]
   complete["complete"] --> compact_real["compact_real"]
   complete["complete"] --> duration["duration"]
   complete["complete"] --> render["render"]
@@ -637,8 +701,8 @@ subroutine draw(self)
 
 ```mermaid
 flowchart TD
+  draw_progress["draw_progress"] --> draw["draw"]
   finish["finish"] --> draw["draw"]
-  update["update"] --> draw["draw"]
   write_message["write_message"] --> draw["draw"]
   draw["draw"] --> ucs4_string["ucs4_string"]
   style draw fill:#3e63dd,stroke:#99b,stroke-width:2px
@@ -663,8 +727,8 @@ subroutine update_rate(self, fraction, tic, count_rate)
 
 ```mermaid
 flowchart TD
+  draw_progress["draw_progress"] --> update_rate["update_rate"]
   finish["finish"] --> update_rate["update_rate"]
-  update["update"] --> update_rate["update_rate"]
   style update_rate fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 

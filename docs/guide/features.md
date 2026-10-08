@@ -26,11 +26,13 @@ Every feature of forbear, where the tutorial teaches it and where the reference 
 | Spinners | `spinner_string` | [5](/manual/tutorial/05-spinners) | [Spinners](./spinners) |
 | Spinner or percentage alone | `width=0` | [5](/manual/tutorial/05-spinners#without-the-bar) | [The line](./bar#the-line) |
 | Lines above the bar | `write` | [6](/manual/tutorial/06-terminal) | [write](./bar#write) |
+| Output of a library | `suspend`, `resume` | [6](/manual/tutorial/06-terminal#output-you-do-not-control) | [suspend and resume](./bar#suspend-and-resume) |
 | A message at the end of the bar | `update(message=)` | [6](/manual/tutorial/06-terminal) | [update](./bar#update) |
 | Drawing rate | `min_interval`, `frequency` | [6](/manual/tutorial/06-terminal#how-often-the-bar-is-drawn) | [update](./bar#update) |
 | Output unit | `output_unit` | [cookbook](/manual/cookbook#the-bar-on-standard-error) | [initialize](./bar#initialize) |
 | Nested bars | `position` | [7](/manual/tutorial/07-nested) | [initialize](./bar#initialize) |
 | Plain log off a terminal | `interactive`, `FORBEAR_INTERACTIVE` | [8](/manual/tutorial/08-logs) | [Terminals and logs](./terminals) |
+| A log line every so often | `log_interval`, `FORBEAR_LOG_INTERVAL` | [8](/manual/tutorial/08-logs#signs-of-life-in-long-jobs) | [How often the bar is drawn](./limitations#how-often-the-bar-is-drawn) |
 | Cursor left visible | `hide_cursor` | | [If the program stops](./limitations#if-the-program-stops) |
 | Bars off | `disabled`, `FORBEAR_DISABLE` | [8](/manual/tutorial/08-logs#turning-the-bars-off) | [Terminals and logs](./terminals#environment-variables) |
 | Terminal state | `is_stdout_locked` | | [is_stdout_locked](./bar#is-stdout-locked) |

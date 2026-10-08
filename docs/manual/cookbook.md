@@ -100,6 +100,15 @@ bar the program stops:
 `bar%write` prints above the running bar; `message=` shows the text at the end of the bar line until the next one. A
 plain `print` would be drawn over the bar.
 
+## Output of a library while the bar runs
+
+<<< @/examples/snippets/march_6p-loop.f90
+
+<<< @/examples/output/march_6p.ansi{ansi}
+
+`suspend` clears the bar and frees the terminal, `resume` draws it again below what was printed: see
+[suspend and resume](/guide/bar#suspend-and-resume).
+
 ## A bar for each loop of a nest
 
 <<< @/examples/snippets/march_7-init.f90
@@ -130,6 +139,15 @@ Nothing to do: when the output of the bar is not a terminal, the bar writes a pl
 
 `interactive=.false.` (or `FORBEAR_INTERACTIVE=0`) forces this mode on a terminal too; see
 [Terminals and logs](/guide/terminals).
+
+## A log line every ten minutes
+
+```fortran
+call bar%initialize(max_value=real(steps, R8P), log_interval=600._R8P)
+```
+
+Or, for every bar, without recompiling: `export FORBEAR_LOG_INTERVAL=600` in the job script. See
+[Signs of life in long jobs](/manual/tutorial/08-logs#signs-of-life-in-long-jobs).
 
 ## No bars at all
 

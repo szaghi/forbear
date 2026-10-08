@@ -1,0 +1,7 @@
+$ march > run.log; cat run.log
+solve 0 iterations, hh:mm:ss elapsed
+solve 2 iterations, hh:mm:ss elapsed
+solve 4 iterations, hh:mm:ss elapsed
+solve 6 iterations, hh:mm:ss elapsed
+solve 8 iterations, hh:mm:ss elapsed
+solve 10 iterations, hh:mm:ss elapsed

@@ -26,7 +26,8 @@ change. `scripts/docs_examples.sh` runs the examples of this documentation in a 
 
 - A line at 0%, at every multiple of 10% (of `frequency`%, if larger than 1) and at 100%, then the start and end line
   and the summary, if asked. `finish` writes a last line where the bar stopped, if the previous one does not show it;
-  an indeterminate bar writes a line at the start and one at `finish` only.
+  an indeterminate bar writes a line at the start and one at `finish` only. With `log_interval`, also a line whenever
+  that many seconds have passed since the last one.
 - The same elements as on a terminal, without colours and without the spinner, which has no meaning in a log.
 - A bar at a position larger than 0 writes nothing: a log cannot come back to a line below.
 - `write` prints its lines as they come, between the lines of the bar.
@@ -41,11 +42,14 @@ They act on every bar of a program, without recompiling it; a keyword passed to 
 | `FORBEAR_INTERACTIVE` | `1` / `0` | Draw for a terminal / write plain lines, when `interactive` is not passed. |
 | `FORBEAR_DISABLE` | any but `0` | Turn every bar off; `write` still prints. Wins over `disabled=.false.`. |
 | `FORBEAR_MIN_INTERVAL` | seconds, e.g. `0.5` | The minimum time between two drawings, when `min_interval` is not passed. |
+| `FORBEAR_LOG_INTERVAL` | seconds, e.g. `600` | In a log, a line at least that often, when `log_interval` is not passed. |
 
 ## Batch jobs
 
 - Nothing to do for a readable log: the output of a job is a file, and the bar writes plain lines.
 - `frequency=5` (or 20, 25) gives a finer (coarser) log.
+- `FORBEAR_LOG_INTERVAL=600` in the job script writes a line at least every ten minutes: a long job shows it is alive
+  between two tens, and an indeterminate bar between its first and last lines.
 - `FORBEAR_DISABLE=1` in the job script removes the bars from the log altogether.
 
 ## MPI

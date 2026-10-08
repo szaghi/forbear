@@ -38,7 +38,7 @@ features:
     linkText: What the bar reports
   - icon: 💬
     title: Talk while it runs
-    details: "bar%write prints a line above the running bar, update(message=) shows the residual of the step at its end: no broken lines."
+    details: "bar%write prints a line above the running bar, update(message=) shows the residual of the step at its end, suspend and resume let a library print freely: no broken lines."
     link: /manual/tutorial/06-terminal
     linkText: Talking while the bar runs
   - icon: 🪆
@@ -48,7 +48,7 @@ features:
     linkText: Nested loops
   - icon: 📜
     title: Batch jobs and logs
-    details: "Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log. One variable turns it off."
+    details: "Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log; a line every ten minutes, if asked. One variable turns it off."
     link: /manual/tutorial/08-logs
     linkText: Batch jobs and logs
   - icon: 🎨

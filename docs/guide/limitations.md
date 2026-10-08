@@ -29,6 +29,10 @@ larger than 1 the bar is drawn when the progress enters a new multiple of `f`, a
 28%, 42%, ...) with `frequency=10` is drawn at every step, since each one enters a new ten. A message passed to an
 update that is not drawn is shown at the next drawing.
 
+In a log, a line is written at every 10% (every `frequency`% if larger than 1), whatever the time between them. A long
+job can go for hours between two tens, and an indeterminate bar writes only its first and last lines: `log_interval=600`
+(or `FORBEAR_LOG_INTERVAL=600` in the job script) adds a line whenever ten minutes have passed since the last one.
+
 ## Number formats
 
 The progress speed and the values of the scale have fixed widths, six and five characters: a line that got shorter
@@ -80,8 +84,9 @@ element without its colour.
 ## Other output while the bar runs
 
 The bar line ends with a carriage return: anything written to the same terminal by `print` or `write` statements is
-drawn over the bar. Print through `bar%write` instead, or send the bar to standard error with
-`output_unit=error_unit`: see [Talking while the bar runs](/manual/tutorial/06-terminal).
+drawn over the bar. Print through `bar%write` instead, wrap output you do not control (a library, the MPI runtime) in
+`bar%suspend` and `bar%resume`, or send the bar to standard error with `output_unit=error_unit`: see
+[Talking while the bar runs](/manual/tutorial/06-terminal).
 
 ## Terminals, files and batch jobs
 

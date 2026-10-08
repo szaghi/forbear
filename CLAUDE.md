@@ -155,6 +155,11 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   `indeterminate=.true.` makes `measure` return what is done (`current - min_value`, not clamped above) as `fraction`
   and 0%: the body is a block bouncing one cell per drawing (`pulse_`), full once complete, an empty track in a log; a
   log writes only the start and `finish` lines. Percent, ETA and scale tokens are rejected in `initialize`.
+- `update` stores `current_`/message and calls `draw_progress(force)`, which owns the due test, the drawing and the
+  completion. `suspend` (terminal only) clears the line, shows the cursor, unlocks and sets `is_suspended_`: updates
+  then only record; `resume` relocks and calls `draw_progress(force=.true.)`, completing there at 100%. In a log,
+  `log_interval` > 0 also makes a line due when that many seconds passed since the last (`tic_`); `finish` writes an
+  indeterminate end line only if it differs from the last line.
 - `width=0` makes a spinner-only or counter-only display, with no bar body. `add_scale_bar` requires `width >= 22`
   and otherwise raises `error stop`.
 
@@ -176,4 +181,4 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 
 Releases: run `scripts/release.sh --patch|--minor|--major|vX.Y.Z` from `master`. It regenerates `CHANGELOG.md`
 with git-cliff, writes `VERSION` (and the `fpm.toml` version, if the manifest declares one), commits, tags and
-pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.7.0` (`finish`, indeterminate bars, #8); v1.6.1 cut lines wider than the terminal (#10); v1.6.0 brought templates, program fields and loud name errors; v1.4.0 brought the seven 2026 features and the compiler matrix, v1.5.0 `hide_cursor`.
+pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.7.1` (prefix and suffix changeable while running again); v1.7.0 brought `finish` and indeterminate bars (#8); v1.6.1 cut lines wider than the terminal (#10); v1.6.0 brought templates, program fields and loud name errors; v1.4.0 brought the seven 2026 features and the compiler matrix, v1.5.0 `hide_cursor`.

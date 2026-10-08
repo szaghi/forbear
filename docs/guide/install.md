@@ -46,10 +46,10 @@ Add forbear as a dependency in your project's `fpm.toml`:
 
 ```toml
 [dependencies]
-forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.7.0" }
+forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.7.1" }
 ```
 
-v1.2.0 and older releases have no `fpm.toml`; the features of this documentation need v1.7.0 or later.
+v1.2.0 and older releases have no `fpm.toml`; the features of this documentation need v1.7.1 or later.
 
 `fpm build` fetches forbear and FACE. To build and test forbear itself:
 

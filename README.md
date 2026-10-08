@@ -24,11 +24,11 @@
 <td width="50%"><b>⏱️ ETA, speed, count, summary</b><br><sub>A smoothed speed and the time to the end, the count of steps done, start and end time, a closing line with duration and throughput. <a href="https://szaghi.github.io/forbear/manual/tutorial/04-reports">What the bar reports</a></sub></td>
 </tr>
 <tr>
-<td width="50%"><b>💬 Talk while it runs</b><br><sub><code>bar%write</code> prints a line above the running bar; <code>update(message=)</code> shows the residual of the step at its end. No broken lines. <a href="https://szaghi.github.io/forbear/manual/tutorial/06-terminal">Talking while the bar runs</a></sub></td>
+<td width="50%"><b>💬 Talk while it runs</b><br><sub><code>bar%write</code> prints a line above the running bar; <code>update(message=)</code> shows the residual of the step at its end; <code>suspend</code>/<code>resume</code> let a library print freely. No broken lines. <a href="https://szaghi.github.io/forbear/manual/tutorial/06-terminal">Talking while the bar runs</a></sub></td>
 <td width="50%"><b>🪆 Nested and open-ended loops</b><br><sub>One bar per loop level, each on its own line with <code>position</code>; an <code>indeterminate</code> bar for a solver that runs until it converges; <code>finish</code> for a loop left early. <a href="https://szaghi.github.io/forbear/manual/tutorial/07-nested">Nested loops</a>, <a href="https://szaghi.github.io/forbear/manual/tutorial/10-unknown-ends">Unknown ends</a></sub></td>
 </tr>
 <tr>
-<td width="50%"><b>📜 Batch jobs and logs</b><br><sub>Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log. <code>FORBEAR_DISABLE=1</code> turns every bar off; <code>disabled=(rank /= 0)</code> under MPI. <a href="https://szaghi.github.io/forbear/manual/tutorial/08-logs">Batch jobs and logs</a></sub></td>
+<td width="50%"><b>📜 Batch jobs and logs</b><br><sub>Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log, and a line every ten minutes with <code>FORBEAR_LOG_INTERVAL=600</code>. <code>FORBEAR_DISABLE=1</code> turns every bar off; <code>disabled=(rank /= 0)</code> under MPI. <a href="https://szaghi.github.io/forbear/manual/tutorial/08-logs">Batch jobs and logs</a></sub></td>
 <td width="50%"><b>🎨 Smooth, coloured, Unicode</b><br><sub>Eighth-of-a-cell partial blocks, 17 colours and 16 styles for every element through <a href="https://github.com/szaghi/FACE">FACE</a>, any Unicode string, 40 spinners. <a href="https://szaghi.github.io/forbear/guide/spinners">Spinners</a></sub></td>
 </tr>
 <tr>
@@ -131,10 +131,10 @@ Add to your `fpm.toml`:
 
 ```toml
 [dependencies]
-forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.7.0" }
+forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.7.1" }
 ```
 
-v1.2.0 and older releases have no `fpm.toml`; the features of this documentation need v1.7.0 or later.
+v1.2.0 and older releases have no `fpm.toml`; the features of this documentation need v1.7.1 or later.
 
 A Fortran 2008 compiler is required: tested on every push with gfortran 13 to 15 (and the 16 trunk), Intel ifx 2025.3
 and NVIDIA nvfortran 26.1 (see [Installation](https://szaghi.github.io/forbear/guide/install)).

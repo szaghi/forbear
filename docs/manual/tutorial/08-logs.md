@@ -23,6 +23,20 @@ With the output sent to a file:
   the same for every bar, when the keyword is not passed.
 - Bars below the current line (`position` larger than 0) write nothing in a log.
 
+## Signs of life in long jobs
+
+A line every 10% is a fine log for a job of an hour; for a job of two days, ten lines leave hours of silence, and an
+indeterminate bar writes nothing between its first and last lines. `log_interval` adds a line whenever that many
+seconds have passed since the last one:
+
+<<< @/examples/snippets/march_8l-init.f90
+
+<<< @/examples/output/march_8l.ansi{ansi}
+
+Each iteration of this solver takes 0.2 s: a line every 0.3 s comes every other iteration. In a real job,
+`log_interval=600` gives a line every ten minutes; `FORBEAR_LOG_INTERVAL=600` in the job script does it for every bar,
+without recompiling. On a terminal, `log_interval` does nothing.
+
 ## Turning the bars off
 
 `disabled=.true.` turns a bar off: `start` and `update` draw nothing, `write` still prints its lines. The environment
@@ -37,7 +51,8 @@ call bar%initialize(max_value=real(steps, R8P), disabled=(rank /= 0)) ! rank fro
 ```
 
 ::: tip What you learned
-Interactive and log modes, `interactive`, `disabled`, the `FORBEAR_*` environment variables, one bar under MPI.
+Interactive and log modes, `log_interval`, `interactive`, `disabled`, the `FORBEAR_*` environment variables, one bar
+under MPI.
 Reference: [Terminals and logs](/guide/terminals).
 :::
 

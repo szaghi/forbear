@@ -17,6 +17,7 @@ use forbear, only : bar_object, field_object, progress_object, ASCII, UCS4
 | [`update`](#update) | Compute the progress of the current value, redraw the bar when due; at 100% end its line. |
 | [`finish`](#finish) | End the bar where it is: an indeterminate bar, a loop left before its end. |
 | [`write`](#write) | Print a line above the running bar. |
+| [`suspend`, `resume`](#suspend-and-resume) | Clear the bar while other code prints freely, then draw it again. |
 | [`add_field`](./templates#fields-of-the-program) | Add a field of the program, for the template. |
 | [`is_stdout_locked`](#is-stdout-locked) | True while the bar is running on a terminal, from `start` to 100% or `finish`. |
 | [`destroy`](#destroy) | Reset the bar to its defaults. |
@@ -66,6 +67,7 @@ setting not passed takes its default, whatever the bar had before.
 | `max_value` | `real(real64)` | 1 | End of the range. |
 | `partial_blocks` | `logical` | `.false.` | Draw the done part with full and partial blocks, eight steps per character. |
 | `min_interval` | `real(real64)` | 0.1 | Minimum time between two drawings on a terminal, in seconds; `FORBEAR_MIN_INTERVAL` replaces the default. |
+| `log_interval` | `real(real64)` | 0 | In a log, also write a line when this many seconds have passed since the last one; 0 for none. `FORBEAR_LOG_INTERVAL` replaces the default. On a terminal it does nothing. |
 | `frequency` | `integer(int32)` | 1 | With 1, draw at every update due; with `f > 1`, only when the progress enters a new multiple of `f`% (and at 100%). In a log, a line every `f`% (every 10% with 1). |
 | `smoothing` | `real(real64)` | 0.3 | Weight of the last speed in its moving average: 1 the momentary speed, 0 the average since the start. |
 | `position` | `integer(int32)` | 0 | Line of the bar, counted below the current one; a bar at a position larger than 0 is cleared when it completes. |
@@ -117,12 +119,14 @@ call bar%update(current=value [, message=text])   ! value: real(real64); text: a
 ```
 
 1. If the bar is disabled or complete, nothing happens.
-2. A `message`, if passed, replaces the one shown at the end of the line.
+2. A `message`, if passed, replaces the one shown at the end of the line. A [suspended](#suspend-and-resume) bar stops
+   here: it records `current` and `message`, and `resume` draws them.
 3. The progress is `(current - min_value) / (max_value - min_value)`, clamped to [0, 1], truncated to an integer
    percent: 100% only when `current` reaches `max_value`.
 4. On a terminal, the bar is drawn when the update is due: always at 0% and 100%; otherwise if at least `min_interval`
    seconds have passed since the last drawing and, with `frequency > 1`, the progress has entered a new multiple of
-   `frequency`. In a log, a line is written when the progress enters a new multiple of 10% (of `frequency`%).
+   `frequency`. In a log, a line is written when the progress enters a new multiple of 10% (of `frequency`%), or when
+   `log_interval` seconds have passed since the last line.
 5. At each drawing, the spinner moves one frame and the speed is updated: the progress made since the previous drawing,
    over the time elapsed since then, averaged with `smoothing`.
 6. At 100% the bar is complete: on a terminal, the cursor is shown again and the line ended (a bar at a position larger
@@ -130,7 +134,8 @@ call bar%update(current=value [, message=text])   ! value: real(real64); text: a
    false.
 
 An [indeterminate](#initialize) bar counts `current - min_value` (not below 0) and never reaches 100%: it is drawn at
-most once every `min_interval` seconds on a terminal, and only at the start and at `finish` in a log.
+most once every `min_interval` seconds on a terminal; in a log, at the start, at `finish`, and every `log_interval`
+seconds if set.
 
 ## finish
 
@@ -141,7 +146,7 @@ call bar%finish([message=text])   ! text: any string
 Ends a running bar where it is, as 100% would: it draws the last update (an indeterminate bar with its track full), with
 the `message` if passed, then ends the line, shows the cursor and writes the date and summary lines, if asked. The rate
 of the summary is that of what was done. In a log, it writes a last line unless the previous one already shows that
-progress. After `finish`, updates do nothing until the next `start`. On a bar not running (not started, already
+progress. A suspended bar is drawn again to end. After `finish`, updates do nothing until the next `start`. On a bar not running (not started, already
 complete, disabled) it does nothing. Call it after a loop that may `exit` early, and to end an indeterminate bar.
 
 ## write
@@ -155,6 +160,24 @@ the line below: the text scrolls up with the output, the bar stays at the bottom
 100%, in a log, with the bar disabled) it writes the text as a line of the unit of the bar. With nested bars, call the
 `write` of the bar at position 0.
 
+## suspend and resume
+
+```fortran
+call bar%suspend
+call solver_library_step   ! prints with print, write, or from C: anything
+call bar%resume
+```
+
+`write` covers the lines your program prints. Output you do not control, from a library, the MPI runtime or a `print`
+deep in a call, would be drawn over the bar: `suspend` steps aside first. It clears the bar line, shows the cursor at
+its start and frees the terminal (`is_stdout_locked` becomes false); the other output goes there and below. Meanwhile
+updates record the progress without drawing it, and `resume` draws the bar again, on the line where the cursor is,
+with the last update; if that update reached 100%, the bar completes there. A bar at a position larger than 0 clears
+its own line: suspend every running bar of the terminal, nested ones included, and resume them after.
+
+In a log, on a disabled bar, or on a bar not running, `suspend` and `resume` do nothing: there, other output and the
+lines of the bar never overlap. `finish` ends a suspended bar too.
+
 ## is_stdout_locked
 
 ```fortran
@@ -162,7 +185,7 @@ logical :: running
 running = bar%is_stdout_locked()
 ```
 
-True from `start` until the bar reaches 100% or is finished, on a terminal: while it is true, anything written to the terminal but
+True from `start` until the bar reaches 100% or is finished, on a terminal, except while it is suspended: while it is true, anything written to the terminal but
 through `write` is drawn over the bar. It reports the state of the bar, and locks nothing.
 
 ## destroy
