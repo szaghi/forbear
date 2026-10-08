@@ -1,0 +1,6 @@
+$ march 2> /dev/null
+step  10, residual  9.77E-04
+step  20, residual  9.54E-07
+step  30, residual  9.31E-10
+step  40, residual  9.09E-13
+step  50, residual  8.88E-16

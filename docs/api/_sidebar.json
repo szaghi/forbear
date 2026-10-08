@@ -1,0 +1,34 @@
+[
+  {
+    "text": "src/lib",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "forbear",
+        "link": "/api/src/lib/forbear"
+      },
+      {
+        "text": "forbear_bar_object",
+        "link": "/api/src/lib/forbear_bar_object"
+      },
+      {
+        "text": "forbear_element_object",
+        "link": "/api/src/lib/forbear_element_object"
+      },
+      {
+        "text": "forbear_kinds",
+        "link": "/api/src/lib/forbear_kinds"
+      }
+    ]
+  },
+  {
+    "text": "src/third_party/FACE/src/lib",
+    "collapsed": true,
+    "items": [
+      {
+        "text": "face",
+        "link": "/api/src/third_party/FACE/src/lib/face"
+      }
+    ]
+  }
+]

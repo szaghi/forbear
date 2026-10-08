@@ -31,3 +31,11 @@ wiki/
 
 # special files
 get_automatic_changelog.sh
+
+# documentation
+build/
+docs/node_modules/
+docs/package-lock.json
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+docs/public/coverage.json
