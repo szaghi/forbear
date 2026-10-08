@@ -23,6 +23,7 @@ const docs = [
       { text: '6. Talking while the bar runs',    link: '/manual/tutorial/06-terminal' },
       { text: '7. Nested loops',                  link: '/manual/tutorial/07-nested' },
       { text: '8. Batch jobs and logs',           link: '/manual/tutorial/08-logs' },
+      { text: '9. Layout templates',              link: '/manual/tutorial/09-templates' },
     ],
   },
   {
@@ -38,6 +39,7 @@ const docs = [
       { text: 'The bar object',             link: '/guide/bar' },
       { text: 'Colours and styles',         link: '/guide/styling' },
       { text: 'Spinners',                   link: '/guide/spinners' },
+      { text: 'Layout templates',           link: '/guide/templates' },
       { text: 'Terminals and logs',         link: '/guide/terminals' },
       { text: 'Behaviour and limitations',  link: '/guide/limitations' },
     ],
@@ -78,7 +80,7 @@ export default withMermaid({
       {
         text: 'Reference',
         link: '/guide/features',
-        activeMatch: '^/guide/(features|bar|styling|spinners|terminals|limitations)',
+        activeMatch: '^/guide/(features|bar|styling|spinners|templates|terminals|limitations)',
       },
       { text: 'API', link: '/api/' },
       {

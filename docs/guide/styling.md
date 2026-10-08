@@ -8,7 +8,7 @@ Every element of the bar takes a foreground colour (`<element>_color_fg`), a bac
 and a style (`<element>_style`), by name. The names are those of [FACE](https://github.com/szaghi/FACE), which writes
 them as ANSI escape sequences; they are case insensitive (`red`, `RED`, `Red`).
 
-A name that is not in these lists is ignored, without a message.
+A name that is not in these lists stops the program in `initialize`, with a message that names it.
 
 ## Colours
 

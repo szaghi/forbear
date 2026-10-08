@@ -4,10 +4,10 @@ title: The bar object
 
 # The bar object
 
-forbear exports one class and two character kinds:
+forbear exports the bar, the two types of the fields of a program, and two character kinds:
 
 ```fortran
-use forbear, only : bar_object, ASCII, UCS4
+use forbear, only : bar_object, field_object, progress_object, ASCII, UCS4
 ```
 
 | Method | What it does |
@@ -16,6 +16,7 @@ use forbear, only : bar_object, ASCII, UCS4
 | [`start`](#start) | Print the scale (if asked), draw the bar at 0%, take over the terminal line. |
 | [`update`](#update) | Compute the progress of the current value, redraw the bar when due; at 100% end its line. |
 | [`write`](#write) | Print a line above the running bar. |
+| [`add_field`](./templates#fields-of-the-program) | Add a field of the program, for the template. |
 | [`is_stdout_locked`](#is-stdout-locked) | True while the bar is running on a terminal, from `start` to 100%. |
 | [`destroy`](#destroy) | Reset the bar to its defaults. |
 | `=` | Copy a bar (intrinsic assignment). |
@@ -69,12 +70,13 @@ setting not passed takes its default, whatever the bar had before.
 | `position` | `integer(int32)` | 0 | Line of the bar, counted below the current one; a bar at a position larger than 0 is cleared when it completes. |
 | `interactive` | `logical` | detected | Draw for a terminal (`.true.`) or write a plain log (`.false.`). Not passed: `FORBEAR_INTERACTIVE`, else whether `output_unit` is a terminal. See [Terminals and logs](./terminals). |
 | `disabled` | `logical` | `.false.` | Draw nothing; `write` still prints. `FORBEAR_DISABLE` turns every bar off. |
+| `template` | `character(*)` | none | The layout of the bar line: see [Layout templates](./templates). Without it, the keywords above describe the line. |
 | `hide_cursor` | `logical` | `.true.` | Hide the cursor while the bar runs on a terminal, show it again at 100%. `.false.` leaves it visible: see [If the program stops](./limitations#if-the-program-stops). |
 | `output_unit` | `integer(int32)` | standard output | The unit the bar is written to, e.g. `error_unit`. |
 
 ## The line
 
-`update` draws one line, in this order:
+Without a [template](./templates), `update` draws one line, in this order:
 
 ```
 prefix  bracket_left  done part  remaining part  bracket_right  suffix  spinner  percent  count  speed  ETA  message

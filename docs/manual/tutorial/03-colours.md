@@ -14,7 +14,8 @@ While running:
 
 - Colours and styles are names: `red`, `green_intense`, `bold_on`, ... in any case. There are 17 colours, the same for
   the foreground and the background, and 16 styles: the full list is in [Colours and styles](/guide/styling).
-- A name that is not in the list is ignored, without a message: if a colour does not show, check its spelling first.
+- A name that is not in the list stops the program in `initialize`, with a message that names it: a typo cannot go
+  unnoticed.
 - Each element takes one style.
 - A background colour fills the cell behind the characters: `filled_char_string=' ', filled_char_color_bg='green'`
   makes a solid bar too. The outputs of this documentation cannot show background colours, so the examples use

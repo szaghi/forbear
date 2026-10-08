@@ -5,7 +5,8 @@ module forbear_bar_object
 use, intrinsic :: iso_c_binding, only : c_int
 use, intrinsic :: iso_fortran_env, only : I4P=>int32, I8P=>int64, R8P=>real64, stdout=>output_unit, stderr=>error_unit
 use, intrinsic :: ieee_arithmetic, only : ieee_is_finite, ieee_is_nan
-use forbear_element_object, only : element_object
+use forbear_element_object, only : element_object, is_color, is_style
+use forbear_field_object, only : field_object, progress_object
 use forbear_kinds, only : ASCII, UCS4, ucs4_string
 implicit none
 private
@@ -17,6 +18,35 @@ character(len=1), parameter :: LF  = achar(10) !< Line feed.
 ! UTF-8 encoded, as every literal of the sources: written byte by byte, the terminal shows the characters
 character(len=*), parameter :: FULL_BLOCK = '█'                                          !< Full block.
 character(len=*), parameter :: PARTIAL_BLOCKS(1:7) = ['▏', '▎', '▍', '▌', '▋', '▊', '▉'] !< Blocks of 1/8 to 7/8.
+
+! kinds of the tokens of a template: text, or one of the fields
+integer(I4P), parameter :: TOKEN_TEXT    = 0  !< Literal text.
+integer(I4P), parameter :: TOKEN_BAR     = 1  !< The bar body.
+integer(I4P), parameter :: TOKEN_SPINNER = 2  !< The spinner.
+integer(I4P), parameter :: TOKEN_PERCENT = 3  !< The progress in percent.
+integer(I4P), parameter :: TOKEN_COUNT   = 4  !< The progress count.
+integer(I4P), parameter :: TOKEN_SPEED   = 5  !< The progress speed.
+integer(I4P), parameter :: TOKEN_ETA     = 6  !< The estimated time of arrival.
+integer(I4P), parameter :: TOKEN_ELAPSED = 7  !< The time elapsed since the start.
+integer(I4P), parameter :: TOKEN_MESSAGE = 8  !< The message of the last update.
+integer(I4P), parameter :: TOKEN_PREFIX  = 9  !< The prefix string.
+integer(I4P), parameter :: TOKEN_SUFFIX  = 10 !< The suffix string.
+integer(I4P), parameter :: TOKEN_FIELD   = 11 !< A field added by the program.
+
+type :: token_object
+   !< A piece of the bar line: literal text, or a field with its colours.
+   integer(I4P)                  :: kind = TOKEN_TEXT !< Kind of token.
+   logical                       :: decorated = .false. !< Field with its own separators (layout without template).
+   character(len=:), allocatable :: name               !< Name of a field added by the program.
+   integer(I4P)                  :: field = 0          !< Index of a field added by the program.
+   type(element_object)          :: style              !< Text (of a literal) and colours.
+endtype token_object
+
+type :: field_entry
+   !< A field added by the program, with its name.
+   character(len=:),    allocatable :: name  !< Name, as written in the template.
+   class(field_object), allocatable :: field !< Field.
+endtype field_entry
 
 interface
    function isatty(fd) bind(c, name='isatty')
@@ -75,8 +105,14 @@ type :: bar_object
    character(len=18)                        :: date_time_start_ = ''    !< Start date/time.
    logical                                  :: is_complete_ = .false.   !< Flag set when the bar has reached 100%.
    character(len=:, kind=UCS4), allocatable :: frame_                   !< Last frame drawn, without control sequences.
+   ! layout
+   type(token_object), allocatable          :: tokens_(:)                !< Tokens of the bar line.
+   type(field_entry),  allocatable          :: fields_(:)                !< Fields added by the program.
+   logical                                  :: has_template_ = .false.   !< The layout comes from a template.
+   character(len=:),   allocatable          :: template_                 !< Template, as given.
    contains
       ! public methods
+      procedure, pass(self) :: add_field              !< Add a field defined by the program.
       procedure, pass(self) :: destroy                !< Destroy bar.
       procedure, pass(self) :: initialize             !< Initialize bar.
       procedure, pass(self) :: is_stdout_locked       !< Return status of standard output unit.
@@ -84,7 +120,14 @@ type :: bar_object
       procedure, pass(self) :: update                 !< Update bar.
       procedure, pass(self) :: write => write_message !< Write a message above the bar.
       ! private methods
+      procedure, pass(self), private :: add_token      !< Add a token to the layout.
+      procedure, pass(self), private :: bar_body       !< Return the body of the bar.
       procedure, pass(self), private :: build_frame    !< Build the frame of the current progress.
+      procedure, pass(self), private :: default_layout !< Build the layout the keywords describe.
+      procedure, pass(self), private :: parse_template !< Build the layout of a template.
+      procedure, pass(self), private :: progress_state !< Return the progress, for the fields of the program.
+      procedure, pass(self), private :: resolve_fields !< Find the fields of the program named by the template.
+      procedure, pass(self), private :: width_before_bar !< Return the columns of the layout before the bar body.
       procedure, pass(self), private :: complete       !< Complete the bar.
       procedure, pass(self), private :: create_spinner !< Create spinner.
       procedure, pass(self), private :: draw           !< Draw the last frame on the terminal.
@@ -148,6 +191,9 @@ contains
    self%date_time_start_ = ''
    self%is_complete_ = .false.
    if (allocated(self%frame_)) deallocate(self%frame_)
+   if (allocated(self%tokens_)) deallocate(self%tokens_)
+   if (allocated(self%fields_)) deallocate(self%fields_)
+   self%has_template_ = .false.
    endsubroutine destroy
 
    subroutine initialize(self,                                                                                               &
@@ -167,7 +213,7 @@ contains
                          add_summary, summary_color_fg, summary_color_bg, summary_style,                                     &
                          message_color_fg, message_color_bg, message_style,                                                  &
                          width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position,          &
-                         interactive, disabled, hide_cursor, output_unit)
+                         interactive, disabled, hide_cursor, template, output_unit)
    !< Initialize bar.
    !<
    !< Every setting not passed takes its default. The display mode is resolved here: `interactive` if passed, else the
@@ -245,6 +291,7 @@ contains
    logical,           intent(in), optional  :: interactive               !< Draw for a terminal (else for a log).
    logical,           intent(in), optional  :: disabled                  !< Draw nothing.
    logical,           intent(in), optional  :: hide_cursor               !< Hide the cursor while the bar runs.
+   character(len=*),  intent(in), optional  :: template                  !< Layout of the bar line.
    integer(I4P),      intent(in), optional  :: output_unit               !< Output unit to display bar
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
@@ -328,6 +375,12 @@ contains
    ! a log cannot come back to a line below: only the bar on the current line is logged
    if (.not.self%is_interactive_ .and. self%position > 0) self%is_disabled_ = .true.
 
+   if (present(template)) then
+      call self%parse_template(template)
+   else
+      call self%default_layout
+   endif
+
    if (self%add_scale_bar .and. self%width < 22) error stop 'error: for adding scale bar the bar width must be at least 22 chars'
    endsubroutine initialize
 
@@ -343,6 +396,7 @@ contains
    !< Start bar.
    class(bar_object), intent(inout) :: self !< Bar.
 
+   call self%resolve_fields
    self%progress_drawn_ = -1_I4P
    self%fraction_drawn_ = 0._R8P
    self%rate_ = 0._R8P
@@ -371,8 +425,12 @@ contains
       min_value = compact_real(self%min_value, 5_I4P)//' (min)'
       max_value = '(max) '//compact_real(self%max_value, 5_I4P)
       self%scale_bar%string = ucs4_string(min_value//repeat(' ', self%width - len(min_value) - len(max_value))//max_value)
-      bar = repeat(UCS4_' ', display_width(self%prefix%string))//render(self%bracket_left, plain)//render(self%scale_bar, plain)//&
-            render(self%bracket_right, plain)
+      if (self%has_template_) then ! the scale right above the bar body
+         bar = repeat(UCS4_' ', self%width_before_bar())//render(self%scale_bar, plain)
+      else
+         bar = repeat(UCS4_' ', display_width(self%prefix%string))//render(self%bracket_left, plain)//&
+               render(self%scale_bar, plain)//render(self%bracket_right, plain)
+      endif
       write(self%output_unit, '(A)') bar
       endsubroutine add_scale_bar
    endsubroutine start
@@ -418,7 +476,8 @@ contains
    endif
    if (.not.is_due) return
    call self%update_rate(fraction=fraction, tic=tic, count_rate=count_rate)
-   call self%build_frame(progress=progress, fraction=fraction)
+   call self%build_frame(progress=progress, fraction=fraction, &
+                         elapsed=real(tic - self%tic_start_, kind=R8P) / real(count_rate, kind=R8P))
    if (self%is_interactive_) then
       call self%draw
    else
@@ -451,72 +510,380 @@ contains
    endsubroutine write_message
 
    ! private methods
-   subroutine build_frame(self, progress, fraction)
-   !< Build the frame of the current progress, without control sequences, in `frame_`.
+   subroutine build_frame(self, progress, fraction, elapsed)
+   !< Build the frame of the current progress, without control sequences, in `frame_`: the tokens of the layout, in order.
    class(bar_object), intent(inout)         :: self     !< Bar.
    integer(I4P),      intent(in)            :: progress !< Progress, in percent.
    real(R8P),         intent(in)            :: fraction !< Fraction of the range done, in [0, 1].
+   real(R8P),         intent(in)            :: elapsed  !< Time since the start, in seconds.
    character(len=:, kind=UCS4), allocatable :: frame    !< Frame.
-   character(len=5)                         :: percent  !< Progress in percent.
-   type(element_object)                     :: glyph    !< Partial block.
+   character(len=:),            allocatable :: text     !< Text of a field.
+   character(len=4)                         :: percent  !< Progress in percent.
    logical                                  :: plain    !< Write without colors.
+   integer(I4P)                             :: t        !< Counter.
+
+   plain = .not.self%is_interactive_
+   frame = UCS4_''
+   do t = 1, size(self%tokens_, dim=1)
+      associate(token => self%tokens_(t))
+      select case(token%kind)
+      case(TOKEN_TEXT, TOKEN_PREFIX, TOKEN_SUFFIX)
+         frame = frame//render(token%style, plain)
+      case(TOKEN_BAR)
+         frame = frame//self%bar_body(progress=progress, fraction=fraction, plain=plain)
+      case(TOKEN_SPINNER)
+         if (self%is_interactive_) then ! a spinner has no meaning in a log
+            self%spinner_count_ = self%spinner_count_ + 1
+            if (self%spinner_count_ > size(self%spinner, dim=1)) self%spinner_count_ = 1
+            token%style%string = self%spinner(self%spinner_count_)%string
+            frame = frame//render(token%style, plain)
+         endif
+      case(TOKEN_PERCENT)
+         write(percent, '(I3,A)') progress, '%'
+         text = percent ; if (token%decorated) text = ' '//text ! the space keeps 100% apart from what precedes it
+         frame = frame//styled(token, text, plain)
+      case(TOKEN_COUNT)
+         text = count_text(self%min_value, self%max_value, fraction) ; if (token%decorated) text = ' '//text
+         frame = frame//styled(token, text, plain)
+      case(TOKEN_SPEED)
+         text = compact_real(100._R8P * self%rate_, 6_I4P) ; if (token%decorated) text = ' ('//text//'%/s)'
+         frame = frame//styled(token, text, plain)
+      case(TOKEN_ETA)
+         if (progress == 100) then
+            text = hms(0._R8P)
+         elseif (self%rate_ > 0._R8P) then
+            text = hms((1._R8P - fraction) / self%rate_)
+         else
+            text = '--:--:--'
+         endif
+         if (token%decorated) text = ' ETA '//text
+         frame = frame//styled(token, text, plain)
+      case(TOKEN_ELAPSED)
+         frame = frame//styled(token, hms(elapsed), plain)
+      case(TOKEN_MESSAGE)
+         token%style%string = self%message%string
+         if (.not.token%decorated) then
+            frame = frame//render(token%style, plain)
+         elseif (len(self%message%string) > 0) then
+            frame = frame//UCS4_' '//render(token%style, plain)
+         endif
+      case(TOKEN_FIELD)
+         text = self%fields_(token%field)%field%render(self%progress_state(fraction=fraction, progress=progress, &
+                                                                             elapsed=elapsed))
+         frame = frame//styled(token, text, plain)
+      endselect
+      endassociate
+   enddo
+   self%frame_ = frame
+   endsubroutine build_frame
+
+   function bar_body(self, progress, fraction, plain) result(body)
+   !< Return the body of the bar: the done part, the partial block, the remaining part.
+   class(bar_object), intent(in)            :: self     !< Bar.
+   integer(I4P),      intent(in)            :: progress !< Progress, in percent.
+   real(R8P),         intent(in)            :: fraction !< Fraction of the range done, in [0, 1].
+   logical,           intent(in)            :: plain    !< Write without colors.
+   character(len=:, kind=UCS4), allocatable :: body     !< Body of the bar.
+   type(element_object)                     :: glyph    !< Partial block.
    real(R8P)                                :: cells    !< Filled cells, with their fraction.
    integer(I4P)                             :: full     !< Filled cells.
    integer(I4P)                             :: eighths  !< Eighths of the partially filled cell.
    integer(I4P)                             :: rest     !< Empty cells.
 
-   plain = .not.self%is_interactive_
-   frame = render(self%prefix, plain)//render(self%bracket_left, plain)
    if (self%partial_blocks) then
       cells = fraction * self%width
       full = min(self%width, int(cells, I4P))
       eighths = int((cells - full) * 8._R8P, I4P)
-      frame = frame//repeat(render(self%filled_char, plain), full)
+      body = repeat(render(self%filled_char, plain), full)
       rest = self%width - full
       if (eighths > 0 .and. rest > 0) then
          glyph = self%filled_char
          glyph%string = ucs4_string(input=PARTIAL_BLOCKS(eighths))
          glyph%color_bg = self%empty_char%color_bg ! the rest of the cell looks as an empty one
-         frame = frame//render(glyph, plain)
+         body = body//render(glyph, plain)
          rest = rest - 1
       endif
-      frame = frame//repeat(render(self%empty_char, plain), rest)
+      body = body//repeat(render(self%empty_char, plain), rest)
    else
       full = nint(progress / 100._R8P * self%width)
-      frame = frame//repeat(render(self%filled_char, plain), full)//repeat(render(self%empty_char, plain), self%width - full)
+      body = repeat(render(self%filled_char, plain), full)//repeat(render(self%empty_char, plain), self%width - full)
    endif
-   frame = frame//render(self%bracket_right, plain)//render(self%suffix, plain)
-   if (allocated(self%spinner) .and. self%is_interactive_) then
-      self%spinner_count_ = self%spinner_count_ + 1
-      if (self%spinner_count_ > size(self%spinner, dim=1)) self%spinner_count_ = 1
-      frame = frame//render(self%spinner(self%spinner_count_), plain)
+   endfunction bar_body
+
+   function progress_state(self, fraction, progress, elapsed) result(state)
+   !< Return the progress of the bar, for the fields of the program.
+   class(bar_object), intent(in) :: self     !< Bar.
+   real(R8P),         intent(in) :: fraction !< Fraction of the range done, in [0, 1].
+   integer(I4P),      intent(in) :: progress !< Progress, in percent.
+   real(R8P),         intent(in) :: elapsed  !< Time since the start, in seconds.
+   type(progress_object)         :: state    !< Progress.
+
+   state%current = self%min_value + fraction * (self%max_value - self%min_value)
+   state%min_value = self%min_value
+   state%max_value = self%max_value
+   state%fraction = fraction
+   state%percent = progress
+   state%rate = self%rate_
+   state%elapsed = elapsed
+   if (progress == 100) then
+      state%eta = 0._R8P
+   elseif (self%rate_ > 0._R8P) then
+      state%eta = (1._R8P - fraction) / self%rate_
    endif
-   if (self%add_progress_percent) then
-      write(percent, '(A,I3,A)') ' ', progress, '%' ! the space keeps 100% apart from what precedes it
-      self%progress_percent%string = ucs4_string(input=percent)
-      frame = frame//render(self%progress_percent, plain)
-   endif
-   if (self%add_progress_count) then
-      self%progress_count%string = ucs4_string(input=' '//count_text(self%min_value, self%max_value, fraction))
-      frame = frame//render(self%progress_count, plain)
-   endif
-   if (self%add_progress_speed) then
-      self%progress_speed%string = ucs4_string(input=' ('//compact_real(100._R8P * self%rate_, 6_I4P)//'%/s)')
-      frame = frame//render(self%progress_speed, plain)
-   endif
-   if (self%add_eta) then
-      if (progress == 100) then
-         self%eta%string = ucs4_string(input=' ETA '//hms(0._R8P))
-      elseif (self%rate_ > 0._R8P) then
-         self%eta%string = ucs4_string(input=' ETA '//hms((1._R8P - fraction) / self%rate_))
-      else
-         self%eta%string = ucs4_string(input=' ETA --:--:--')
+   endfunction progress_state
+
+   subroutine add_field(self, name, field)
+   !< Add a field defined by the program: the template shows it where it writes `{name}`. Call it after `initialize`,
+   !< which removes the fields, and before `start`, which looks for the fields the template names.
+   class(bar_object),   intent(inout) :: self  !< Bar.
+   character(len=*),    intent(in)    :: name  !< Name of the field in the template.
+   class(field_object), intent(in)    :: field !< Field.
+   type(field_entry),   allocatable   :: fields(:) !< Fields, with the new one.
+   integer(I4P)                       :: f     !< Counter.
+
+   if (token_kind(name) /= TOKEN_FIELD) call template_error('"'//name//'" is the name of a field of forbear', name)
+   if (.not.allocated(self%fields_)) allocate(self%fields_(0))
+   do f = 1, size(self%fields_, dim=1)
+      if (self%fields_(f)%name == name) then ! the same name again: the new field replaces the old one
+         deallocate(self%fields_(f)%field)
+         allocate(self%fields_(f)%field, source=field)
+         return
       endif
-      frame = frame//render(self%eta, plain)
+   enddo
+   allocate(fields(size(self%fields_, dim=1) + 1))
+   do f = 1, size(self%fields_, dim=1)
+      fields(f)%name = self%fields_(f)%name
+      call move_alloc(self%fields_(f)%field, fields(f)%field)
+   enddo
+   fields(size(fields, dim=1))%name = name
+   allocate(fields(size(fields, dim=1))%field, source=field)
+   call move_alloc(fields, self%fields_)
+   endsubroutine add_field
+
+   subroutine add_token(self, kind, style, decorated, name)
+   !< Add a token to the layout.
+   class(bar_object),    intent(inout)        :: self      !< Bar.
+   integer(I4P),         intent(in)           :: kind      !< Kind of token.
+   type(element_object), intent(in), optional :: style     !< Text and colours.
+   logical,              intent(in), optional :: decorated !< Field with its own separators.
+   character(len=*),     intent(in), optional :: name      !< Name of a field of the program.
+   type(token_object),   allocatable          :: tokens(:) !< Tokens, with the new one.
+   integer(I4P)                               :: n         !< Number of tokens.
+
+   if (.not.allocated(self%tokens_)) allocate(self%tokens_(0))
+   n = size(self%tokens_, dim=1)
+   allocate(tokens(n + 1))
+   tokens(1:n) = self%tokens_
+   tokens(n + 1)%kind = kind
+   if (present(style)) then
+      tokens(n + 1)%style = style
+   else
+      call tokens(n + 1)%style%initialize
    endif
-   if (len(self%message%string) > 0) frame = frame//UCS4_' '//render(self%message, plain)
-   self%frame_ = frame
-   endsubroutine build_frame
+   if (present(decorated)) tokens(n + 1)%decorated = decorated
+   if (present(name)) tokens(n + 1)%name = name
+   call move_alloc(tokens, self%tokens_)
+   endsubroutine add_token
+
+   subroutine default_layout(self)
+   !< Build the layout the keywords describe, without a template: the line of forbear 1.x, byte for byte.
+   class(bar_object), intent(inout) :: self !< Bar.
+
+   if (allocated(self%tokens_)) deallocate(self%tokens_)
+   self%has_template_ = .false.
+   call self%add_token(TOKEN_PREFIX, style=self%prefix)
+   call self%add_token(TOKEN_TEXT, style=self%bracket_left)
+   call self%add_token(TOKEN_BAR)
+   call self%add_token(TOKEN_TEXT, style=self%bracket_right)
+   call self%add_token(TOKEN_SUFFIX, style=self%suffix)
+   if (allocated(self%spinner)) call self%add_token(TOKEN_SPINNER, style=self%spinner(1))
+   if (self%add_progress_percent) call self%add_token(TOKEN_PERCENT, style=self%progress_percent, decorated=.true.)
+   if (self%add_progress_count) call self%add_token(TOKEN_COUNT, style=self%progress_count, decorated=.true.)
+   if (self%add_progress_speed) call self%add_token(TOKEN_SPEED, style=self%progress_speed, decorated=.true.)
+   if (self%add_eta) call self%add_token(TOKEN_ETA, style=self%eta, decorated=.true.)
+   call self%add_token(TOKEN_MESSAGE, style=self%message, decorated=.true.)
+   endsubroutine default_layout
+
+   subroutine parse_template(self, template)
+   !< Build the layout of a template: literal text and `{name[:spec]}` fields; `{{` and `}}` write a brace.
+   class(bar_object), intent(inout) :: self     !< Bar.
+   character(len=*),  intent(in)    :: template !< Template.
+   character(len=:),  allocatable   :: literal  !< Literal text being read.
+   type(element_object)             :: text     !< Literal text, as a token style.
+   integer(I4P)                     :: i        !< Position in the template.
+   integer(I4P)                     :: closing  !< Position of the closing brace, from the opening one.
+
+   if (allocated(self%tokens_)) deallocate(self%tokens_)
+   allocate(self%tokens_(0))
+   self%has_template_ = .true.
+   self%template_ = template
+   literal = ''
+   i = 1
+   do while (i <= len(template))
+      select case(template(i:i))
+      case('{')
+         if (i < len(template)) then
+            if (template(i + 1:i + 1) == '{') then
+               literal = literal//'{'
+               i = i + 2
+               cycle
+            endif
+         endif
+         closing = index(template(i + 1:), '}')
+         if (closing == 0) call template_error('"{" not closed', template)
+         call flush_literal
+         call parse_field(template(i + 1:i + closing - 1))
+         i = i + closing + 1
+      case('}')
+         if (i < len(template)) then
+            if (template(i + 1:i + 1) == '}') then
+               literal = literal//'}'
+               i = i + 2
+               cycle
+            endif
+         endif
+         call template_error('"}" not opened', template)
+      case default
+         literal = literal//template(i:i)
+         i = i + 1
+      endselect
+   enddo
+   call flush_literal
+   contains
+      subroutine flush_literal()
+      !< Add the literal text read so far, if any, as a token.
+      if (len(literal) > 0) then
+         call text%initialize(string=literal)
+         call self%add_token(TOKEN_TEXT, style=text)
+         literal = ''
+      endif
+      endsubroutine flush_literal
+
+      subroutine parse_field(content)
+      !< Add the token of a field, `name[:spec]`; the spec is a comma-separated list of a width (the bar only), colours
+      !< (foreground), `on_` colours (background) and a style.
+      character(len=*), intent(in)  :: content !< Content of the braces.
+      character(len=:), allocatable :: name    !< Name of the field.
+      character(len=:), allocatable :: spec    !< Spec of the field.
+      character(len=:), allocatable :: item    !< Item of the spec.
+      type(element_object)          :: style   !< Colours of the field.
+      integer(I4P)                  :: colon   !< Position of the colon.
+      integer(I4P)                  :: comma   !< Position of a comma.
+      integer(I4P)                  :: kind    !< Kind of token.
+      integer(I4P)                  :: width   !< Width of the bar.
+      integer(I4P)                  :: iostat  !< Status of a read.
+
+      colon = index(content, ':')
+      if (colon > 0) then
+         name = trim(adjustl(content(:colon - 1)))
+         spec = content(colon + 1:)
+      else
+         name = trim(adjustl(content))
+         spec = ''
+      endif
+      if (len(name) == 0) call template_error('a field without a name', template)
+      kind = token_kind(name)
+      ! the colours of the field: those of its keywords, then those of the spec
+      select case(kind)
+      case(TOKEN_PREFIX)  ; style = self%prefix
+      case(TOKEN_SUFFIX)  ; style = self%suffix
+      case(TOKEN_PERCENT) ; style = self%progress_percent
+      case(TOKEN_COUNT)   ; style = self%progress_count ; self%add_progress_count = .true. ! the summary counts too
+      case(TOKEN_SPEED)   ; style = self%progress_speed
+      case(TOKEN_ETA)     ; style = self%eta
+      case(TOKEN_MESSAGE) ; style = self%message
+      case(TOKEN_SPINNER)
+         if (.not.allocated(self%spinner)) call template_error('{spinner} without spinner_string', template)
+         style = self%spinner(1)
+      case(TOKEN_BAR)
+         if (any(self%tokens_%kind == TOKEN_BAR)) call template_error('two {bar} fields', template)
+         call style%initialize
+      case default
+         call style%initialize
+      endselect
+      do while (len(spec) > 0)
+         comma = index(spec, ',')
+         if (comma > 0) then
+            item = trim(adjustl(spec(:comma - 1)))
+            spec = spec(comma + 1:)
+         else
+            item = trim(adjustl(spec))
+            spec = ''
+         endif
+         if (len(item) == 0) cycle
+         if (verify(item, '0123456789') == 0) then
+            if (kind /= TOKEN_BAR) call template_error('a width "'//item//'" for {'//name//'}, only {bar} has one', template)
+            read(item, *, iostat=iostat) width
+            if (iostat /= 0 .or. width < 0) call template_error('a wrong width "'//item//'"', template)
+            self%width = width
+         elseif (kind == TOKEN_BAR) then
+            call template_error('a colour "'//item//'" for {bar}, coloured by the filled_char and empty_char keywords', &
+                                template)
+         elseif (len(item) > 3 .and. item(1:min(3, len(item))) == 'on_') then
+            if (.not.is_color(item(4:))) call template_error('an unknown colour "'//item(4:)//'"', template)
+            style%color_bg = item(4:)
+         elseif (is_color(item)) then
+            style%color_fg = item
+         elseif (is_style(item)) then
+            style%style = item
+         else
+            call template_error('an unknown colour or style "'//item//'"', template)
+         endif
+      enddo
+      call self%add_token(kind, style=style, name=name)
+      endsubroutine parse_field
+   endsubroutine parse_template
+
+   subroutine resolve_fields(self)
+   !< Find the fields of the program that the template names: a name with no field stops the program.
+   class(bar_object), intent(inout) :: self !< Bar.
+   integer(I4P)                     :: t    !< Counter.
+   integer(I4P)                     :: f    !< Counter.
+
+   if (.not.allocated(self%tokens_)) call self%default_layout
+   do t = 1, size(self%tokens_, dim=1)
+      if (self%tokens_(t)%kind /= TOKEN_FIELD) cycle
+      self%tokens_(t)%field = 0
+      if (allocated(self%fields_)) then
+         do f = 1, size(self%fields_, dim=1)
+            if (self%fields_(f)%name == self%tokens_(t)%name) self%tokens_(t)%field = f
+         enddo
+      endif
+      if (self%tokens_(t)%field == 0) &
+         call template_error('{'//self%tokens_(t)%name//'} never added (add_field, after initialize, before start)', &
+                             self%template_)
+   enddo
+   endsubroutine resolve_fields
+
+   function width_before_bar(self) result(width)
+   !< Return the columns of the layout before the bar body, with the values of the start: the scale is drawn above the bar.
+   class(bar_object), intent(in) :: self  !< Bar.
+   integer(I4P)                  :: width !< Columns.
+   integer(I4P)                  :: t     !< Counter.
+
+   width = 0
+   do t = 1, size(self%tokens_, dim=1)
+      select case(self%tokens_(t)%kind)
+      case(TOKEN_BAR)
+         return
+      case(TOKEN_TEXT, TOKEN_PREFIX, TOKEN_SUFFIX)
+         width = width + display_width(self%tokens_(t)%style%string)
+      case(TOKEN_SPINNER)
+         width = width + display_width(self%spinner(1)%string)
+      case(TOKEN_PERCENT)
+         width = width + 4
+      case(TOKEN_COUNT)
+         width = width + len(count_text(self%min_value, self%max_value, 0._R8P))
+      case(TOKEN_SPEED)
+         width = width + 6
+      case(TOKEN_ETA, TOKEN_ELAPSED)
+         width = width + 8
+      case(TOKEN_FIELD)
+         width = width + len(self%fields_(self%tokens_(t)%field)%field%render(progress_object()))
+      endselect
+   enddo
+   endfunction width_before_bar
+
 
    subroutine complete(self, tic, count_rate)
    !< Complete the bar: end its line (clear it, at a position below the current line), write date and time and summary.
@@ -1040,6 +1407,10 @@ contains
          allocate(self%spinner(1:2))
          call self%spinner(1)%initialize(string='🚶 ', color_fg=color_fg, color_bg=color_bg, style=style)
          call self%spinner(2)%initialize(string='🏃 ', color_fg=color_fg, color_bg=color_bg, style=style)
+      case default
+         write(stderr, '(3A)') 'forbear: unknown spinner "', string_, &
+                               '", see https://szaghi.github.io/forbear/guide/spinners'
+         error stop 'forbear: unknown spinner'
       endselect
    endif
    endsubroutine create_spinner
@@ -1137,6 +1508,46 @@ contains
       if (code < 128 .or. code > 191) width = width + 1
    enddo
    endfunction display_width
+
+   function styled(token, text, plain) result(output)
+   !< Return the text of a field in the colours of its token.
+   type(token_object), intent(inout)        :: token  !< Token.
+   character(len=*),   intent(in)           :: text   !< Text.
+   logical,            intent(in)           :: plain  !< Without colours.
+   character(len=:, kind=UCS4), allocatable :: output !< Rendered text.
+
+   token%style%string = ucs4_string(input=text)
+   output = render(token%style, plain)
+   endfunction styled
+
+   subroutine template_error(what, template)
+   !< Stop the program on a wrong template.
+   character(len=*), intent(in) :: what     !< What is wrong.
+   character(len=*), intent(in) :: template !< Template, or a hint.
+
+   write(stderr, '(A)') 'forbear: '//what//' in template "'//template//'", see https://szaghi.github.io/forbear/guide/templates'
+   error stop 'forbear: wrong template'
+   endsubroutine template_error
+
+   pure function token_kind(name) result(kind)
+   !< Return the kind of token of a field name: a field of forbear, or one of the program.
+   character(len=*), intent(in) :: name !< Name.
+   integer(I4P)                 :: kind !< Kind of token.
+
+   select case(name)
+   case('bar')     ; kind = TOKEN_BAR
+   case('spinner') ; kind = TOKEN_SPINNER
+   case('percent') ; kind = TOKEN_PERCENT
+   case('count')   ; kind = TOKEN_COUNT
+   case('speed')   ; kind = TOKEN_SPEED
+   case('eta')     ; kind = TOKEN_ETA
+   case('elapsed') ; kind = TOKEN_ELAPSED
+   case('message') ; kind = TOKEN_MESSAGE
+   case('prefix')  ; kind = TOKEN_PREFIX
+   case('suffix')  ; kind = TOKEN_SUFFIX
+   case default    ; kind = TOKEN_FIELD
+   endselect
+   endfunction token_kind
 
    pure function duration(seconds) result(text)
    !< Return a duration for people: seconds below a minute (`2.53 s`), else `hh:mm:ss`.

@@ -103,6 +103,12 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   `complete` handles 100 %: at position 0 it restores the cursor, writes a newline and `ESC[J`, then the date and
   summary lines; at position>0 it clears its own line. `write_message` (bound as `write`) clears the line, prints the
   text and redraws `frame_`.
+- **Layout**: the bar line is a list of `token_object`s in `tokens_`, each a literal or a field with its own colours,
+  and `build_frame` loops over them. `template=` is parsed by `parse_template`; without it, `default_layout` builds
+  the 1.x line from the keywords. "Decorated" tokens carry 1.x separators (`' nnn%'`, `' ETA …'`), and the 26 docs
+  outputs prove the two paths draw the same bytes. Program fields are `field_object` extensions (in
+  `forbear_field_object`, re-exported), added with `add_field` after `initialize` and resolved by name in `start`.
+  Mistakes stop the program: template syntax, field names, colour, style and spinner names.
 - **Modes**, resolved once in `initialize`: interactive comes from the `interactive` keyword, else
   `FORBEAR_INTERACTIVE`, else `is_terminal(output_unit)`. That calls C `isatty` through `iso_c_binding`, and only
   `output_unit`→fd 1 and `error_unit`→fd 2 can be terminals. `FORBEAR_DISABLE` (≠0) forces disabled. A

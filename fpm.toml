@@ -48,3 +48,8 @@ main = "forbear_test_range.F90"
 name = "forbear_test_terminal"
 source-dir = "src/tests"
 main = "forbear_test_terminal.F90"
+
+[[test]]
+name = "forbear_test_template"
+source-dir = "src/tests"
+main = "forbear_test_template.F90"

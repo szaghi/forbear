@@ -16,6 +16,10 @@
         "link": "/api/src/lib/forbear_element_object"
       },
       {
+        "text": "forbear_field_object",
+        "link": "/api/src/lib/forbear_field_object"
+      },
+      {
         "text": "forbear_kinds",
         "link": "/api/src/lib/forbear_kinds"
       }

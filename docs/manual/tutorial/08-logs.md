@@ -41,4 +41,4 @@ Interactive and log modes, `interactive`, `disabled`, the `FORBEAR_*` environmen
 Reference: [Terminals and logs](/guide/terminals).
 :::
 
-That is the end of the tutorial: the [cookbook](../cookbook) has short recipes for everyday tasks.
+Next: [9. Layout templates](./09-templates).

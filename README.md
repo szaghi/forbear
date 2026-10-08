@@ -20,7 +20,7 @@
 <div>
 <table>
 <tr>
-<td width="50%"><b>📊 A bar in three calls</b><br><sub><code>initialize</code> sets its look and range, <code>start</code> draws it, <code>update</code> redraws it, at most ten times a second; at 100% it ends its line and gives the terminal back. <a href="https://szaghi.github.io/forbear/manual/tutorial/01-first-bar">A first bar</a></sub></td>
+<td width="50%"><b>📊 Your layout, your fields</b><br><sub>One template lays the line out, <code>'{bar:30} {percent:yellow} ETA {eta}'</code>; a field of your own (extend <code>field_object</code>) shows the residual of your solver, or anything else. <a href="https://szaghi.github.io/forbear/manual/tutorial/09-templates">Layout templates</a></sub></td>
 <td width="50%"><b>⏱️ ETA, speed, count, summary</b><br><sub>A smoothed speed and the time to the end, the count of steps done, start and end time, a closing line with duration and throughput. <a href="https://szaghi.github.io/forbear/manual/tutorial/04-reports">What the bar reports</a></sub></td>
 </tr>
 <tr>

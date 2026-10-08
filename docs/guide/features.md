@@ -34,6 +34,7 @@ Every feature of forbear, where the tutorial teaches it and where the reference 
 | Cursor left visible | `hide_cursor` | | [If the program stops](./limitations#if-the-program-stops) |
 | Bars off | `disabled`, `FORBEAR_DISABLE` | [8](/manual/tutorial/08-logs#turning-the-bars-off) | [Terminals and logs](./terminals#environment-variables) |
 | Terminal state | `is_stdout_locked` | | [is_stdout_locked](./bar#is-stdout-locked) |
+| Layout template | `template` | [9](/manual/tutorial/09-templates) | [Layout templates](./templates) |
+| Fields of the program | `field_object`, `add_field` | [9](/manual/tutorial/09-templates#a-field-of-your-own) | [Fields of the program](./templates#fields-of-the-program) |
 
-Not available: a bar that runs backwards, a spinner animated by a clock of its own (Fortran has no portable threads),
-a layout given as a template string.
+Not available: a bar that runs backwards, a spinner animated by a clock of its own (Fortran has no portable threads).

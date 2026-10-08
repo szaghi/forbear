@@ -67,10 +67,12 @@ program is interrupted. `reset` or `tput cnorm` brings the cursor back. For prog
 long run killed by its user, pass `hide_cursor=.false.`: the bar is drawn the same, with the cursor visible at the start
 of its line.
 
-## Silent defaults
+## Mistakes stop the program
 
-A colour or style name that is not in [the lists](./styling), or a `spinner_string` that is not the key of a
-[spinner](./spinners), is ignored without a message.
+A colour or style name that is not in [the lists](./styling), a `spinner_string` that is not the key of a
+[spinner](./spinners), a wrong [template](./templates): `initialize` stops the program (`error stop`), after a message on
+standard error that names the mistake. Before forbear 1.6 the names were ignored without a message, and a typo left an
+element without its colour.
 
 ## Other output while the bar runs
 

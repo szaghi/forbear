@@ -12,6 +12,7 @@ title: forbear_element_object
 graph LR
   forbear_element_object["forbear_element_object"] --> face["face"]
   forbear_element_object["forbear_element_object"] --> forbear_kinds["forbear_kinds"]
+  forbear_element_object["forbear_element_object"] --> iso_fortran_env["iso_fortran_env"]
 ```
 
 ## Contents
@@ -19,8 +20,11 @@ graph LR
 - [element_object](#element-object)
 - [destroy](#destroy)
 - [initialize](#initialize)
+- [stop_unknown](#stop-unknown)
 - [assign_element](#assign-element)
 - [output](#output)
+- [is_color](#is-color)
+- [is_style](#is-style)
 
 ## Derived Types
 
@@ -30,7 +34,7 @@ graph LR
 
 | Name | Type | Attributes | Description |
 |------|------|------------|-------------|
-| `string` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:) | allocatable |  |
+| `string` | character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:) | allocatable |  |
 | `color_fg` | character(len=:) | allocatable |  |
 | `color_bg` | character(len=:) | allocatable |  |
 | `style` | character(len=:) | allocatable |  |
@@ -73,8 +77,6 @@ flowchart TD
 
 ### initialize
 
-**Attributes**: pure
-
 ```fortran
 subroutine initialize(self, string, color_fg, color_bg, style)
 ```
@@ -93,10 +95,35 @@ subroutine initialize(self, string, color_fg, color_bg, style)
 
 ```mermaid
 flowchart TD
+  add_token["add_token"] --> initialize["initialize"]
   create_spinner["create_spinner"] --> initialize["initialize"]
   initialize["initialize"] --> initialize["initialize"]
   initialize["initialize"] --> destroy["destroy"]
+  initialize["initialize"] --> is_color["is_color"]
+  initialize["initialize"] --> is_style["is_style"]
+  initialize["initialize"] --> stop_unknown["stop_unknown"]
   style initialize fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
+### stop_unknown
+
+```fortran
+subroutine stop_unknown(what, name)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `what` | character(len=*) | in |  |  |
+| `name` | character(len=*) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  initialize["initialize"] --> stop_unknown["stop_unknown"]
+  style stop_unknown fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
 ### assign_element
@@ -120,7 +147,7 @@ subroutine assign_element(lhs, rhs)
 
 **Attributes**: pure
 
-**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
+**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
 
 ```fortran
 function output(self)
@@ -139,4 +166,54 @@ flowchart TD
   render["render"] --> output["output"]
   output["output"] --> colorize["colorize"]
   style output fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
+### is_color
+
+**Attributes**: pure
+
+**Returns**: `logical`
+
+```fortran
+function is_color(name)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `name` | character(len=*) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  initialize["initialize"] --> is_color["is_color"]
+  is_color["is_color"] --> colorize["colorize"]
+  style is_color fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
+### is_style
+
+**Attributes**: pure
+
+**Returns**: `logical`
+
+```fortran
+function is_style(name)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `name` | character(len=*) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  initialize["initialize"] --> is_style["is_style"]
+  is_style["is_style"] --> colorize["colorize"]
+  style is_style fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```

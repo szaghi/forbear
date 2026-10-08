@@ -9,7 +9,7 @@ final screen, colours kept as SGR sequences. With --frame K it stops at the end 
 the one drawn by `start`), showing the screen while that frame is displayed.
 
 The output of the documentation examples must not change from a run to the next: the progress speed, the estimated
-time of arrival, the summary and the dates, which depend on the clock, are replaced by placeholders.
+time of arrival, the elapsed time, the summary and the dates, which depend on the clock, are replaced by placeholders.
 
 Usage: ansi_screen.py [--frame K] < CAPTURE > SCREEN
 """
@@ -22,6 +22,8 @@ import sys
 CSI = re.compile(r"\x1b\[([0-9;?]*)([A-Za-z])")
 SPEED = re.compile(r"\(\s*[^()%\s]+%/s\)")
 ETA = re.compile(r"ETA (?:\d\d:\d\d:\d\d|\s*\S+ d)")
+# an ETA or an elapsed time of a template: its colour code may touch it, so no \b
+CLOCK = re.compile(r"(?<!\d)\d\d:\d\d:\d\d(?!\d)")
 SUMMARY = re.compile(r"\[done in [^,\]]+, [^\]]+/s\]")
 DATE = re.compile(r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}")
 
@@ -104,6 +106,7 @@ def main() -> None:
         line = ETA.sub("ETA hh:mm:ss", line)
         line = SUMMARY.sub("[done in n.nn s, nn.nn/s]", line)
         line = DATE.sub("yyyy/mm/dd hh:mm:ss", line)
+        line = CLOCK.sub("hh:mm:ss", line)
         sys.stdout.write(line + "\n")
 
 

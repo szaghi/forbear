@@ -8,7 +8,7 @@ title: Spinners
 
 `spinner_string` chooses a spinner by its key: pass one of the strings of the first column. The key is one of the
 frames of the spinner, not always the first. The spinner moves one frame at every drawing of the bar, and starts again
-after the last frame. A string that is not a key gives no spinner, without a message.
+after the last frame. A string that is not a key stops the program, with a message that names it.
 
 How a spinner looks depends on the font of the terminal: the Braille patterns (`⠋`, `⣾`, ...) and the emoji need a
 font that has them.

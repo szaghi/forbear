@@ -27,10 +27,10 @@ hero:
 
 features:
   - icon: 📊
-    title: A bar in three calls
-    details: "initialize, start, update: the bar redraws its line in place, at most ten times a second, and gives the terminal back at 100%."
-    link: /manual/tutorial/01-first-bar
-    linkText: A first bar
+    title: Your layout, your fields
+    details: "One template lays the line out, '{bar:30} {percent:yellow} ETA {eta}'; a field of your own shows the residual of your solver, or anything else."
+    link: /manual/tutorial/09-templates
+    linkText: Layout templates
   - icon: ⏱️
     title: ETA, speed, count, summary
     details: "A smoothed speed and the time to the end, the count of steps done, start and end time, a closing line with duration and throughput."

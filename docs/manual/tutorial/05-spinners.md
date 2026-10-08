@@ -12,8 +12,8 @@ While running:
 <<< @/examples/output/march_5-bar.ansi{ansi}
 
 The spinner moves one frame at every drawing of the bar: it is not driven by a clock of its own, so it stands still
-while the program spends a long time between two updates (Fortran has no portable threads to animate it meanwhile). A string that is not the key of a spinner gives no
-spinner, without a message.
+while the program spends a long time between two updates (Fortran has no portable threads to animate it meanwhile).
+A string that is not the key of a spinner stops the program, with a message that names it.
 
 ## Without the bar
 

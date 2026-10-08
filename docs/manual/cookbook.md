@@ -143,6 +143,24 @@ In code, `disabled=.true.`; under MPI, draw the bar of one process only:
 call bar%initialize(max_value=real(steps, R8P), disabled=(rank /= 0)) ! rank from MPI_Comm_rank
 ```
 
+## A layout of your own
+
+<<< @/examples/snippets/layout-init.f90
+
+<<< @/examples/output/layout-running.ansi{ansi}
+
+*While running.* Any order, any words between the fields: see [Layout templates](/guide/templates).
+
+## A field of your own
+
+<<< @/examples/snippets/march_9-field.f90
+
+<<< @/examples/snippets/march_9-init.f90
+
+<<< @/examples/output/march_9.ansi{ansi}
+
+The field reads the residual of the program through a pointer, at every drawing.
+
 ## Several bars one after another
 
 <<< @/examples/snippets/sequence-keep.f90

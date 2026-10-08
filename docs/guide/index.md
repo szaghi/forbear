@@ -18,7 +18,7 @@ one small library by the same author, [FACE](https://github.com/szaghi/FACE), fo
 This documentation reads in order, and each page links to the next one:
 
 1. [Installation](./install): get forbear into your project.
-2. The [tutorial](/manual/): eight short chapters that grow the progress bar of one program.
+2. The [tutorial](/manual/): nine short chapters that grow the progress bar of one program.
 3. The [cookbook](/manual/cookbook): short recipes, one for each "how do I ...?".
 4. The reference, from the [feature map](./features) on: every keyword, every default, every limitation.
 
