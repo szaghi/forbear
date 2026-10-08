@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 Versions follow [Semantic Versioning](https://semver.org/).
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.8.0] — 2026-10-08
+### Added
+- **bar**: Add suspend, resume and log_interval
+
+
+### Documentation
+- Pin the install instructions to v1.8.0
+
+
 ## [1.7.1] — 2026-10-08
 ### Fixed
 - **bar**: Show a prefix or suffix changed while the bar runs
