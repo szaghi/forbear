@@ -25,9 +25,7 @@
 *.log
 
 # special directories
-doc/html/
 exe/
-wiki/
 
 # special files
 get_automatic_changelog.sh

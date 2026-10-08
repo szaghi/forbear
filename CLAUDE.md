@@ -164,8 +164,6 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   `docs/ford.md` and committed. Build the site with `cd docs && npm install && npm run docs:build`; the `predocs` hook
   regenerates the API first. The custom theme (`docs/.vitepress/theme/`) uses the Catppuccin Latte palette in light
   mode and Mocha in dark mode, the GIFs' palette, plus the `img.gif` and `.showcase` styles.
-- Apart from `makecoverage-analysis`, the `fobos` rules still use the deprecated `FoBiS.py rule -ex …` / `-mode` /
-  `-coverage` forms. The legacy `.travis.yml`, `doc/` (FORD) and `wiki/` are still present.
 
 Releases: run `scripts/release.sh --patch|--minor|--major|vX.Y.Z` from `master`. It regenerates `CHANGELOG.md`
 with git-cliff, writes `VERSION` (and the `fpm.toml` version, if the manifest declares one), commits, tags and
