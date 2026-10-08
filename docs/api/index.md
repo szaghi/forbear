@@ -13,6 +13,10 @@ Auto-generated from Fortran source doc comments using [FORMAL](https://github.co
 - [forbear_element_object](/api/src/lib/forbear_element_object)
 - [forbear_kinds](/api/src/lib/forbear_kinds)
 
+## src/tests
+
+- [forbear_test_tools](/api/src/tests/forbear_test_tools)
+
 ## src/third_party/FACE/src/lib
 
 - [face](/api/src/third_party/FACE/src/lib/face)

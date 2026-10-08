@@ -64,7 +64,7 @@ type :: bar_object
    logical                           :: is_stdout_locked_    !< Flag to store standard output status.
    integer(I4P)                      :: output_unit = stdout !< Output unit to display bar
    ! run state, reset by start
-   integer(I4P)                             :: progress_drawn_ = -1     !< Progress at the last drawing, in percent; -1 before the first.
+   integer(I4P)                             :: progress_drawn_ = -1     !< Progress at the last drawing, %; -1 before.
    real(R8P)                                :: fraction_drawn_ = 0._R8P !< Fraction of the range done at the last drawing.
    real(R8P)                                :: rate_ = 0._R8P           !< Smoothed rate, fraction of the range per second.
    integer(I4P)                             :: rate_samples_ = 0        !< Number of rate samples.
@@ -620,7 +620,8 @@ contains
          call self%spinner(1)%initialize(string='|', color_fg=color_fg, color_bg=color_bg, style=style)
          call self%spinner(2)%initialize(string='/', color_fg=color_fg, color_bg=color_bg, style=style)
          call self%spinner(3)%initialize(string='-', color_fg=color_fg, color_bg=color_bg, style=style)
-         call self%spinner(4)%initialize(string='\', color_fg=color_fg, color_bg=color_bg, style=style)
+         ! backslash as achar(92): some compilers (nvfortran) read '\' as an escape in a literal
+         call self%spinner(4)%initialize(string=achar(92), color_fg=color_fg, color_bg=color_bg, style=style)
       case(UCS4_'⠋')
          allocate(self%spinner(1:10))
          call self%spinner(1 )%initialize(string='⠋', color_fg=color_fg, color_bg=color_bg, style=style)

@@ -7,7 +7,7 @@ modes = shared-gnu static-gnu shared-gnu-debug static-gnu-debug
         shared-intel static-intel shared-intel-debug static-intel-debug
         tests-gnu tests-gnu-debug
         tests-intel tests-intel-debug
-        tests-pgi tests-pgi-debug
+        tests-nvf tests-nvf-debug
 
 [common-variables]
 $CSHARED_GNU = -cpp -c -fPIC -frealloc-lhs
@@ -15,10 +15,10 @@ $CSHARED_INT = -cpp -c -fpic -assume realloc_lhs
 $LSHARED     = -shared
 $CSTATIC_GNU = -cpp -c -frealloc-lhs
 $CSTATIC_INT = -cpp -c -assume realloc_lhs
-$CSTATIC_PGI = -c -Mallocatable=03
+$CSTATIC_NVF = -c
 $DEBUG_GNU   = -O0 -g3 -Warray-bounds -Wcharacter-truncation -Wline-truncation -Wimplicit-interface -Wimplicit-procedure -Wunderflow -fcheck=all -fmodule-private -ffree-line-length-132 -fimplicit-none -fbacktrace -fdump-core -finit-real=nan -std=f2008 -fall-intrinsics
 $DEBUG_INT   = -O0 -debug all -check all -warn all -extend-source 132 -traceback -gen-interfaces#-fpe-all=0 -fp-stack-check -fstack-protector-all -ftrapuv -no-ftz -std08
-$DEBUG_PGI   = -C -g -gopt -Mchkfpstk -Mchkptr -Mchkstk -Mcoff -traceback
+$DEBUG_NVF   = -O0 -g -C -traceback
 $OPTIMIZE    = -O3
 $EXDIRS      = FACE/src/tests/
 
@@ -97,13 +97,13 @@ build_dir = ./exe/
 template  = template-static-intel-debug
 build_dir = ./exe/
 
-# PGI
-[tests-pgi]
-template  = template-static-pgi
+# NVIDIA
+[tests-nvf]
+template  = template-static-nvf
 build_dir = ./exe/
 
-[tests-pgi-debug]
-template  = template-static-pgi-debug
+[tests-nvf-debug]
+template  = template-static-nvf-debug
 build_dir = ./exe/
 
 #templates
@@ -163,7 +163,7 @@ log          = True
 jobs         = 2
 
 [template-shared-intel]
-compiler     = intel
+compiler     = intel_nextgen
 cflags       = $CSHARED_INT $OPTIMIZE
 lflags       = $LSHARED $OPTIMIZE
 exclude_dirs = $EXDIRS
@@ -176,7 +176,7 @@ log          = True
 jobs         = 2
 
 [template-static-intel]
-compiler     = intel
+compiler     = intel_nextgen
 cflags       = $CSTATIC_INT $OPTIMIZE
 lflags       = $OPTIMIZE
 exclude_dirs = $EXDIRS
@@ -189,7 +189,7 @@ log          = True
 jobs         = 2
 
 [template-shared-intel-debug]
-compiler     = intel
+compiler     = intel_nextgen
 cflags       = $CSHARED_INT $DEBUG_INT
 lflags       = $LSHARED $DEBUG_INT
 preproc      = -DDEBUG
@@ -203,7 +203,7 @@ log          = True
 jobs         = 2
 
 [template-static-intel-debug]
-compiler     = intel
+compiler     = intel_nextgen
 cflags       = $CSTATIC_INT $DEBUG_INT
 lflags       = $DEBUG_INT
 preproc      = -DDEBUG
@@ -216,9 +216,9 @@ quiet        = False
 log          = True
 jobs         = 2
 
-[template-static-pgi]
-compiler     = pgi
-cflags       = $CSTATIC_PGI $OPTIMIZE
+[template-static-nvf]
+compiler     = nvfortran
+cflags       = $CSTATIC_NVF $OPTIMIZE
 lflags       = $OPTIMIZE
 exclude_dirs = $EXDIRS
 mod_dir      = ./mod/
@@ -229,10 +229,10 @@ quiet        = False
 log          = True
 jobs         = 2
 
-[template-static-pgi-debug]
-compiler     = pgi
-cflags       = $CSTATIC_PGI $DEBUG_PGI
-lflags       = $DEBUG_PGI
+[template-static-nvf-debug]
+compiler     = nvfortran
+cflags       = $CSTATIC_NVF $DEBUG_NVF
+lflags       = $DEBUG_NVF
 preproc      = -DDEBUG
 exclude_dirs = $EXDIRS
 mod_dir      = ./mod/

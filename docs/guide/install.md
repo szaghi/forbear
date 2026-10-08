@@ -6,8 +6,9 @@ title: Installation
 
 ## Requirements
 
-- A **Fortran 2008** compiler with the C preprocessor (the sources are `.F90`). The examples of this documentation are
-  built and run with gfortran 16; the `fobos` file also has modes for Intel (`ifort`/`ifx`) and PGI/NVIDIA compilers.
+- A **Fortran 2008** compiler with the C preprocessor (the sources are `.F90`). forbear is tested on every push with
+  gfortran 13, 14 and 15 (and the gfortran 16 trunk), Intel ifx 2025.3 and NVIDIA nvfortran 26.1, with FoBiS, and with
+  fpm; it also builds and passes its tests with gfortran 11 and 12 and nvfortran 26.5.
 - [FACE](https://github.com/szaghi/FACE) (ANSI colours), fetched into `src/third_party` by every build system.
 - A terminal that understands ANSI escape sequences and the carriage return: see [Behaviour and
   limitations](./limitations#terminals-files-and-batch-jobs).
@@ -21,9 +22,10 @@ git clone https://github.com/szaghi/forbear && cd forbear
 fobis fetch                         # FACE into src/third_party, at the commit pinned by its fobos.lock
 fobis build --mode static-gnu       # static/libforbear.a, modules in static/mod
 fobis build --mode shared-gnu       # shared/libforbear.so
-fobis build --mode tests-gnu        # the test program into exe/
-bash scripts/run_tests.sh           # run it
-fobis build --lmodes                # every mode (GNU, Intel, PGI; debug variants)
+fobis build --mode tests-gnu        # the test programs into exe/
+bash scripts/run_tests.sh           # run them
+fobis build --mode tests-intel      # the same with Intel ifx, tests-nvf with NVIDIA nvfortran
+fobis build --lmodes                # every mode (GNU, Intel ifx, NVIDIA nvfortran; debug variants)
 ```
 
 `fobis fetch --update` moves FACE to its latest commit and updates `src/third_party/fobos.lock`.
@@ -35,7 +37,7 @@ gfortran -I static/mod my_program.f90 static/libforbear.a -o my_program
 ```
 
 The GNU modes define `UCS4_SUPPORTED` and `ASCII_SUPPORTED`, which give the `UCS4` and `ASCII` character kinds their
-own values; the Intel and PGI modes do not, and both kinds fall back to the default character kind there. Plain
+own values; the Intel and NVIDIA modes do not, and both kinds fall back to the default character kind there. Plain
 (default kind) string literals work everywhere, Unicode ones included, provided the source file is UTF-8.
 
 ## fpm

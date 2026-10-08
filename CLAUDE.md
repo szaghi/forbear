@@ -11,22 +11,35 @@ API); the README is a landing page.
 
 ## Build and test
 
-FoBiS is the primary build tool; the `fobos` file defines GNU, Intel and PGI modes. List them with `fobis build --lmodes`.
+FoBiS is the primary build tool; the `fobos` file defines GNU, Intel (ifx, FoBiS `intel_nextgen`) and NVIDIA
+(nvfortran) modes. List them with `fobis build --lmodes`. Run `fobis fetch` first on a fresh clone (FACE).
 
 ```bash
-fobis build --mode tests-gnu          # builds every program under src/ into exe/ (here: exe/forbear_test)
-fobis build --mode tests-gnu-debug    # -O0, -fcheck=all, -std=f2008, -DDEBUG
-fobis build --mode static-gnu         # libforbear.a in ./static/   (shared-gnu → libforbear.so in ./shared/)
+fobis build --mode tests-gnu-debug    # every program under src/ into exe/; -O0, -fcheck=all, -std=f2008, -DDEBUG
 bash scripts/run_tests.sh             # runs every executable in exe/; PASS = exit status 0
+fobis build --mode static-gnu         # libforbear.a in ./static/   (shared-gnu → libforbear.so in ./shared/)
 fobis rule --ex makecoverage          # clean + coverage build + run + gcov over src/lib/forbear*
+fpm test                              # the same tests with fpm (each one is a [[test]] of fpm.toml)
 ```
 
-`fpm build` / `fpm test` also work (`fpm.toml` pulls FACE from git; the library source dir is `src/lib`).
+Locally, ifx and nvfortran are installed but not on PATH: `source /opt/intel/oneapi/compiler/2025.3/env/vars.sh`
+then `--mode tests-intel-debug`; `PATH=/opt/nvidia/hpc_sdk/Linux_x86_64/26.5/compilers/bin:$PATH` then
+`--mode tests-nvf-debug`. `exe/` is shared by all modes: `fobis clean --mode <mode>` when switching compiler.
 
-The single "test" (`src/tests/forbear_test.F90`) is a **visual demo**, not an assertion suite. It draws about 30 bars
-and spinners and passes as long as it exits 0. A wrong rendering does not fail it, so check the output by eye, or add a
-`<name>.result` file: `run_tests.sh` compares a test's trimmed stdout against `<name>.result` when one exists.
-Executables named `*_xfail_*` must exit non-zero, and names containing `mpi` run under `mpirun -np N`.
+The tests (`src/tests/forbear_test_*.F90`, helpers in `forbear_test_tools.F90`) pass a capture file as `output_unit`,
+read back every byte, and `check` it; `report` ends with `error stop 1` on any failure. Log mode
+(`interactive=.false.`) gives exact, deterministic lines to compare. Terminal mode (`interactive=.true.`) checks the
+control-sequence protocol: `ESC[K`+CR per frame, `ESC[nA` for positions, the end sequence. A capture file gets one
+extra LF on `close` after a non-advancing write. Mutation-checked: reverting the rounding, `min_value` or `ESC[K`
+fixes makes them fail. `forbear_test.F90` is the old visual demo (passes if it exits 0). New behaviour needs a test
+here, and a new test program needs a `[[test]]` entry in `fpm.toml`. Executables named `*_xfail_*` must exit
+non-zero, and names containing `mpi` run under `mpirun -np N`.
+
+Portability lessons from ifx and nvfortran:
+- keep every line, comments included, within 132 columns;
+- never write `'\'` (nvfortran treats backslash as an escape in literals): use `achar(92)`;
+- never import an unused `R8P=>…` alias into a private module: nvfortran leaked `forbear_element_object`'s
+  `R8P=>real32` into `forbear_bar_object`.
 
 ## Documentation examples and GIFs
 
@@ -63,7 +76,7 @@ a minute, because each `march_*` step waits 40 ms, so that the GIFs are watchabl
   `FoBiS.py fetch` steps run, and `install.sh` fetches whenever `fobos` has `[dependencies]`. `$EXDIRS` excludes
   FACE's own tests from the build. fpm resolves FACE separately from `fpm.toml`, so it is not pinned to the same
   commit.
-- The `UCS4_SUPPORTED` / `ASCII_SUPPORTED` preprocessor macros are set only in the GNU templates. The Intel and PGI
+- The `UCS4_SUPPORTED` / `ASCII_SUPPORTED` preprocessor macros are set only in the GNU templates. The Intel and NVIDIA
   modes compile without them, so `ASCII` and `UCS4` both fall back to the default character kind. As a result, every
   `select type` over string kinds (`forbear_kinds.F90`, `forbear_element_object.F90`) has `#ifdef`'d branches. Keep
   new string-accepting procedures consistent with that pattern.
@@ -126,6 +139,10 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 
 ## Tooling
 
+- `.github/workflows/matrix.yml` (project-owned, as in FLAP) runs several jobs: gfortran 13/14/15 (16 trunk allowed to
+  fail) with `tests-gnu-debug`; ifx 2025.3 and nvfortran 26.1 via `fortran-lang/setup-fortran` with
+  `tests-intel-debug`/`tests-nvf-debug`; `fpm test`; and the docs-examples job, which reruns `docs_examples.sh` and
+  fails if `docs/examples` changed.
 - CI (`.github/workflows/ci.yml`) runs `FoBiS.py fetch` (gated on `src/third_party/.deps_config.ini`), then the
   coverage action. That action runs `fobis rule --ex makecoverage-analysis`, which removes FACE's coverage data and
   calls `scripts/compute-coverage.sh` to write `docs/public/coverage.json` (`{"pct":"…"}`). That file is a generated

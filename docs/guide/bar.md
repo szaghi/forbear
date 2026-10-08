@@ -151,6 +151,6 @@ Frees the strings and resets the defaults: `width=32`, range [0, 1], `frequency=
 ## Character kinds
 
 `ASCII` and `UCS4` are the kinds of the strings of the elements. With the GNU modes of the `fobos` file they are the
-ASCII and ISO 10646 kinds; with the Intel and PGI modes, and with fpm, they fall back to the default kind. Plain string
+ASCII and ISO 10646 kinds; with the Intel and NVIDIA modes, and with fpm, they fall back to the default kind. Plain string
 literals, Unicode ones included in a UTF-8 source, work in every case: forbear converts every string to `UCS4`
 internally.

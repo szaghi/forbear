@@ -511,6 +511,7 @@ function count_text(min_value, max_value, fraction) result(text)
 ```mermaid
 flowchart TD
   build_frame["build_frame"] --> count_text["count_text"]
+  lines_number["lines_number"] --> count_text["count_text"]
   count_text["count_text"] --> compact_real["compact_real"]
   style count_text fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```

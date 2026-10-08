@@ -2,7 +2,6 @@
 
 module forbear_element_object
 !< **forbear** project, definition of [[element_object]].
-use, intrinsic :: iso_fortran_env, only : I4P=>int32, R8P=>real32, stdout=>output_unit
 use face, only : colorize
 use forbear_kinds, only : ASCII, UCS4
 implicit none

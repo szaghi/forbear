@@ -23,3 +23,28 @@ library = true
 name = "forbear_test"
 source-dir = "src/tests"
 main = "forbear_test.F90"
+
+[[test]]
+name = "forbear_test_elements"
+source-dir = "src/tests"
+main = "forbear_test_elements.F90"
+
+[[test]]
+name = "forbear_test_formats"
+source-dir = "src/tests"
+main = "forbear_test_formats.F90"
+
+[[test]]
+name = "forbear_test_frequency"
+source-dir = "src/tests"
+main = "forbear_test_frequency.F90"
+
+[[test]]
+name = "forbear_test_range"
+source-dir = "src/tests"
+main = "forbear_test_range.F90"
+
+[[test]]
+name = "forbear_test_terminal"
+source-dir = "src/tests"
+main = "forbear_test_terminal.F90"

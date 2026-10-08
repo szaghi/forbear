@@ -137,8 +137,8 @@ forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.3.0" }
 v1.2.0 and older releases have no `fpm.toml`. The ETA, the messages, nested bars, the log mode and the other
 features added after v1.3.0 need `branch = "master"` until the next release.
 
-A Fortran 2008 compiler is required; the examples of the documentation are built with gfortran 16, and the `fobos`
-file has modes for Intel and PGI too (see [Installation](https://szaghi.github.io/forbear/guide/install)).
+A Fortran 2008 compiler is required: tested on every push with gfortran 13 to 15 (and the 16 trunk), Intel ifx 2025.3
+and NVIDIA nvfortran 26.1 (see [Installation](https://szaghi.github.io/forbear/guide/install)).
 
 ## Authors
 

@@ -12,7 +12,6 @@ title: forbear_element_object
 graph LR
   forbear_element_object["forbear_element_object"] --> face["face"]
   forbear_element_object["forbear_element_object"] --> forbear_kinds["forbear_kinds"]
-  forbear_element_object["forbear_element_object"] --> iso_fortran_env["iso_fortran_env"]
 ```
 
 ## Contents

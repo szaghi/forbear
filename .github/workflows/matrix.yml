@@ -1,0 +1,130 @@
+name: Compiler matrix
+
+# Project-owned workflow: ci.yml keeps the single-compiler coverage job; this one checks the compilers (GNU 13 to 16,
+# Intel ifx, NVIDIA nvfortran), the fpm build, and that the outputs shown by the documentation match the sources.
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gnu:
+    name: fobis tests-gnu-debug / gfortran-${{ matrix.gcc }}
+    runs-on: ubuntu-24.04
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        gcc: ['13', '14', '15']
+        experimental: [false]
+        include:
+          # trunk snapshot: tracked, but allowed to fail
+          - gcc: '16'
+            experimental: true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup build environment
+      uses: ./.github/actions/setup-build-env
+      with:
+        gcc-version: ${{ matrix.gcc }}
+
+    - name: Fetch dependencies
+      run: fobis fetch --no-build
+
+    - name: Build
+      run: fobis build --mode tests-gnu-debug
+
+    - name: Test
+      run: bash scripts/run_tests.sh
+
+  vendors:
+    name: fobis ${{ matrix.mode }} / ${{ matrix.compiler }}-${{ matrix.version }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: intel        # ifx
+            version: '2025.3'
+            mode: tests-intel-debug
+          - compiler: nvidia-hpc   # nvfortran
+            version: '26.1'
+            mode: tests-nvf-debug
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup compiler
+      uses: fortran-lang/setup-fortran@v1
+      with:
+        compiler: ${{ matrix.compiler }}
+        version: ${{ matrix.version }}
+
+    - name: Install FoBiS
+      run: pipx install FoBiS.py
+
+    - name: Fetch dependencies
+      run: fobis fetch --no-build
+
+    - name: Build
+      run: fobis build --mode ${{ matrix.mode }}
+
+    - name: Test
+      run: bash scripts/run_tests.sh
+
+  fpm:
+    name: fpm / gfortran-14
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install gfortran-14
+      run: sudo apt-get update && sudo apt-get install -y gfortran-14
+
+    - name: Setup fpm
+      uses: fortran-lang/setup-fpm@v9
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and test
+      run: fpm test --compiler gfortran-14
+
+  docs-examples:
+    # the programs of docs/examples are built and run, and their snippets and outputs regenerated:
+    # the committed ones, included by the guide, must match what the code produces
+    name: docs examples / gfortran-14
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup build environment
+      uses: ./.github/actions/setup-build-env
+      with:
+        gcc-version: '14'
+
+    - name: Fetch dependencies
+      run: fobis fetch --no-build
+
+    - name: Build and run the examples
+      run: bash scripts/docs_examples.sh
+
+    - name: Check the committed snippets and outputs
+      run: |
+        git add --intent-to-add docs/examples
+        git diff --exit-code -- docs/examples || {
+          echo "::error::docs/examples is out of date: run 'bash scripts/docs_examples.sh' and commit the result"
+          exit 1
+        }
