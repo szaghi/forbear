@@ -21,6 +21,14 @@ call check_scale(0._R8P, 1.e300_R8P, ' 0.00 (min)', '(max) 1e300')
 call check_scale(-1000._R8P, 0._R8P, '-1000 (min)', '(max)  0.00')
 call check_scale(-1.e100_R8P, 0._R8P, '***** (min)', '(max)  0.00')
 
+! a UTF-8 prefix: the scale is indented by its columns (6), not by its bytes (8)
+u = capture_open('test_formats_prefix.txt')
+call bar%initialize(width=22, add_scale_bar=.true., prefix_string='Größe ', interactive=.false., output_unit=u)
+call bar%start
+text = capture_close(u, 'test_formats_prefix.txt')
+call check(line(text, 1) == repeat(' ', 6)//' 0.00 (min)(max)  1.00', 'UTF-8 prefix: the scale indented by 6 columns')
+call check(index(line(text, 2), 'Größe ') == 1, 'UTF-8 prefix: the bar line starts with the prefix')
+
 ! speed and ETA: unknown at the first drawing, 0 left at the last; summary, date and time
 u = capture_open('test_formats.txt')
 call bar%initialize(width=10, add_progress_speed=.true., add_eta=.true., add_summary=.true., add_date_time=.true., &

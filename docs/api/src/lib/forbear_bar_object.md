@@ -34,6 +34,7 @@ graph LR
 - [is_stdout_locked](#is-stdout-locked)
 - [compact_real](#compact-real)
 - [count_text](#count-text)
+- [display_width](#display-width)
 - [duration](#duration)
 - [get_environment](#get-environment)
 - [hms](#hms)
@@ -102,7 +103,7 @@ graph LR
 | `spinner_count_` | integer(kind=I4P) |  |  |
 | `date_time_start_` | character(len=18) |  |  |
 | `is_complete_` | logical |  |  |
-| `frame_` | character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:) | allocatable |  |
+| `frame_` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:) | allocatable |  |
 
 #### Type-Bound Procedures
 
@@ -517,6 +518,22 @@ flowchart TD
   style count_text fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
+### display_width
+
+**Attributes**: pure
+
+**Returns**: `integer(kind=I4P)`
+
+```fortran
+function display_width(string) result(width)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `string` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=*) | in |  |  |
+
 ### duration
 
 **Attributes**: pure
@@ -618,7 +635,7 @@ flowchart TD
 
 **Attributes**: pure
 
-**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function render(element, plain) result(text)

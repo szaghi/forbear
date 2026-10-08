@@ -23,7 +23,7 @@ title: forbear_kinds
 
 **Attributes**: pure
 
-**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function ucs4_string(input) result(output)

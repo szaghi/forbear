@@ -137,6 +137,9 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 - The percent is written `(A,I3,A)` as `' nnn%'`: it always has its own leading space (count, speed, ETA too), so an
   element before it needs no trailing space. `hide_cursor=.false.` drops the hide/show sequences; the end still
   writes a newline and `ESC[J`.
+- Any column count must use `display_width`, never `len`: strings hold UTF-8 byte by byte, so it skips continuation
+  bytes (128–191). Wide characters (CJK, emoji) count as one column, a documented limit. Today only the scale
+  indentation needs it.
 - `width=0` makes a spinner-only or counter-only display, with no bar body. `add_scale_bar` requires `width >= 22`
   and otherwise raises `error stop`.
 

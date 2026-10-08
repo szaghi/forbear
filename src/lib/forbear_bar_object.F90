@@ -371,7 +371,7 @@ contains
       min_value = compact_real(self%min_value, 5_I4P)//' (min)'
       max_value = '(max) '//compact_real(self%max_value, 5_I4P)
       self%scale_bar%string = ucs4_string(min_value//repeat(' ', self%width - len(min_value) - len(max_value))//max_value)
-      bar = repeat(UCS4_' ', len(self%prefix%string))//render(self%bracket_left, plain)//render(self%scale_bar, plain)//&
+      bar = repeat(UCS4_' ', display_width(self%prefix%string))//render(self%bracket_left, plain)//render(self%scale_bar, plain)//&
             render(self%bracket_right, plain)
       write(self%output_unit, '(A)') bar
       endsubroutine add_scale_bar
@@ -1119,6 +1119,24 @@ contains
       text = compact_real(value, 6_I4P)//'/'//trim(adjustl(compact_real(max_value, 6_I4P)))
    endif
    endfunction count_text
+
+   pure function display_width(string) result(width)
+   !< Return the columns a string takes on a terminal: its characters, UTF-8 continuation bytes excluded.
+   !<
+   !< Strings hold UTF-8 text byte by byte (`ucs4_string` keeps every byte as one character), so `'Größe'` has 7
+   !< characters for 5 columns: the bytes 128 to 191 continue a character and take no column. Wide characters (East
+   !< Asian ideographs, emoji) take two columns and are counted as one.
+   character(len=*, kind=UCS4), intent(in) :: string !< String.
+   integer(I4P)                            :: width  !< Columns.
+   integer(I4P)                            :: c      !< Counter.
+   integer(I4P)                            :: code   !< Code of a character.
+
+   width = 0
+   do c = 1, len(string)
+      code = ichar(string(c:c))
+      if (code < 128 .or. code > 191) width = width + 1
+   enddo
+   endfunction display_width
 
    pure function duration(seconds) result(text)
    !< Return a duration for people: seconds below a minute (`2.53 s`), else `hh:mm:ss`.

@@ -86,6 +86,7 @@ cursor movement, erase in line): every modern terminal does, Windows Terminal in
 
 ## Unicode prefixes and the scale
 
-The scale is indented by the length of the prefix string, in characters of the string. gfortran stores every UTF-8 byte
-of a literal of the source as one character, in a `UCS4` literal too: `'Größe '` is 8 characters for 6 shown, and the
-scale is shifted by two columns. The bar itself is not affected. With the scale, use an ASCII prefix.
+The scale is indented by the columns of the prefix, so that it sits above the bar: forbear counts the characters of the
+prefix, without the bytes that continue a UTF-8 character (`'Größe '` is 8 bytes and 6 columns). East Asian wide
+characters and emoji take two columns on a terminal, and are counted as one: with such a prefix, the scale is shifted
+to the left by one column per wide character.
