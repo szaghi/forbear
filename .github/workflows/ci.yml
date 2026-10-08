@@ -16,8 +16,6 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        submodules: true   # FACE lives in src/third_party/FACE
 
     - name: Setup build environment
       uses: ./.github/actions/setup-build-env

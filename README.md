@@ -112,10 +112,11 @@ documentation.
 
 ### FoBiS
 
-Clone with the FACE submodule, and build:
+Clone, fetch FACE, and build:
 
 ```bash
-git clone --recursive https://github.com/szaghi/forbear && cd forbear
+git clone https://github.com/szaghi/forbear && cd forbear
+fobis fetch                           # FACE into src/third_party, pinned by its fobos.lock
 fobis build --mode static-gnu         # static/libforbear.a, modules in static/mod
 ```
 

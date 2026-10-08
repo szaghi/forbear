@@ -1,3 +1,7 @@
+[dependencies]
+deps_dir = src/third_party
+FACE     = https://github.com/szaghi/FACE
+
 [modes]
 modes = shared-gnu static-gnu shared-gnu-debug static-gnu-debug
         shared-intel static-intel shared-intel-debug static-intel-debug
@@ -16,8 +20,7 @@ $DEBUG_GNU   = -O0 -g3 -Warray-bounds -Wcharacter-truncation -Wline-truncation -
 $DEBUG_INT   = -O0 -debug all -check all -warn all -extend-source 132 -traceback -gen-interfaces#-fpe-all=0 -fp-stack-check -fstack-protector-all -ftrapuv -no-ftz -std08
 $DEBUG_PGI   = -C -g -gopt -Mchkfpstk -Mchkptr -Mchkstk -Mcoff -traceback
 $OPTIMIZE    = -O3
-$EXDIRS      = PENF/src/tests/
-               FACE/src/tests/ FACE/src/third_party/
+$EXDIRS      = FACE/src/tests/
 
 # main modes
 # GNU

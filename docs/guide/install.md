@@ -8,7 +8,7 @@ title: Installation
 
 - A **Fortran 2008** compiler with the C preprocessor (the sources are `.F90`). The examples of this documentation are
   built and run with gfortran 16; the `fobos` file also has modes for Intel (`ifort`/`ifx`) and PGI/NVIDIA compilers.
-- [FACE](https://github.com/szaghi/FACE) (ANSI colours), a git submodule in `src/third_party/FACE`.
+- [FACE](https://github.com/szaghi/FACE) (ANSI colours), fetched into `src/third_party` by every build system.
 - A terminal that understands ANSI escape sequences and the carriage return: see [Behaviour and
   limitations](./limitations#terminals-files-and-batch-jobs).
 
@@ -17,7 +17,8 @@ title: Installation
 [FoBiS](https://github.com/szaghi/FoBiS) (3.8+) is the reference build system of forbear.
 
 ```bash
-git clone --recursive https://github.com/szaghi/forbear && cd forbear   # --recursive: FACE
+git clone https://github.com/szaghi/forbear && cd forbear
+fobis fetch                         # FACE into src/third_party, at the commit pinned by its fobos.lock
 fobis build --mode static-gnu       # static/libforbear.a, modules in static/mod
 fobis build --mode shared-gnu       # shared/libforbear.so
 fobis build --mode tests-gnu        # the test program into exe/
@@ -25,7 +26,7 @@ bash scripts/run_tests.sh           # run it
 fobis build --lmodes                # every mode (GNU, Intel, PGI; debug variants)
 ```
 
-On a clone made without `--recursive`, fetch FACE with `git submodule update --init`.
+`fobis fetch --update` moves FACE to its latest commit and updates `src/third_party/fobos.lock`.
 
 The library archive contains FACE too, so a program needs only `libforbear.a` and the module directory:
 
@@ -57,12 +58,10 @@ fpm test
 
 ## Install script
 
-From the release after v1.2.0 on, every release ships a tarball, which contains FACE, and an `install.sh`, which
-downloads the tarball and builds it with FoBiS:
+From the release after v1.2.0 on, every release ships a tarball and an `install.sh`, which downloads forbear, fetches
+FACE with `fobis fetch` and builds it with FoBiS:
 
 ```bash
-./install.sh --download wget --build fobis
+./install.sh --download git --build fobis
+./install.sh --download wget --build fobis    # the release tarball
 ```
-
-`--download git` clones without the submodule, so the build cannot find FACE: clone with `git clone --recursive`
-instead, as above.

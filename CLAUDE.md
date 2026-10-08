@@ -49,10 +49,13 @@ Every code sample and output in the tutorial and cookbook comes from a real prog
 
 ## Dependencies
 
-- **FACE** (ANSI colours, `colorize`) is the only dependency. It is a **git submodule** at `src/third_party/FACE`, not
-  a `fobis fetch` dependency: there is no `[dependencies]` section in `fobos` and no `.deps_config.ini`. Run
-  `git submodule update --init` on a fresh clone. The `$EXDIRS` setting in `fobos` excludes FACE's own tests and its
-  nested PENF from the build.
+- **FACE** (ANSI colours, `colorize`) is the only dependency. `fobis fetch` puts it in `src/third_party/FACE`, as the
+  `fobos` `[dependencies]` section declares, and checks it out at the commit pinned in `src/third_party/fobos.lock`.
+  Run `fobis fetch` on a fresh clone before any build; `fobis fetch --update` moves the pin. In `src/third_party`,
+  only `.gitignore`, `.deps_config.ini` and `fobos.lock` are tracked. The `.deps_config.ini` makes the CI
+  `FoBiS.py fetch` steps run, and `install.sh` fetches whenever `fobos` has `[dependencies]`. `$EXDIRS` excludes
+  FACE's own tests from the build. fpm resolves FACE separately from `fpm.toml`, so it is not pinned to the same
+  commit.
 - The `UCS4_SUPPORTED` / `ASCII_SUPPORTED` preprocessor macros are set only in the GNU templates. The Intel and PGI
   modes compile without them, so `ASCII` and `UCS4` both fall back to the default character kind. As a result, every
   `select type` over string kinds (`forbear_kinds.F90`, `forbear_element_object.F90`) has `#ifdef`'d branches. Keep
@@ -106,8 +109,8 @@ The index currently stages a move from Travis/FORD to GitHub Actions, VitePress 
 `.travis.yml`, `doc/` (FORD), `wiki/`, and the `makedoc`/`makecoverage-analysis` rules in `fobos`. Current
 state:
 
-- The workflows check out with `submodules: true` to get FACE. Their `FoBiS.py fetch` step is a no-op, because
-  there is no `.deps_config.ini`.
+- The workflows run `FoBiS.py fetch` (gated on `.deps_config.ini`) to get FACE; the release tarball does not
+  contain it, and `install.sh` fetches it.
 - `run-coverage-analysis` runs `fobis rule --ex makecoverage-analysis`. That rule removes FACE's coverage data, then
   calls `scripts/compute-coverage.sh`, which writes `docs/public/coverage.json` (`{"pct":"…"}`). That file is a
   generated artifact: do not commit it.

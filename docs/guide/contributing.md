@@ -20,7 +20,7 @@ is welcome. The project follows a KISS (Keep It Simple and Stupid) philosophy.
    ```bash
    git checkout -b fix/my_contribution
    ```
-3. Test your changes with `fobis build && bash scripts/run_tests.sh`
+3. Test your changes with `fobis fetch && fobis build --mode tests-gnu && bash scripts/run_tests.sh`
 4. Check for unnecessary whitespace: `git diff --check`
 5. Submit a pull request with a clear commit message
 

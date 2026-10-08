@@ -1,0 +1,4 @@
+*
+!.gitignore
+!.deps_config.ini
+!fobos.lock
