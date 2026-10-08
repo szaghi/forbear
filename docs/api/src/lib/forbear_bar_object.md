@@ -12,6 +12,7 @@ title: forbear_bar_object
 graph LR
   forbear_bar_object["forbear_bar_object"] --> forbear_element_object["forbear_element_object"]
   forbear_bar_object["forbear_bar_object"] --> forbear_kinds["forbear_kinds"]
+  forbear_bar_object["forbear_bar_object"] --> ieee_arithmetic["ieee_arithmetic"]
   forbear_bar_object["forbear_bar_object"] --> iso_fortran_env["iso_fortran_env"]
 ```
 
@@ -25,6 +26,7 @@ graph LR
 - [assign_bar](#assign-bar)
 - [create_spinner](#create-spinner)
 - [is_stdout_locked](#is-stdout-locked)
+- [compact_real](#compact-real)
 
 ## Derived Types
 
@@ -215,6 +217,7 @@ subroutine update(self, current)
 ```mermaid
 flowchart TD
   start["start"] --> update["update"]
+  update["update"] --> compact_real["compact_real"]
   update["update"] --> output["output"]
   style update fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
@@ -285,3 +288,28 @@ function is_stdout_locked(self) result(is_locked)
 | Name | Type | Intent | Attributes | Description |
 |------|------|--------|------------|-------------|
 | `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | in |  |  |
+
+### compact_real
+
+**Attributes**: pure
+
+**Returns**: `character(len=w)`
+
+```fortran
+function compact_real(x, w) result(compact)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `x` | real(kind=R8P) | in |  |  |
+| `w` | integer(kind=I4P) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  update["update"] --> compact_real["compact_real"]
+  style compact_real fill:#3e63dd,stroke:#99b,stroke-width:2px
+```

@@ -46,7 +46,7 @@ setting not passed takes its default, whatever the bar had before.
 | Switch | Adds | Colour keywords |
 |---|---|---|
 | `add_progress_percent` | the progress, `nnn%` | `progress_percent_color_fg`, `progress_percent_color_bg`, `progress_percent_style` |
-| `add_progress_speed` | the progress speed, ` (nnn.nn%/s)` | `progress_speed_color_fg`, `progress_speed_color_bg`, `progress_speed_style` |
+| `add_progress_speed` | the progress speed, ` (nnn.nn%/s)`, the number in [six characters](./limitations#number-formats) | `progress_speed_color_fg`, `progress_speed_color_bg`, `progress_speed_style` |
 | `add_date_time` | at the end, a line `[start - end]`, `yyyy/mm/dd hh:mm:ss` each | `date_time_color_fg`, `date_time_color_bg`, `date_time_style` |
 | `add_scale_bar` | at the start, a line with `min_value` and `max_value` above the bar | `scale_bar_color_fg`, `scale_bar_color_bg`, `scale_bar_style` |
 

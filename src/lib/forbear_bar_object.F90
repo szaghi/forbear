@@ -3,6 +3,7 @@
 module forbear_bar_object
 !< **forbear** project, definition of [[bar_object]].
 use, intrinsic :: iso_fortran_env, only : I4P=>int32, I8P=>int64, R8P=>real64, stdout=>output_unit
+use, intrinsic :: ieee_arithmetic, only : ieee_is_finite, ieee_is_nan
 use forbear_element_object, only : element_object
 use forbear_kinds, only : ASCII, UCS4, ucs4_string
 implicit none
@@ -227,8 +228,8 @@ contains
       character(len=11)             :: min_value !< Minimum_value.
       character(len=11)             :: max_value !< Maximum_value.
 
-      write(min_value, '(F5.2)') self%min_value ; min_value = trim(min_value)//' (min)'
-      write(max_value, '(F5.2)') self%max_value ; max_value = '(max) '//trim(max_value)
+      min_value = compact_real(self%min_value, 5_I4P)//' (min)'
+      max_value = '(max) '//compact_real(self%max_value, 5_I4P)
       self%scale_bar%string = min_value//repeat(' ', self%width - len(min_value) - len(max_value))//max_value
       bar = repeat(UCS4_' ', len(self%prefix%string))//self%bracket_left%output()//self%scale_bar%output()//&
             self%bracket_right%output()
@@ -295,7 +296,7 @@ contains
          elapsed = real(tic - self%tic_, kind=R8P) / real(count_rate, kind=R8P)
          speed = 0._R8P
          if (self%progress_drawn_ >= 0 .and. elapsed > 0._R8P) speed = (progress - self%progress_drawn_) / elapsed
-         write(progress_speed, '(A,F6.2,A)') ' (', speed, '%/s)'
+         write(progress_speed, '(3A)') ' (', compact_real(speed, 6_I4P), '%/s)'
          self%progress_speed%string = progress_speed
          bar = bar//self%progress_speed%output()
       endif
@@ -799,4 +800,55 @@ contains
       endselect
    endif
    endsubroutine create_spinner
+
+   ! non type-bound procedures
+   pure function compact_real(x, w) result(compact)
+   !< Return a real number in exactly `w` characters, right-aligned: with two decimals while they fit, then one, then
+   !< as an integer, then as `<m.m>e<n>` or `<m>e<n>`; `nan` and `inf` for non finite numbers.
+   !<
+   !< A fixed width keeps the bar line from shrinking: a shorter drawing would leave the end of the previous one on
+   !< screen. With `w >= 6` every finite number fits; with `w = 5`, every one above -1e100 (else `*****`).
+   real(R8P),    intent(in) :: x       !< Number.
+   integer(I4P), intent(in) :: w       !< Width.
+   character(len=w)         :: compact !< Number in `w` characters.
+   character(len=32)        :: buffer  !< Formatting buffer.
+   real(R8P)                :: mantissa !< Mantissa of the scientific form.
+   integer(I4P)             :: m        !< Mantissa of the scientific form, one significant digit.
+   integer(I4P)             :: e        !< Exponent of the scientific form.
+
+   if (ieee_is_nan(x)) then
+      buffer = 'nan'
+   elseif (.not.ieee_is_finite(x)) then
+      buffer = 'inf'
+      if (x < 0._R8P) buffer = '-inf'
+   else
+      buffer = repeat('*', len(buffer)) ! not fitting, unless a form below fits
+      if (abs(x) < 1.e9_R8P) then      ! the fixed forms fit the buffer: F32.d, not F0.d, keeps the leading zero
+         write(buffer, '(F32.2)') x ; buffer = adjustl(buffer)
+         if (len_trim(buffer) > w) then
+            write(buffer, '(F32.1)') x ; buffer = adjustl(buffer)
+         endif
+         if (len_trim(buffer) > w) write(buffer, '(I0)') nint(x, I8P)
+      endif
+      if (len_trim(buffer) > w) then
+         e = floor(log10(abs(x)), I4P)
+         mantissa = x / 10._R8P**e
+         if (abs(nint(mantissa * 10._R8P)) >= 100) then ! e.g. 9.96e6 rounds to 10.0e6
+            mantissa = mantissa / 10._R8P
+            e = e + 1
+         endif
+         write(buffer, '(F0.1,A,I0)') mantissa, 'e', e
+         if (len_trim(buffer) > w) then ! one significant digit only
+            m = nint(mantissa, I4P)
+            if (abs(m) == 10) then
+               m = sign(1_I4P, m)
+               e = e + 1
+            endif
+            write(buffer, '(I0,A,I0)') m, 'e', e
+         endif
+      endif
+   endif
+   if (len_trim(buffer) > w) buffer = repeat('*', w) ! never truncate a number into a wrong one
+   compact = adjustr(buffer(1:w))
+   endfunction compact_real
 endmodule forbear_bar_object

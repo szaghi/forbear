@@ -44,7 +44,7 @@ Every code sample and output in the tutorial and cookbook comes from a real prog
 - Shiki's dual-theme ANSI renderer drops background colours, so examples that render in the docs must use foreground
   colours only.
 - `docs/guide/limitations.md`, `guide/bar.md` (the `update` steps) and the tutorial and cookbook describe the exact
-  semantics of `update` (truncation, clamping, `frequency`, the format limits). Any change to `update` must update
+  semantics of `update` (truncation, clamping, `frequency`, the number formats). Any change to `update` must update
   them, then rerun `scripts/docs_examples.sh`.
 
 ## Dependencies
@@ -90,8 +90,11 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 - Once complete, `update` returns immediately until the next `start`.
 - `frequency=1` redraws on every update (the spinner animates even when the percent is unchanged). `frequency>1`
   redraws when progress enters a new multiple of it.
-- Remaining format limits: the speed is `F6.2`, so it shows `******` above 999.99 %/s, and the scale labels are
-  `F5.2`, so they show `*****` from 100 upwards.
+- The speed (6 characters) and the scale labels (5) go through the private `compact_real(x, w)`. It fits any real
+  into exactly `w` characters, right-aligned, using the first form that fits: two decimals, one decimal, an integer,
+  `m.me<n>`, `me<n>`. It uses `F32.d` plus `adjustl`, not `F0.d`, because gfortran's `F0.d` drops the leading zero
+  (`.00`). The fixed width matters: a shorter redraw would leave stale characters on screen. Only a scale value from
+  about −1e100 down gives `*****`.
 - `width=0` makes a spinner-only or counter-only display, with no bar body. `add_scale_bar` requires `width >= 22`
   and otherwise raises `error stop`.
 

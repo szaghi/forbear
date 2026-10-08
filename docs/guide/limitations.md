@@ -24,13 +24,23 @@ moves at every update. With `frequency=f` larger than 1 it is drawn when the pro
 and at 100%: a loop of 7 steps (14%, 28%, 42%, ...) with `frequency=10` is drawn at every step, since each one enters a
 new ten. The first drawing, at `start`, is always made.
 
-## Numbers that do not fit
+## Number formats
 
-- The progress speed is written with two decimals in six characters: above 999.99%/s, a very fast loop, it shows as
-  `******`. It is the speed between the last two drawings, not an average.
-- The scale shows `min_value` and `max_value` with two decimals in five characters: from 100 on (and below −9.99) they
-  show as `*****`. The scale is useful for ranges such as [0, 1] or [0, 50]; for a larger one, use the percentage.
-- `add_scale_bar` needs `width` of at least 22: a narrower bar stops the program in `initialize`, with an `error stop`.
+The progress speed and the values of the scale have fixed widths, six and five characters: a line that got shorter
+would leave the end of the previous drawing on screen. A number takes the most precise form that fits, right-aligned:
+
+| Form | Speed (6 characters) | Scale (5 characters) |
+|---|---|---|
+| two decimals | `  0.00` to `999.99` | ` 0.00` to `99.99` |
+| one decimal | `1000.0` to `9999.9` | `100.0` to `999.9` |
+| integer | `10000` to `999999` | `1000` to `99999` |
+| one decimal and exponent | `1.2e6`, `2.5e9`, `1.0e10` | `1.2e5`, `2.5e9` |
+| one digit and exponent | `1e100` | `1e10`, `1e300` |
+
+Negative numbers take one more character for the sign. Only a scale value from about −1e100 down does not fit, and shows as
+`*****`. The speed is the one between the last two drawings, not an average.
+
+`add_scale_bar` needs `width` of at least 22: a narrower bar stops the program in `initialize`, with an `error stop`.
 
 ## Several bars, one terminal
 

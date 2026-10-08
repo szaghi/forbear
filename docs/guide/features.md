@@ -16,9 +16,9 @@ Every feature of forbear, where the tutorial teaches it and where the reference 
 | Unicode strings | UTF-8 literals or `UCS4` kind | [2](/manual/tutorial/02-look#unicode) | [Character kinds](./bar#character-kinds) |
 | Colours and styles | `<element>_color_fg`, `_color_bg`, `_style` | [3](/manual/tutorial/03-colours) | [Colours and styles](./styling) |
 | Progress in percent | `add_progress_percent` | [4](/manual/tutorial/04-reports) | [initialize](./bar#initialize) |
-| Progress speed | `add_progress_speed` | [4](/manual/tutorial/04-reports) | [Numbers that do not fit](./limitations#numbers-that-do-not-fit) |
+| Progress speed | `add_progress_speed` | [4](/manual/tutorial/04-reports) | [Number formats](./limitations#number-formats) |
 | Start and end time | `add_date_time` | [4](/manual/tutorial/04-reports) | [initialize](./bar#initialize) |
-| Scale | `add_scale_bar` | [4](/manual/tutorial/04-reports) | [Numbers that do not fit](./limitations#numbers-that-do-not-fit) |
+| Scale | `add_scale_bar` | [4](/manual/tutorial/04-reports) | [Number formats](./limitations#number-formats) |
 | Spinners | `spinner_string` | [5](/manual/tutorial/05-spinners) | [Spinners](./spinners) |
 | Spinner or percentage alone | `width=0` | [5](/manual/tutorial/05-spinners#without-the-bar) | [The line](./bar#the-line) |
 | Output unit | `output_unit` | [6](/manual/tutorial/06-terminal#separate-streams) | [initialize](./bar#initialize) |

@@ -56,8 +56,8 @@ drawn at every update: a million drawings cost more than the loop itself, while 
 
 <<< @/examples/output/march_4.ansi{ansi}
 
-The scale needs `width` of at least 22, and `max_value` below 100 to show its value (see
-[Behaviour and limitations](/guide/limitations#numbers-that-do-not-fit)). With a narrower bar the program stops:
+The scale needs `width` of at least 22 (see [Number formats](/guide/limitations#number-formats)). With a narrower
+bar the program stops:
 
 <<< @/examples/snippets/scale_narrow.f90
 

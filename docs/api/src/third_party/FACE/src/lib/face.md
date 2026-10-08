@@ -84,7 +84,7 @@ flowchart TD
 
 **Attributes**: pure
 
-**Returns**: character(kind=[ASCII](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[ASCII](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function colorize_ascii(string, color_fg, color_bg, style) result(colorized)
@@ -94,7 +94,7 @@ function colorize_ascii(string, color_fg, color_bg, style) result(colorized)
 
 | Name | Type | Intent | Attributes | Description |
 |------|------|--------|------------|-------------|
-| `string` | character(kind=[ASCII](/api/src/third_party/FACE/src/lib/face), len=*) | in |  |  |
+| `string` | character(kind=[ASCII](/api/src/lib/forbear_kinds), len=*) | in |  |  |
 | `color_fg` | character(len=*) | in | optional |  |
 | `color_bg` | character(len=*) | in | optional |  |
 | `style` | character(len=*) | in | optional |  |
@@ -142,7 +142,7 @@ flowchart TD
 
 **Attributes**: pure
 
-**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function colorize_ucs4(string, color_fg, color_bg, style) result(colorized)
@@ -152,7 +152,7 @@ function colorize_ucs4(string, color_fg, color_bg, style) result(colorized)
 
 | Name | Type | Intent | Attributes | Description |
 |------|------|--------|------------|-------------|
-| `string` | character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=*) | in |  |  |
+| `string` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=*) | in |  |  |
 | `color_fg` | character(len=*) | in | optional |  |
 | `color_bg` | character(len=*) | in | optional |  |
 | `style` | character(len=*) | in | optional |  |
