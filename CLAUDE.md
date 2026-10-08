@@ -181,4 +181,4 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 
 Releases: run `scripts/release.sh --patch|--minor|--major|vX.Y.Z` from `master`. It regenerates `CHANGELOG.md`
 with git-cliff, writes `VERSION` (and the `fpm.toml` version, if the manifest declares one), commits, tags and
-pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.7.1` (prefix and suffix changeable while running again); v1.7.0 brought `finish` and indeterminate bars (#8); v1.6.1 cut lines wider than the terminal (#10); v1.6.0 brought templates, program fields and loud name errors; v1.4.0 brought the seven 2026 features and the compiler matrix, v1.5.0 `hide_cursor`.
+pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.8.0` (`suspend`/`resume`, `log_interval`); v1.7.1 made prefix and suffix changeable while running again; v1.7.0 brought `finish` and indeterminate bars (#8); v1.6.1 cut lines wider than the terminal (#10); v1.6.0 brought templates, program fields and loud name errors; v1.4.0 brought the seven 2026 features and the compiler matrix, v1.5.0 `hide_cursor`.
