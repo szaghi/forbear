@@ -39,12 +39,14 @@ own values; the Intel and PGI modes do not, and both kinds fall back to the defa
 
 ## fpm
 
-Add forbear as a dependency in your project's `fpm.toml`, pinned to a release:
+Add forbear as a dependency in your project's `fpm.toml`:
 
 ```toml
 [dependencies]
-forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.2.0" }
+forbear = { git = "https://github.com/szaghi/forbear", branch = "master" }
 ```
+
+v1.2.0 and older releases have no `fpm.toml`: use the branch until the next release, then pin its tag.
 
 `fpm build` fetches forbear and FACE. To build and test forbear itself:
 
