@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 Versions follow [Semantic Versioning](https://semver.org/).
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.7.0] — 2026-10-08
+### Added
+- **bar**: Add finish and indeterminate bars
+
+
+### Documentation
+- Pin the install instructions to v1.6.1
+
+
 ## [1.6.1] — 2026-10-08
 ### Documentation
 - Pin the install instructions to v1.6.0
