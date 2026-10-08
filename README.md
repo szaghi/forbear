@@ -59,7 +59,7 @@ integer          :: j   ! counter
 real(R8P)        :: y   ! work result
 
 x = 0._R8P
-call bar%initialize(filled_char_string='+', prefix_string='progress |', suffix_string='| ', &
+call bar%initialize(filled_char_string='+', prefix_string='progress |', suffix_string='|',  &
                     add_progress_percent=.true.)
 call bar%start
 do i = 1, 20
@@ -84,7 +84,7 @@ The same calls scale to what a solver needs: an ETA, the residual of every step 
 printed above it. From the [tutorial](https://szaghi.github.io/forbear/manual/tutorial/06-terminal):
 
 ```fortran
-call bar%initialize(prefix_string='march ', bracket_left_string='[', bracket_right_string='] ', &
+call bar%initialize(prefix_string='march ', bracket_left_string='[', bracket_right_string=']',  &
                     filled_char_string='#', empty_char_string='.', add_progress_percent=.true., &
                     message_color_fg='cyan', width=30, max_value=real(steps, R8P))
 call bar%start
@@ -131,11 +131,10 @@ Add to your `fpm.toml`:
 
 ```toml
 [dependencies]
-forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.3.0" }
+forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.4.0" }
 ```
 
-v1.2.0 and older releases have no `fpm.toml`. The ETA, the messages, nested bars, the log mode and the other
-features added after v1.3.0 need `branch = "master"` until the next release.
+v1.2.0 and older releases have no `fpm.toml`; the features of this documentation need v1.4.0 or later.
 
 A Fortran 2008 compiler is required: tested on every push with gfortran 13 to 15 (and the 16 trunk), Intel ifx 2025.3
 and NVIDIA nvfortran 26.1 (see [Installation](https://szaghi.github.io/forbear/guide/install)).

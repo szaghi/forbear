@@ -15,7 +15,7 @@ real(R8P)        :: residual   ! residual of the solution
 character(64)    :: text       ! a message
 
 blocks = 40
-call mesh%initialize(prefix_string='mesh   ', bracket_left_string='▕', bracket_right_string='▏ ',                 &
+call mesh%initialize(prefix_string='mesh   ', bracket_left_string='▕', bracket_right_string='▏',                  &
                      partial_blocks=.true., filled_char_color_fg='magenta', add_progress_percent=.true.,          &
                      progress_percent_color_fg='yellow', add_progress_count=.true., progress_count_color_fg='blue', &
                      empty_char_string=' ', empty_char_color_bg='black_intense', width=36, max_value=real(blocks, R8P))
@@ -27,14 +27,14 @@ enddo
 
 steps = 30
 iterations = 8
-call steps_bar%initialize(prefix_string='solve  ', bracket_left_string='▕', bracket_right_string='▏ ',              &
+call steps_bar%initialize(prefix_string='solve  ', bracket_left_string='▕', bracket_right_string='▏',               &
                           partial_blocks=.true., filled_char_color_fg='cyan', add_progress_percent=.true., &
                           empty_char_string=' ', empty_char_color_bg='black_intense', &
                           progress_percent_color_fg='yellow', add_progress_count=.true.,                         &
                           progress_count_color_fg='blue', add_eta=.true., eta_color_fg='green',                   &
                           message_color_fg='magenta_intense', add_summary=.true., summary_color_fg='green',        &
                           width=36, max_value=real(steps, R8P))
-call newton%initialize(prefix_string='newton ', bracket_left_string='▕', bracket_right_string='▏ ',                 &
+call newton%initialize(prefix_string='newton ', bracket_left_string='▕', bracket_right_string='▏',                  &
                        partial_blocks=.true., filled_char_color_fg='yellow', add_progress_count=.true., &
                        empty_char_string=' ', empty_char_color_bg='black_intense', &
                        progress_count_color_fg='blue', width=36, max_value=real(iterations, R8P), position=1)

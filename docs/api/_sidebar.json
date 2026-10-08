@@ -22,16 +22,6 @@
     ]
   },
   {
-    "text": "src/tests",
-    "collapsed": true,
-    "items": [
-      {
-        "text": "forbear_test_tools",
-        "link": "/api/src/tests/forbear_test_tools"
-      }
-    ]
-  },
-  {
     "text": "src/third_party/FACE/src/lib",
     "collapsed": true,
     "items": [

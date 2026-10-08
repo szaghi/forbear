@@ -90,6 +90,7 @@ graph LR
 | `partial_blocks` | logical |  |  |
 | `is_interactive_` | logical |  |  |
 | `is_disabled_` | logical |  |  |
+| `hide_cursor` | logical |  |  |
 | `is_stdout_locked_` | logical |  |  |
 | `output_unit` | integer(kind=I4P) |  |  |
 | `progress_drawn_` | integer(kind=I4P) |  |  |
@@ -153,7 +154,7 @@ flowchart TD
 ### initialize
 
 ```fortran
-subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, output_unit)
+subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, hide_cursor, output_unit)
 ```
 
 **Arguments**
@@ -230,6 +231,7 @@ subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, pre
 | `position` | integer(kind=I4P) | in | optional |  |
 | `interactive` | logical | in | optional |  |
 | `disabled` | logical | in | optional |  |
+| `hide_cursor` | logical | in | optional |  |
 | `output_unit` | integer(kind=I4P) | in | optional |  |
 
 **Call graph**
@@ -511,7 +513,6 @@ function count_text(min_value, max_value, fraction) result(text)
 ```mermaid
 flowchart TD
   build_frame["build_frame"] --> count_text["count_text"]
-  lines_number["lines_number"] --> count_text["count_text"]
   count_text["count_text"] --> compact_real["compact_real"]
   style count_text fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```

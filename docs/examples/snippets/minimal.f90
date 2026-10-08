@@ -10,7 +10,7 @@ integer          :: j   ! counter
 real(R8P)        :: y   ! work result
 
 x = 0._R8P
-call bar%initialize(filled_char_string='+', prefix_string='progress |', suffix_string='| ', &
+call bar%initialize(filled_char_string='+', prefix_string='progress |', suffix_string='|',  &
                     add_progress_percent=.true.)
 call bar%start
 do i = 1, 20

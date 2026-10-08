@@ -12,7 +12,7 @@ integer          :: step  ! current time step
 
 steps = 50
 !region init
-call bar%initialize(prefix_string='march ', bracket_left_string='[', bracket_right_string='] ', &
+call bar%initialize(prefix_string='march ', bracket_left_string='[', bracket_right_string=']',  &
                     filled_char_string='#', empty_char_string='.',                             &
                     add_progress_percent=.true., progress_percent_color_fg='yellow',           &
                     add_progress_count=.true., progress_count_color_fg='cyan',                 &

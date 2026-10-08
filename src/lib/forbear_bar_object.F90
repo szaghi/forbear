@@ -61,6 +61,7 @@ type :: bar_object
    logical                           :: partial_blocks       !< Draw the bar with partial blocks, 8 steps per character.
    logical                           :: is_interactive_      !< Flag set when the bar is drawn on a terminal.
    logical                           :: is_disabled_         !< Flag set when the bar draws nothing.
+   logical                           :: hide_cursor          !< Hide the cursor while the bar runs on a terminal.
    logical                           :: is_stdout_locked_    !< Flag to store standard output status.
    integer(I4P)                      :: output_unit = stdout !< Output unit to display bar
    ! run state, reset by start
@@ -135,6 +136,7 @@ contains
    self%partial_blocks = .false.
    self%is_interactive_ = .false.
    self%is_disabled_ = .false.
+   self%hide_cursor = .true.
    self%is_stdout_locked_ = .false.
    self%progress_drawn_ = -1_I4P
    self%fraction_drawn_ = 0._R8P
@@ -165,7 +167,7 @@ contains
                          add_summary, summary_color_fg, summary_color_bg, summary_style,                                     &
                          message_color_fg, message_color_bg, message_style,                                                  &
                          width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position,          &
-                         interactive, disabled, output_unit)
+                         interactive, disabled, hide_cursor, output_unit)
    !< Initialize bar.
    !<
    !< Every setting not passed takes its default. The display mode is resolved here: `interactive` if passed, else the
@@ -242,6 +244,7 @@ contains
    integer(I4P),      intent(in), optional  :: position                  !< Line of the bar, below the current one.
    logical,           intent(in), optional  :: interactive               !< Draw for a terminal (else for a log).
    logical,           intent(in), optional  :: disabled                  !< Draw nothing.
+   logical,           intent(in), optional  :: hide_cursor               !< Hide the cursor while the bar runs.
    integer(I4P),      intent(in), optional  :: output_unit               !< Output unit to display bar
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
@@ -318,6 +321,7 @@ contains
       self%is_interactive_ = is_terminal(self%output_unit)
    endif
    if (present(disabled)) self%is_disabled_ = disabled
+   if (present(hide_cursor)) self%hide_cursor = hide_cursor
    if (get_environment('FORBEAR_DISABLE', env)) then
       if (trim(env) /= '0') self%is_disabled_ = .true.
    endif
@@ -453,7 +457,7 @@ contains
    integer(I4P),      intent(in)            :: progress !< Progress, in percent.
    real(R8P),         intent(in)            :: fraction !< Fraction of the range done, in [0, 1].
    character(len=:, kind=UCS4), allocatable :: frame    !< Frame.
-   character(len=4)                         :: percent  !< Progress in percent.
+   character(len=5)                         :: percent  !< Progress in percent.
    type(element_object)                     :: glyph    !< Partial block.
    logical                                  :: plain    !< Write without colors.
    real(R8P)                                :: cells    !< Filled cells, with their fraction.
@@ -488,7 +492,7 @@ contains
       frame = frame//render(self%spinner(self%spinner_count_), plain)
    endif
    if (self%add_progress_percent) then
-      write(percent, '(I3,A)') progress, '%'
+      write(percent, '(A,I3,A)') ' ', progress, '%' ! the space keeps 100% apart from what precedes it
       self%progress_percent%string = ucs4_string(input=percent)
       frame = frame//render(self%progress_percent, plain)
    endif
@@ -534,7 +538,11 @@ contains
          flush(self%output_unit)
          return
       endif
-      write(self%output_unit, '(A)') ESC//'[?25h' ! restore cursor, go to the next line
+      if (self%hide_cursor) then
+         write(self%output_unit, '(A)') ESC//'[?25h' ! restore cursor, go to the next line
+      else
+         write(self%output_unit, '(A)') ''           ! go to the next line
+      endif
       write(self%output_unit, '(A)', advance='no') ESC//'[J' ! clear what bars below the current line left
    endif
    if (self%add_date_time) then
@@ -564,13 +572,15 @@ contains
    !< Draw the last frame on the terminal, on its line, and come back to the current line.
    class(bar_object), intent(inout) :: self     !< Bar.
    character(len=12)                :: position !< Position, as a string.
+   character(len=:), allocatable    :: hide     !< Sequence hiding the cursor, if asked.
 
+   hide = '' ; if (self%hide_cursor) hide = ESC//'[?25l'
    if (self%position > 0) then
       write(position, '(I0)') self%position
-      write(self%output_unit, '(A)', advance='no') ucs4_string(input=ESC//'[?25l'//repeat(LF, self%position))//self%frame_// &
+      write(self%output_unit, '(A)', advance='no') ucs4_string(input=hide//repeat(LF, self%position))//self%frame_// &
                                                    ucs4_string(input=ESC//'[K'//CR//ESC//'['//trim(position)//'A')
    else
-      write(self%output_unit, '(A)', advance='no') ucs4_string(input=ESC//'[?25l')//self%frame_//ucs4_string(input=ESC//'[K'//CR)
+      write(self%output_unit, '(A)', advance='no') ucs4_string(input=hide)//self%frame_//ucs4_string(input=ESC//'[K'//CR)
    endif
    flush(self%output_unit)
    endsubroutine draw

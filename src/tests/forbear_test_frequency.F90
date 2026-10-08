@@ -19,7 +19,7 @@ call bar%initialize(width=7, add_progress_percent=.true., interactive=.false., m
 call run(7)
 text = capture_close(u, 'test_frequency_1.txt')
 call check(lines_number(text) == 8, 'log, 7 steps: 0% and one line per step (each enters a new ten)')
-call check(line(text, 3) == '**----- 28%', 'log, 7 steps: 2/7 is 28%, truncated')
+call check(line(text, 3) == '**-----  28%', 'log, 7 steps: 2/7 is 28%, truncated')
 
 ! a log with frequency=25
 u = capture_open('test_frequency_2.txt')

@@ -134,6 +134,9 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   speed (6 characters) and the scale labels (5) go through `compact_real(x, w)`, which uses the first form that fits:
   two decimals, one decimal, an integer, `m.me<n>`, `me<n>`. It writes `F32.d` plus `adjustl`, because gfortran's
   `F0.d` drops the leading zero. The ETA uses `hms` (8 characters, days beyond 100 h); the summary uses `duration`.
+- The percent is written `(A,I3,A)` as `' nnn%'`: it always has its own leading space (count, speed, ETA too), so an
+  element before it needs no trailing space. `hide_cursor=.false.` drops the hide/show sequences; the end still
+  writes a newline and `ESC[J`.
 - `width=0` makes a spinner-only or counter-only display, with no bar body. `add_scale_bar` requires `width >= 22`
   and otherwise raises `error stop`.
 
@@ -157,4 +160,4 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 
 Releases: run `scripts/release.sh --patch|--minor|--major|vX.Y.Z` from `master`. It regenerates `CHANGELOG.md`
 with git-cliff, writes `VERSION` (and the `fpm.toml` version, if the manifest declares one), commits, tags and
-pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.3.0`; the seven features of the 2026 update (write, logs, ETA, count, summary, partial blocks, positions) are after it.
+pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.4.0`, the first release with the seven 2026 features (write, logs, ETA, count, summary, partial blocks, positions) and the compiler matrix.

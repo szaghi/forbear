@@ -43,6 +43,27 @@ call check(count_text(text, ESC//'[K'//CR//ESC//'[1A') == 2, 'position 1: and co
 call check(index(text, LF//ESC//'[2K'//CR//ESC//'[1A') > 0, 'position 1: cleared when complete')
 call check(index(text, ESC//'[?25h') == 0, 'position 1: the cursor stays hidden, the outer bar shows it')
 
+! the cursor left visible: no hide, no show, the end still goes to the next line
+u = capture_open('test_terminal_3.txt')
+call bar%initialize(width=4, interactive=.true., min_interval=0._R8P, hide_cursor=.false., max_value=1._R8P, &
+                    output_unit=u)
+call bar%start
+call bar%update(current=1._R8P)
+text = capture_close(u, 'test_terminal_3.txt')
+n = len(text)
+call check(index(text, ESC//'[?25') == 0, 'hide_cursor=.false.: the cursor is neither hidden nor shown')
+call check(count_text(text, ESC//'[K'//CR) == 2, 'hide_cursor=.false.: still two drawings')
+call check(index(text, CR//LF//ESC//'[J') >= n - 5, 'hide_cursor=.false.: the end goes to the next line')
+
+! the percent is always apart from what precedes it, also at 100%
+u = capture_open('test_terminal_4.txt')
+call bar%initialize(width=0, spinner_string='|', add_progress_percent=.true., interactive=.true., &
+                    min_interval=0._R8P, max_value=1._R8P, output_unit=u)
+call bar%start
+call bar%update(current=1._R8P)
+text = capture_close(u, 'test_terminal_4.txt')
+call check(index(text, '/ 100%') > 0, 'percent: a space between the spinner and 100%')
+
 ! a copy is an independent bar with the same settings
 call bar%initialize(width=7, interactive=.false., max_value=3._R8P, output_unit=99)
 copy = bar

@@ -47,7 +47,7 @@ setting not passed takes its default, whatever the bar had before.
 
 | Switch | Adds | Colour keywords |
 |---|---|---|
-| `add_progress_percent` | the progress, `nnn%` | `progress_percent_color_fg`, `progress_percent_color_bg`, `progress_percent_style` |
+| `add_progress_percent` | the progress, ` nnn%` | `progress_percent_color_fg`, `progress_percent_color_bg`, `progress_percent_style` |
 | `add_progress_count` | the count, ` current/max`, integers with whole-number bounds | `progress_count_color_fg`, `progress_count_color_bg`, `progress_count_style` |
 | `add_progress_speed` | the smoothed speed, ` (nnn.nn%/s)`, the number in [six characters](./limitations#number-formats) | `progress_speed_color_fg`, `progress_speed_color_bg`, `progress_speed_style` |
 | `add_eta` | the estimated time to the end, ` ETA hh:mm:ss` | `eta_color_fg`, `eta_color_bg`, `eta_style` |
@@ -69,6 +69,7 @@ setting not passed takes its default, whatever the bar had before.
 | `position` | `integer(int32)` | 0 | Line of the bar, counted below the current one; a bar at a position larger than 0 is cleared when it completes. |
 | `interactive` | `logical` | detected | Draw for a terminal (`.true.`) or write a plain log (`.false.`). Not passed: `FORBEAR_INTERACTIVE`, else whether `output_unit` is a terminal. See [Terminals and logs](./terminals). |
 | `disabled` | `logical` | `.false.` | Draw nothing; `write` still prints. `FORBEAR_DISABLE` turns every bar off. |
+| `hide_cursor` | `logical` | `.true.` | Hide the cursor while the bar runs on a terminal, show it again at 100%. `.false.` leaves it visible: see [If the program stops](./limitations#if-the-program-stops). |
 | `output_unit` | `integer(int32)` | standard output | The unit the bar is written to, e.g. `error_unit`. |
 
 ## The line
@@ -84,9 +85,9 @@ and a partial block for the eighths of the next character, in the foreground of 
 `empty_char`. The filled and empty strings are repeated as they are: with more than one character each, the bar is
 wider than `width`. With `width=0` the bar body is empty and the line is the rest: a spinner or a percentage alone.
 
-On a terminal, every drawing starts with the ANSI sequence that hides the cursor and ends with "erase to the end of the
-line" and a carriage return: the next drawing overwrites it, and a shorter line leaves nothing behind. The end of the
-bar shows the cursor again. In a log, the line is written as it is, with no colours and no control sequences.
+On a terminal, every drawing starts with the ANSI sequence that hides the cursor (unless `hide_cursor=.false.`) and
+ends with "erase to the end of the line" and a carriage return: the next drawing overwrites it, and a shorter line
+leaves nothing behind. The end of the bar shows the cursor again. In a log, the line is written as it is, with no colours and no control sequences.
 
 ## start
 

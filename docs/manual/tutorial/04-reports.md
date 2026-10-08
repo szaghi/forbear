@@ -16,8 +16,8 @@ At the end:
 
 On the bar line, in this order:
 
-- `add_progress_percent`: the progress in percent, right after the suffix (here the right bracket ends with a space,
-  `'] '`, to keep it apart).
+- `add_progress_percent`: the progress in percent, right after the suffix, always one space apart from it:
+  ` 50%`, ` 100%`.
 - `add_progress_count`: the current value and `max_value`, `25/50`. With whole-number bounds the count is an integer,
   right-aligned to the width of `max_value`, so the line does not shift; otherwise it is a real in six characters.
 - `add_progress_speed`: the speed, in percent per second. It is smoothed: an exponential moving average of the speed

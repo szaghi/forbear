@@ -59,6 +59,14 @@ bar at position 0.
 configured before or copied from another bar (see
 [Several bars one after another](/manual/cookbook#several-bars-one-after-another)).
 
+## If the program stops
+
+On a terminal, a running bar hides the cursor and shows it again at 100%. A program that stops before, with an
+`error stop`, a crash or Ctrl-C, leaves the terminal without a cursor: Fortran has no portable way to run code when a
+program is interrupted. `reset` or `tput cnorm` brings the cursor back. For programs that may stop half way, as a
+long run killed by its user, pass `hide_cursor=.false.`: the bar is drawn the same, with the cursor visible at the start
+of its line.
+
 ## Silent defaults
 
 A colour or style name that is not in [the lists](./styling), or a `spinner_string` that is not the key of a

@@ -26,9 +26,9 @@ do i = 1001, 2000
 enddo
 text = capture_close(u, 'test_range_1.txt')
 call check(lines_number(text) == 11, 'range [1000, 2000]: a line at 0%, every 10% and 100%')
-call check(line(text, 1) == '----------  0% 1000/2000', 'range [1000, 2000]: starts at 0%')
-call check(line(text, 6) == '*****----- 50% 1500/2000', 'range [1000, 2000]: 50% at 1500')
-call check(line(text, -1) == '**********100% 2000/2000', 'range [1000, 2000]: ends at 100%')
+call check(line(text, 1) == '----------   0% 1000/2000', 'range [1000, 2000]: starts at 0%')
+call check(line(text, 6) == '*****-----  50% 1500/2000', 'range [1000, 2000]: 50% at 1500')
+call check(line(text, -1) == '********** 100% 2000/2000', 'range [1000, 2000]: ends at 100%')
 
 ! many updates: only the last one is 100% (rounding made it 100% from 99.5% on)
 u = capture_open('test_range_2.txt')
@@ -52,8 +52,8 @@ do i = 1, 15
 enddo
 text = capture_close(u, 'test_range_3.txt')
 call check(lines_number(text) == 11, 'beyond max: 11 lines, the updates after 100% do nothing')
-call check(line(text, 1) == '----------  0%  0/10', 'below min: clamped to 0%')
-call check(line(text, -1) == '**********100% 10/10', 'beyond max: clamped to 100%')
+call check(line(text, 1) == '----------   0%  0/10', 'below min: clamped to 0%')
+call check(line(text, -1) == '********** 100% 10/10', 'beyond max: clamped to 100%')
 
 ! round-off: 20 sums of 0.05 make 0.999..., still 100%
 u = capture_open('test_range_4.txt')
@@ -65,7 +65,7 @@ do i = 1, 20
    call bar%update(current=x)
 enddo
 text = capture_close(u, 'test_range_4.txt')
-call check(line(text, -1) == '**********100%', '20 sums of 0.05: the bar completes')
+call check(line(text, -1) == '********** 100%', '20 sums of 0.05: the bar completes')
 
 ! an empty range completes at start, and leaves the terminal free
 u = capture_open('test_range_5.txt')

@@ -31,6 +31,7 @@ Every feature of forbear, where the tutorial teaches it and where the reference 
 | Output unit | `output_unit` | [cookbook](/manual/cookbook#the-bar-on-standard-error) | [initialize](./bar#initialize) |
 | Nested bars | `position` | [7](/manual/tutorial/07-nested) | [initialize](./bar#initialize) |
 | Plain log off a terminal | `interactive`, `FORBEAR_INTERACTIVE` | [8](/manual/tutorial/08-logs) | [Terminals and logs](./terminals) |
+| Cursor left visible | `hide_cursor` | | [If the program stops](./limitations#if-the-program-stops) |
 | Bars off | `disabled`, `FORBEAR_DISABLE` | [8](/manual/tutorial/08-logs#turning-the-bars-off) | [Terminals and logs](./terminals#environment-variables) |
 | Terminal state | `is_stdout_locked` | | [is_stdout_locked](./bar#is-stdout-locked) |
 
