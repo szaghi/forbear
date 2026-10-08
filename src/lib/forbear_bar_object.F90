@@ -576,7 +576,13 @@ contains
    do t = 1, size(self%tokens_, dim=1)
       associate(token => self%tokens_(t))
       select case(token%kind)
-      case(TOKEN_TEXT, TOKEN_PREFIX, TOKEN_SUFFIX)
+      case(TOKEN_TEXT)
+         frame = frame//render(token%style, plain)
+      case(TOKEN_PREFIX) ! the string of the bar, which the program may change while it runs, in the token colours
+         token%style%string = self%prefix%string
+         frame = frame//render(token%style, plain)
+      case(TOKEN_SUFFIX)
+         token%style%string = self%suffix%string
          frame = frame//render(token%style, plain)
       case(TOKEN_BAR)
          if (self%indeterminate .and. self%is_interactive_) self%pulse_ = self%pulse_ + 1
@@ -972,8 +978,12 @@ contains
       select case(self%tokens_(t)%kind)
       case(TOKEN_BAR)
          return
-      case(TOKEN_TEXT, TOKEN_PREFIX, TOKEN_SUFFIX)
+      case(TOKEN_TEXT)
          width = width + display_width(self%tokens_(t)%style%string)
+      case(TOKEN_PREFIX)
+         width = width + display_width(self%prefix%string)
+      case(TOKEN_SUFFIX)
+         width = width + display_width(self%suffix%string)
       case(TOKEN_SPINNER)
          width = width + display_width(self%spinner(1)%string)
       case(TOKEN_PERCENT)

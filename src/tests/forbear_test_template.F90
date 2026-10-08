@@ -125,6 +125,34 @@ text = capture_close(u, 'test_template_6.txt')
 call check(line(text, 1) == '     0.00 (min)(max) 10.00', 'template: the scale above the bar body')
 call check(index(line(text, -1), '%/s]') == 0 .and. index(line(text, -1), '/s]') > 0, 'template: summary in units')
 
+! prefix and suffix changed while the bar runs: the next drawing shows them, with the keywords and with a template
+u = capture_open('test_template_7.txt')
+call bar%initialize(width=4, prefix_string='one ', suffix_string=' a', interactive=.false., max_value=2._R8P, &
+                    frequency=50, output_unit=u)
+call bar%start
+bar%prefix%string = 'two '
+bar%suffix%string = ' b'
+call bar%update(current=2._R8P)
+call bar%initialize(width=4, template='{prefix}[{bar}]{suffix}', prefix_string='one ', suffix_string=' a', &
+                    interactive=.false., max_value=2._R8P, frequency=50, output_unit=u)
+call bar%start
+bar%prefix%string = 'two '
+bar%suffix%string = ' b'
+call bar%update(current=2._R8P)
+text = capture_close(u, 'test_template_7.txt')
+call check(line(text, 1) == 'one ---- a' .and. line(text, 2) == 'two **** b', 'prefix, suffix changed: keywords')
+call check(line(text, 3) == 'one [----] a' .and. line(text, 4) == 'two [****] b', 'prefix, suffix changed: template')
+
+! a changed prefix keeps the colours of its token
+u = capture_open('test_template_8.txt')
+call bar%initialize(width=4, template='{prefix:red}{bar}', prefix_string='one ', interactive=.true., &
+                    min_interval=0._R8P, max_value=1._R8P, output_unit=u)
+call bar%start
+bar%prefix%string = 'two '
+call bar%update(current=1._R8P)
+text = capture_close(u, 'test_template_8.txt')
+call check(index(text, ESC//'[31m'//'two ') > 0, 'prefix changed: in the colours of its token')
+
 call report
 contains
    subroutine run(steps_number)

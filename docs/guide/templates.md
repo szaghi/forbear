@@ -37,7 +37,7 @@ item     := width (bar only) | colour | on_colour | style
 | `{elapsed}` | the time since the start, `hh:mm:ss` | 8 |
 | `{spinner}` | the current frame of the spinner of `spinner_string` | that of its frames |
 | `{message}` | the message of the last `update` | variable |
-| `{prefix}`, `{suffix}` | the strings of `prefix_string`, `suffix_string` | as given |
+| `{prefix}`, `{suffix}` | the strings of `prefix_string`, `suffix_string`, or what the program assigned to `bar%prefix%string`, `bar%suffix%string` while the bar runs | as given |
 | `{name}` | a field of the program, added with [`add_field`](#fields-of-the-program) | its own |
 
 A field takes the colours of its keywords (`progress_percent_color_fg`, ...) unless its spec gives others.

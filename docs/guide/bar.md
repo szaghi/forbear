@@ -89,6 +89,10 @@ and a partial block for the eighths of the next character, in the foreground of 
 `empty_char`. The filled and empty strings are repeated as they are: with more than one character each, the bar is
 wider than `width`. With `width=0` the bar body is empty and the line is the rest: a spinner or a percentage alone.
 
+The prefix and the suffix can change while the bar runs: assign `bar%prefix%string` or `bar%suffix%string` (any
+string, as `prefix_string`), and the next drawing shows it, in the colours set by `initialize` (or by the template).
+For instance, the name of the phase of a solver: `bar%prefix%string = 'assemble '`.
+
 On a terminal, every drawing starts with the ANSI sequence that hides the cursor (unless `hide_cursor=.false.`) and
 ends with "erase to the end of the line" and a carriage return: the next drawing overwrites it, and a shorter line
 leaves nothing behind. Line wrapping is off while a drawing is written, so a line wider than the terminal is cut at its

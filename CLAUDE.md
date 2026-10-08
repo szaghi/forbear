@@ -110,6 +110,8 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   the 1.x line from the keywords. "Decorated" tokens carry 1.x separators (`' nnn%'`, `' ETA …'`), and the 26 docs
   outputs prove the two paths draw the same bytes. Program fields are `field_object` extensions (in
   `forbear_field_object`, re-exported), added with `add_field` after `initialize` and resolved by name in `start`.
+  Prefix and suffix tokens keep only colours: `build_frame` reads `self%prefix%string`/`self%suffix%string` at every
+  drawing, so a program may change them while the bar runs (v1.6.0 copied them, and silently broke that).
   Mistakes stop the program: template syntax, field names, colour, style and spinner names.
 - **Modes**, resolved once in `initialize`: interactive comes from the `interactive` keyword, else
   `FORBEAR_INTERACTIVE`, else `is_terminal(output_unit)`. That calls C `isatty` through `iso_c_binding`, and only
@@ -174,4 +176,4 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 
 Releases: run `scripts/release.sh --patch|--minor|--major|vX.Y.Z` from `master`. It regenerates `CHANGELOG.md`
 with git-cliff, writes `VERSION` (and the `fpm.toml` version, if the manifest declares one), commits, tags and
-pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.6.1` (lines wider than the terminal are cut, #10); v1.6.0 brought templates, program fields and loud name errors; v1.4.0 brought the seven 2026 features and the compiler matrix, v1.5.0 `hide_cursor`.
+pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.7.0` (`finish`, indeterminate bars, #8); v1.6.1 cut lines wider than the terminal (#10); v1.6.0 brought templates, program fields and loud name errors; v1.4.0 brought the seven 2026 features and the compiler matrix, v1.5.0 `hide_cursor`.
