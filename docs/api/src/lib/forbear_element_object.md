@@ -34,7 +34,7 @@ graph LR
 
 | Name | Type | Attributes | Description |
 |------|------|------------|-------------|
-| `string` | character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:) | allocatable |  |
+| `string` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:) | allocatable |  |
 | `color_fg` | character(len=:) | allocatable |  |
 | `color_bg` | character(len=:) | allocatable |  |
 | `style` | character(len=:) | allocatable |  |
@@ -147,7 +147,7 @@ subroutine assign_element(lhs, rhs)
 
 **Attributes**: pure
 
-**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function output(self)

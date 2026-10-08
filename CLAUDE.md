@@ -169,4 +169,4 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 
 Releases: run `scripts/release.sh --patch|--minor|--major|vX.Y.Z` from `master`. It regenerates `CHANGELOG.md`
 with git-cliff, writes `VERSION` (and the `fpm.toml` version, if the manifest declares one), commits, tags and
-pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.4.0`, the first release with the seven 2026 features (write, logs, ETA, count, summary, partial blocks, positions) and the compiler matrix.
+pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.6.0` (templates, program fields, loud name errors); v1.4.0 brought the seven 2026 features and the compiler matrix, v1.5.0 `hide_cursor`.

@@ -150,7 +150,7 @@ graph LR
 | `spinner_count_` | integer(kind=I4P) |  |  |
 | `date_time_start_` | character(len=18) |  |  |
 | `is_complete_` | logical |  |  |
-| `frame_` | character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:) | allocatable |  |
+| `frame_` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:) | allocatable |  |
 | `tokens_` | type([token_object](/api/src/lib/forbear_bar_object#token-object)) | allocatable |  |
 | `fields_` | type([field_entry](/api/src/lib/forbear_bar_object#field-entry)) | allocatable |  |
 | `has_template_` | logical |  |  |
@@ -670,7 +670,7 @@ function is_stdout_locked(self) result(is_locked)
 
 ### bar_body
 
-**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function bar_body(self, progress, fraction, plain) result(body)
@@ -815,7 +815,7 @@ function display_width(string) result(width)
 
 | Name | Type | Intent | Attributes | Description |
 |------|------|--------|------------|-------------|
-| `string` | character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=*) | in |  |  |
+| `string` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=*) | in |  |  |
 
 **Call graph**
 
@@ -827,7 +827,7 @@ flowchart TD
 
 ### styled
 
-**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function styled(token, text, plain) result(output)
@@ -976,7 +976,7 @@ flowchart TD
 
 **Attributes**: pure
 
-**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
 
 ```fortran
 function render(element, plain) result(text)
