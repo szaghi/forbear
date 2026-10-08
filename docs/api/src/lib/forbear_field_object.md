@@ -34,6 +34,7 @@ graph LR
 | `rate` | real(kind=R8P) |  |  |
 | `elapsed` | real(kind=R8P) |  |  |
 | `eta` | real(kind=R8P) |  |  |
+| `indeterminate` | logical |  |  |
 
 ### field_object
 

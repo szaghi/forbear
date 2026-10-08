@@ -25,7 +25,8 @@ change. `scripts/docs_examples.sh` runs the examples of this documentation in a 
 <<< @/examples/output/march_8-log.ansi{ansi}
 
 - A line at 0%, at every multiple of 10% (of `frequency`%, if larger than 1) and at 100%, then the start and end line
-  and the summary, if asked.
+  and the summary, if asked. `finish` writes a last line where the bar stopped, if the previous one does not show it;
+  an indeterminate bar writes a line at the start and one at `finish` only.
 - The same elements as on a terminal, without colours and without the spinner, which has no meaning in a log.
 - A bar at a position larger than 0 writes nothing: a log cannot come back to a line below.
 - `write` prints its lines as they come, between the lines of the bar.

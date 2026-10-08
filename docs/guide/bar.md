@@ -15,9 +15,10 @@ use forbear, only : bar_object, field_object, progress_object, ASCII, UCS4
 | [`initialize`](#initialize) | Set up the bar: its elements, its range, what it reports, where and how it draws. Resets every other setting. |
 | [`start`](#start) | Print the scale (if asked), draw the bar at 0%, take over the terminal line. |
 | [`update`](#update) | Compute the progress of the current value, redraw the bar when due; at 100% end its line. |
+| [`finish`](#finish) | End the bar where it is: an indeterminate bar, a loop left before its end. |
 | [`write`](#write) | Print a line above the running bar. |
 | [`add_field`](./templates#fields-of-the-program) | Add a field of the program, for the template. |
-| [`is_stdout_locked`](#is-stdout-locked) | True while the bar is running on a terminal, from `start` to 100%. |
+| [`is_stdout_locked`](#is-stdout-locked) | True while the bar is running on a terminal, from `start` to 100% or `finish`. |
 | [`destroy`](#destroy) | Reset the bar to its defaults. |
 | `=` | Copy a bar (intrinsic assignment). |
 
@@ -71,6 +72,7 @@ setting not passed takes its default, whatever the bar had before.
 | `interactive` | `logical` | detected | Draw for a terminal (`.true.`) or write a plain log (`.false.`). Not passed: `FORBEAR_INTERACTIVE`, else whether `output_unit` is a terminal. See [Terminals and logs](./terminals). |
 | `disabled` | `logical` | `.false.` | Draw nothing; `write` still prints. `FORBEAR_DISABLE` turns every bar off. |
 | `template` | `character(*)` | none | The layout of the bar line: see [Layout templates](./templates). Without it, the keywords above describe the line. |
+| `indeterminate` | `logical` | `.false.` | The total is unknown: `current` counts what is done from `min_value`, the bar body is a block going back and forth, and only [`finish`](#finish) ends the bar. `max_value` and `frequency` are ignored; a percent, an ETA or a scale stops the program (`error stop`). |
 | `hide_cursor` | `logical` | `.true.` | Hide the cursor while the bar runs on a terminal, show it again at 100%. `.false.` leaves it visible: see [If the program stops](./limitations#if-the-program-stops). |
 | `output_unit` | `integer(int32)` | standard output | The unit the bar is written to, e.g. `error_unit`. |
 
@@ -123,6 +125,21 @@ call bar%update(current=value [, message=text])   ! value: real(real64); text: a
    than 0 is cleared instead); the start and end line and the summary are printed, if asked; `is_stdout_locked` becomes
    false.
 
+An [indeterminate](#initialize) bar counts `current - min_value` (not below 0) and never reaches 100%: it is drawn at
+most once every `min_interval` seconds on a terminal, and only at the start and at `finish` in a log.
+
+## finish
+
+```fortran
+call bar%finish([message=text])   ! text: any string
+```
+
+Ends a running bar where it is, as 100% would: it draws the last update (an indeterminate bar with its track full), with
+the `message` if passed, then ends the line, shows the cursor and writes the date and summary lines, if asked. The rate
+of the summary is that of what was done. In a log, it writes a last line unless the previous one already shows that
+progress. After `finish`, updates do nothing until the next `start`. On a bar not running (not started, already
+complete, disabled) it does nothing. Call it after a loop that may `exit` early, and to end an indeterminate bar.
+
 ## write
 
 ```fortran
@@ -141,7 +158,7 @@ logical :: running
 running = bar%is_stdout_locked()
 ```
 
-True from `start` until the bar reaches 100%, on a terminal: while it is true, anything written to the terminal but
+True from `start` until the bar reaches 100% or is finished, on a terminal: while it is true, anything written to the terminal but
 through `write` is drawn over the bar. It reports the state of the bar, and locks nothing.
 
 ## destroy

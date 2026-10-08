@@ -43,6 +43,7 @@ flowchart TD
   complete["complete"] --> ucs4_string["ucs4_string"]
   create_spinner["create_spinner"] --> ucs4_string["ucs4_string"]
   draw["draw"] --> ucs4_string["ucs4_string"]
+  finish["finish"] --> ucs4_string["ucs4_string"]
   initialize["initialize"] --> ucs4_string["ucs4_string"]
   styled["styled"] --> ucs4_string["ucs4_string"]
   update["update"] --> ucs4_string["ucs4_string"]

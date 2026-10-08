@@ -36,5 +36,7 @@ Every feature of forbear, where the tutorial teaches it and where the reference 
 | Terminal state | `is_stdout_locked` | | [is_stdout_locked](./bar#is-stdout-locked) |
 | Layout template | `template` | [9](/manual/tutorial/09-templates) | [Layout templates](./templates) |
 | Fields of the program | `field_object`, `add_field` | [9](/manual/tutorial/09-templates#a-field-of-your-own) | [Fields of the program](./templates#fields-of-the-program) |
+| Loops of unknown length | `indeterminate`, `finish` | [10](/manual/tutorial/10-unknown-ends) | [finish](./bar#finish) |
+| A loop left before its end | `finish` | [10](/manual/tutorial/10-unknown-ends#leaving-a-loop-early) | [finish](./bar#finish) |
 
 Not available: a bar that runs backwards, a spinner animated by a clock of its own (Fortran has no portable threads).

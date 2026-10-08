@@ -89,6 +89,7 @@ type :: bar_object
    logical                           :: add_date_time        !< Add date and time.
    logical                           :: add_summary          !< Add a summary line at the end.
    logical                           :: partial_blocks       !< Draw the bar with partial blocks, 8 steps per character.
+   logical                           :: indeterminate        !< The total is unknown: `current` counts what is done.
    logical                           :: is_interactive_      !< Flag set when the bar is drawn on a terminal.
    logical                           :: is_disabled_         !< Flag set when the bar draws nothing.
    logical                           :: hide_cursor          !< Hide the cursor while the bar runs on a terminal.
@@ -103,7 +104,9 @@ type :: bar_object
    integer(I8P)                             :: tic_start_ = 0_I8P       !< Timer count at the start.
    integer(I4P)                             :: spinner_count_ = 0       !< Spinner frame at the last drawing.
    character(len=18)                        :: date_time_start_ = ''    !< Start date/time.
-   logical                                  :: is_complete_ = .false.   !< Flag set when the bar has reached 100%.
+   logical                                  :: is_complete_ = .false.   !< Flag set when the bar has ended: 100%, finish.
+   real(R8P)                                :: current_ = 0._R8P        !< Current value of the last update.
+   integer(I4P)                             :: pulse_ = 0               !< Drawings of an indeterminate bar body.
    character(len=:, kind=UCS4), allocatable :: frame_                   !< Last frame drawn, without control sequences.
    ! layout
    type(token_object), allocatable          :: tokens_(:)                !< Tokens of the bar line.
@@ -114,6 +117,7 @@ type :: bar_object
       ! public methods
       procedure, pass(self) :: add_field              !< Add a field defined by the program.
       procedure, pass(self) :: destroy                !< Destroy bar.
+      procedure, pass(self) :: finish                 !< End the bar where it is.
       procedure, pass(self) :: initialize             !< Initialize bar.
       procedure, pass(self) :: is_stdout_locked       !< Return status of standard output unit.
       procedure, pass(self) :: start                  !< Start bar.
@@ -125,6 +129,7 @@ type :: bar_object
       procedure, pass(self), private :: build_frame    !< Build the frame of the current progress.
       procedure, pass(self), private :: default_layout !< Build the layout the keywords describe.
       procedure, pass(self), private :: parse_template !< Build the layout of a template.
+      procedure, pass(self), private :: measure        !< Return the progress of a current value.
       procedure, pass(self), private :: progress_state !< Return the progress, for the fields of the program.
       procedure, pass(self), private :: resolve_fields !< Find the fields of the program named by the template.
       procedure, pass(self), private :: width_before_bar !< Return the columns of the layout before the bar body.
@@ -177,6 +182,7 @@ contains
    self%add_date_time = .false.
    self%add_summary = .false.
    self%partial_blocks = .false.
+   self%indeterminate = .false.
    self%is_interactive_ = .false.
    self%is_disabled_ = .false.
    self%hide_cursor = .true.
@@ -190,6 +196,8 @@ contains
    self%spinner_count_ = 0_I4P
    self%date_time_start_ = ''
    self%is_complete_ = .false.
+   self%current_ = 0._R8P
+   self%pulse_ = 0_I4P
    if (allocated(self%frame_)) deallocate(self%frame_)
    if (allocated(self%tokens_)) deallocate(self%tokens_)
    if (allocated(self%fields_)) deallocate(self%fields_)
@@ -213,13 +221,14 @@ contains
                          add_summary, summary_color_fg, summary_color_bg, summary_style,                                     &
                          message_color_fg, message_color_bg, message_style,                                                  &
                          width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position,          &
-                         interactive, disabled, hide_cursor, template, output_unit)
+                         interactive, disabled, hide_cursor, template, indeterminate, output_unit)
    !< Initialize bar.
    !<
    !< Every setting not passed takes its default. The display mode is resolved here: `interactive` if passed, else the
    !< environment variable `FORBEAR_INTERACTIVE` (0 or 1) if set, else whether `output_unit` is a terminal. The
    !< environment variable `FORBEAR_DISABLE` (any value but 0) disables every bar; `FORBEAR_MIN_INTERVAL` replaces the
-   !< default of `min_interval`.
+   !< default of `min_interval`. With `indeterminate`, the total is unknown: `current` counts what is done, from
+   !< `min_value`, and the bar ends with `finish`; it has no percent, ETA or scale (asking for them stops the program).
    class(bar_object), intent(inout)         :: self                      !< Bar.
    class(*),          intent(in), optional  :: prefix_string             !< Prefix string.
    character(len=*),  intent(in), optional  :: prefix_color_fg           !< Prefix foreground color.
@@ -292,6 +301,7 @@ contains
    logical,           intent(in), optional  :: disabled                  !< Draw nothing.
    logical,           intent(in), optional  :: hide_cursor               !< Hide the cursor while the bar runs.
    character(len=*),  intent(in), optional  :: template                  !< Layout of the bar line.
+   logical,           intent(in), optional  :: indeterminate             !< The total is unknown.
    integer(I4P),      intent(in), optional  :: output_unit               !< Output unit to display bar
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
@@ -369,6 +379,7 @@ contains
    endif
    if (present(disabled)) self%is_disabled_ = disabled
    if (present(hide_cursor)) self%hide_cursor = hide_cursor
+   if (present(indeterminate)) self%indeterminate = indeterminate
    if (get_environment('FORBEAR_DISABLE', env)) then
       if (trim(env) /= '0') self%is_disabled_ = .true.
    endif
@@ -381,6 +392,13 @@ contains
       call self%default_layout
    endif
 
+   if (self%indeterminate) then ! nothing to measure against: no percent, no ETA, no scale
+      if (self%add_scale_bar .or. any(self%tokens_%kind == TOKEN_PERCENT) .or. any(self%tokens_%kind == TOKEN_ETA)) then
+         write(stderr, '(A)') 'forbear: an indeterminate bar has no percent, ETA or scale, '// &
+                              'see https://szaghi.github.io/forbear/guide/bar#initialize'
+         error stop 'forbear: indeterminate bar with a percent, an ETA or a scale'
+      endif
+   endif
    if (self%add_scale_bar .and. self%width < 22) error stop 'error: for adding scale bar the bar width must be at least 22 chars'
    endsubroutine initialize
 
@@ -402,7 +420,9 @@ contains
    self%rate_ = 0._R8P
    self%rate_samples_ = 0_I4P
    self%spinner_count_ = 0_I4P
+   self%pulse_ = 0_I4P
    self%is_complete_ = .false.
+   self%current_ = self%min_value
    self%message%string = UCS4_''
    if (allocated(self%frame_)) deallocate(self%frame_)
    call system_clock(self%tic_start_)
@@ -442,13 +462,15 @@ contains
    !< 100% only when `current` reaches `max_value`. On a terminal the bar is drawn when the progress enters a new
    !< multiple of `frequency` (at every update with `frequency=1`), at most once every `min_interval` seconds, and
    !< always at 0% and 100%; in a log, a line is written at every 10% (every `frequency` percent if larger than 1).
-   !< Once at 100%, the bar is complete and further updates do nothing until the next `start`.
+   !< Once at 100%, the bar is complete and further updates do nothing until the next `start`. An indeterminate bar is
+   !< drawn at most once every `min_interval` seconds on a terminal, at the start and the end only in a log, and never
+   !< completes: `finish` ends it.
    class(bar_object), intent(inout)        :: self       !< Bar.
    real(R8P),         intent(in)           :: current    !< Current value.
    class(*),          intent(in), optional :: message    !< Message shown at the end of the bar, until the next one.
    integer(I4P)                            :: progress   !< Progress, in percent.
    integer(I4P)                            :: step       !< Progress between two lines of a log, in percent.
-   real(R8P)                               :: fraction   !< Fraction of the range done, in [0, 1].
+   real(R8P)                               :: fraction   !< Fraction of the range done, in [0, 1]; done, if indeterminate.
    real(R8P)                               :: elapsed    !< Time elapsed since the last drawing, in seconds.
    integer(I8P)                            :: tic        !< Timer count.
    integer(I8P)                            :: count_rate !< Timer count rate.
@@ -456,17 +478,14 @@ contains
 
    if (self%is_disabled_ .or. self%is_complete_) return
    if (present(message)) self%message%string = ucs4_string(input=message)
-   if (self%max_value > self%min_value) then
-      fraction = max(0._R8P, min(1._R8P, (current - self%min_value) / (self%max_value - self%min_value)))
-   else
-      fraction = 1._R8P ! empty range: nothing to do
-   endif
-   ! truncate, so that 100% means done; the tolerance absorbs round-off, e.g. 20 sums of 0.05 giving 0.999...
-   progress = int(fraction * 100._R8P + 1.e-9_R8P, I4P)
+   self%current_ = current
+   call self%measure(current=current, fraction=fraction, progress=progress)
    call system_clock(tic, count_rate)
    elapsed = real(tic - self%tic_, kind=R8P) / real(count_rate, kind=R8P)
    if (self%progress_drawn_ < 0 .or. progress == 100) then
       is_due = .true.
+   elseif (self%indeterminate) then
+      is_due = self%is_interactive_ .and. elapsed >= self%min_interval
    elseif (self%is_interactive_) then
       is_due = (self%frequency <= 1 .or. progress / self%frequency > self%progress_drawn_ / self%frequency) .and. &
                elapsed >= self%min_interval
@@ -489,6 +508,36 @@ contains
    self%tic_ = tic
    if (progress == 100) call self%complete(tic=tic, count_rate=count_rate)
    endsubroutine update
+
+   subroutine finish(self, message)
+   !< End the bar where it is: draw the progress of the last update, end the line, write date and time and summary, as
+   !< at 100%. It ends an indeterminate bar, or a loop left before its end; further updates do nothing until the next
+   !< `start`. A bar not running (not started, complete, disabled) is left as it is.
+   class(bar_object), intent(inout)        :: self       !< Bar.
+   class(*),          intent(in), optional :: message    !< Message shown at the end of the bar.
+   integer(I4P)                            :: progress   !< Progress, in percent.
+   real(R8P)                               :: fraction   !< Fraction of the range done, in [0, 1]; done, if indeterminate.
+   integer(I8P)                            :: tic        !< Timer count.
+   integer(I8P)                            :: count_rate !< Timer count rate.
+
+   if (self%is_disabled_ .or. self%is_complete_ .or. .not.allocated(self%frame_)) return
+   if (present(message)) self%message%string = ucs4_string(input=message)
+   call self%measure(current=self%current_, fraction=fraction, progress=progress)
+   call system_clock(tic, count_rate)
+   self%is_complete_ = .true. ! the last frame: an indeterminate bar body is drawn full
+   call self%update_rate(fraction=fraction, tic=tic, count_rate=count_rate)
+   call self%build_frame(progress=progress, fraction=fraction, &
+                         elapsed=real(tic - self%tic_start_, kind=R8P) / real(count_rate, kind=R8P))
+   if (self%is_interactive_) then
+      call self%draw
+   elseif (fraction /= self%fraction_drawn_ .or. present(message)) then ! a log line, unless the last one says it
+      write(self%output_unit, '(A)') self%frame_
+   endif
+   self%progress_drawn_ = progress
+   self%fraction_drawn_ = fraction
+   self%tic_ = tic
+   call self%complete(tic=tic, count_rate=count_rate)
+   endsubroutine finish
 
    subroutine write_message(self, message)
    !< Write a message above the bar.
@@ -530,6 +579,7 @@ contains
       case(TOKEN_TEXT, TOKEN_PREFIX, TOKEN_SUFFIX)
          frame = frame//render(token%style, plain)
       case(TOKEN_BAR)
+         if (self%indeterminate .and. self%is_interactive_) self%pulse_ = self%pulse_ + 1
          frame = frame//self%bar_body(progress=progress, fraction=fraction, plain=plain)
       case(TOKEN_SPINNER)
          if (self%is_interactive_) then ! a spinner has no meaning in a log
@@ -543,10 +593,19 @@ contains
          text = percent ; if (token%decorated) text = ' '//text ! the space keeps 100% apart from what precedes it
          frame = frame//styled(token, text, plain)
       case(TOKEN_COUNT)
-         text = count_text(self%min_value, self%max_value, fraction) ; if (token%decorated) text = ' '//text
+         if (self%indeterminate) then
+            text = done_text(self%min_value, fraction)
+         else
+            text = count_text(self%min_value, self%max_value, fraction)
+         endif
+         if (token%decorated) text = ' '//text
          frame = frame//styled(token, text, plain)
       case(TOKEN_SPEED)
-         text = compact_real(100._R8P * self%rate_, 6_I4P) ; if (token%decorated) text = ' ('//text//'%/s)'
+         if (self%indeterminate) then ! what is done per second
+            text = compact_real(self%rate_, 6_I4P) ; if (token%decorated) text = ' ('//text//'/s)'
+         else
+            text = compact_real(100._R8P * self%rate_, 6_I4P) ; if (token%decorated) text = ' ('//text//'%/s)'
+         endif
          frame = frame//styled(token, text, plain)
       case(TOKEN_ETA)
          if (progress == 100) then
@@ -589,8 +648,24 @@ contains
    integer(I4P)                             :: full     !< Filled cells.
    integer(I4P)                             :: eighths  !< Eighths of the partially filled cell.
    integer(I4P)                             :: rest     !< Empty cells.
+   integer(I4P)                             :: block    !< Cells of the block of an indeterminate bar.
+   integer(I4P)                             :: travel   !< Positions of the block, after the first.
+   integer(I4P)                             :: k        !< Phase of the block, in a back and forth.
 
-   if (self%partial_blocks) then
+   if (self%indeterminate) then ! a block going back and forth, one cell per drawing; full at the end, empty in a log
+      if (self%is_complete_) then
+         body = repeat(render(self%filled_char, plain), self%width)
+      elseif (plain) then
+         body = repeat(render(self%empty_char, plain), self%width)
+      else
+         block = min(self%width, max(1_I4P, self%width / 4_I4P))
+         travel = self%width - block
+         k = 0 ; if (travel > 0) k = mod(self%pulse_ - 1_I4P, 2_I4P * travel)
+         if (k > travel) k = 2_I4P * travel - k
+         body = repeat(render(self%empty_char, plain), k)//repeat(render(self%filled_char, plain), block)// &
+                repeat(render(self%empty_char, plain), travel - k)
+      endif
+   elseif (self%partial_blocks) then
       cells = fraction * self%width
       full = min(self%width, int(cells, I4P))
       eighths = int((cells - full) * 8._R8P, I4P)
@@ -610,6 +685,28 @@ contains
    endif
    endfunction bar_body
 
+   pure subroutine measure(self, current, fraction, progress)
+   !< Return the progress of a current value: the fraction of the range done, clamped to [0, 1], and the percent,
+   !< truncated; for an indeterminate bar, what is done since `min_value` (not below 0), and 0%.
+   class(bar_object), intent(in)  :: self     !< Bar.
+   real(R8P),         intent(in)  :: current  !< Current value.
+   real(R8P),         intent(out) :: fraction !< Fraction of the range done; done, if indeterminate.
+   integer(I4P),      intent(out) :: progress !< Progress, in percent.
+
+   if (self%indeterminate) then
+      fraction = max(0._R8P, current - self%min_value)
+      progress = 0_I4P
+      return
+   endif
+   if (self%max_value > self%min_value) then
+      fraction = max(0._R8P, min(1._R8P, (current - self%min_value) / (self%max_value - self%min_value)))
+   else
+      fraction = 1._R8P ! empty range: nothing to do
+   endif
+   ! truncate, so that 100% means done; the tolerance absorbs round-off, e.g. 20 sums of 0.05 giving 0.999...
+   progress = int(fraction * 100._R8P + 1.e-9_R8P, I4P)
+   endsubroutine measure
+
    function progress_state(self, fraction, progress, elapsed) result(state)
    !< Return the progress of the bar, for the fields of the program.
    class(bar_object), intent(in) :: self     !< Bar.
@@ -618,6 +715,15 @@ contains
    real(R8P),         intent(in) :: elapsed  !< Time since the start, in seconds.
    type(progress_object)         :: state    !< Progress.
 
+   if (self%indeterminate) then ! the rate is what is done per second; no fraction, no ETA
+      state%indeterminate = .true.
+      state%current = self%min_value + fraction
+      state%min_value = self%min_value
+      state%max_value = self%max_value
+      state%rate = self%rate_
+      state%elapsed = elapsed
+      return
+   endif
    state%current = self%min_value + fraction * (self%max_value - self%min_value)
    state%min_value = self%min_value
    state%max_value = self%max_value
@@ -886,7 +992,8 @@ contains
 
 
    subroutine complete(self, tic, count_rate)
-   !< Complete the bar: end its line (clear it, at a position below the current line), write date and time and summary.
+   !< Complete the bar: end its line (clear it, at a position below the current line), write date and time and summary;
+   !< the rate of the summary is that of what was done, the whole range unless the bar was finished before.
    class(bar_object), intent(inout) :: self       !< Bar.
    integer(I8P),      intent(in)    :: tic        !< Timer count.
    integer(I8P),      intent(in)    :: count_rate !< Timer count rate.
@@ -923,12 +1030,16 @@ contains
    endif
    if (self%add_summary) then
       elapsed = real(tic - self%tic_start_, kind=R8P) / real(count_rate, kind=R8P)
-      if (self%add_progress_count) then
+      if (self%indeterminate) then
          self%summary%string = ucs4_string(input='[done in '//duration(elapsed)//', '//                                     &
-                               trim(adjustl(compact_real(abs(self%max_value - self%min_value) / elapsed, 6_I4P)))//'/s]')
+                               trim(adjustl(compact_real(self%fraction_drawn_ / elapsed, 6_I4P)))//'/s]')
+      elseif (self%add_progress_count) then
+         self%summary%string = ucs4_string(input='[done in '//duration(elapsed)//', '//                                     &
+                               trim(adjustl(compact_real(abs(self%max_value - self%min_value) * self%fraction_drawn_ /     &
+                                                         elapsed, 6_I4P)))//'/s]')
       else
          self%summary%string = ucs4_string(input='[done in '//duration(elapsed)//', '//                                     &
-                               trim(adjustl(compact_real(100._R8P / elapsed, 6_I4P)))//'%/s]')
+                               trim(adjustl(compact_real(100._R8P * self%fraction_drawn_ / elapsed, 6_I4P)))//'%/s]')
       endif
       write(self%output_unit, '(A)') render(self%summary, plain)
    endif
@@ -1496,6 +1607,21 @@ contains
       text = compact_real(value, 6_I4P)//'/'//trim(adjustl(compact_real(max_value, 6_I4P)))
    endif
    endfunction count_text
+
+   pure function done_text(min_value, done) result(text)
+   !< Return what an indeterminate bar has done: an integer when `min_value` and `done` are whole, else compact.
+   real(R8P), intent(in)         :: min_value !< Minimum value.
+   real(R8P), intent(in)         :: done      !< Done since `min_value`.
+   character(len=:), allocatable :: text      !< Done.
+   character(len=24)             :: buffer    !< Formatting buffer.
+
+   if (abs(min_value) < 1.e9_R8P .and. done < 1.e18_R8P .and. min_value == aint(min_value) .and. done == aint(done)) then
+      write(buffer, '(I0)') nint(done, I8P)
+      text = trim(buffer)
+   else
+      text = trim(adjustl(compact_real(done, 6_I4P)))
+   endif
+   endfunction done_text
 
    pure function display_width(string) result(width)
    !< Return the columns a string takes on a terminal: its characters, UTF-8 continuation bytes excluded.

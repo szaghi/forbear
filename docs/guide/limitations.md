@@ -16,6 +16,9 @@ and truncated to an integer percent: 99.9% shows as 99%, and the bar is complete
 - A `current` outside the range is clamped: below `min_value` the bar shows 0%, above `max_value` 100%.
 - The bar completes once: it ends its line at 100%, and further updates do nothing until the next `start`.
 - An empty range (`max_value <= min_value`) completes the bar at `start`.
+- A loop left before its end leaves the bar running: call `finish` after it, which ends the bar where it is.
+- A loop of unknown length takes an `indeterminate` bar: `current` counts what is done, and `finish` ends it. Such a bar
+  has no percent, ETA or scale.
 
 ## How often the bar is drawn
 
@@ -61,7 +64,7 @@ configured before or copied from another bar (see
 
 ## If the program stops
 
-On a terminal, a running bar hides the cursor and shows it again at 100%. A program that stops before, with an
+On a terminal, a running bar hides the cursor and shows it again at 100% or at `finish`. A program that stops before, with an
 `error stop`, a crash or Ctrl-C, leaves the terminal without a cursor: Fortran has no portable way to run code when a
 program is interrupted. `reset` or `tput cnorm` brings the cursor back. For programs that may stop half way, as a
 long run killed by its user, pass `hide_cursor=.false.`: the bar is drawn the same, with the cursor visible at the start

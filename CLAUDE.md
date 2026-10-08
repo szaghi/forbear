@@ -148,6 +148,11 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 - Any column count must use `display_width`, never `len`: strings hold UTF-8 byte by byte, so it skips continuation
   bytes (128–191). Wide characters (CJK, emoji) count as one column, a documented limit. Today only the scale
   indentation needs it.
+- `finish` ends a running bar where it is (the last `current_`, kept by every `update`): it sets `is_complete_` before
+  `build_frame`, draws, then calls `complete`; the summary rate uses `fraction_drawn_`, so it counts only what was done.
+  `indeterminate=.true.` makes `measure` return what is done (`current - min_value`, not clamped above) as `fraction`
+  and 0%: the body is a block bouncing one cell per drawing (`pulse_`), full once complete, an empty track in a log; a
+  log writes only the start and `finish` lines. Percent, ETA and scale tokens are rejected in `initialize`.
 - `width=0` makes a spinner-only or counter-only display, with no bar body. `add_scale_bar` requires `width >= 22`
   and otherwise raises `error stop`.
 

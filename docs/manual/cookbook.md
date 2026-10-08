@@ -161,6 +161,21 @@ call bar%initialize(max_value=real(steps, R8P), disabled=(rank /= 0)) ! rank fro
 
 The field reads the residual of the program through a pointer, at every drawing.
 
+## A loop of unknown length
+
+<<< @/examples/snippets/march_10-solve.f90
+
+<<< @/examples/output/march_10-running.ansi{ansi}
+
+*While running.* `current` counts the iterations; `finish` ends the bar. No percent, ETA or scale: see
+[chapter 10](/manual/tutorial/10-unknown-ends).
+
+## Leaving a loop early
+
+<<< @/examples/snippets/march_10-steady.f90
+
+`finish` ends the bar where the loop left it: the line ended, the cursor shown, the summary written if asked.
+
 ## Several bars one after another
 
 <<< @/examples/snippets/sequence-keep.f90

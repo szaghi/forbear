@@ -24,6 +24,7 @@ const docs = [
       { text: '7. Nested loops',                  link: '/manual/tutorial/07-nested' },
       { text: '8. Batch jobs and logs',           link: '/manual/tutorial/08-logs' },
       { text: '9. Layout templates',              link: '/manual/tutorial/09-templates' },
+      { text: '10. Unknown ends',                 link: '/manual/tutorial/10-unknown-ends' },
     ],
   },
   {

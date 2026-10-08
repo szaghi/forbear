@@ -45,4 +45,4 @@ the same line, for when the order, the words or the spacing are yours.
 Reference: [Layout templates](/guide/templates).
 :::
 
-That is the end of the tutorial: the [cookbook](../cookbook) has short recipes for everyday tasks.
+Next: [10. Unknown ends](./10-unknown-ends).

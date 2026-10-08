@@ -21,6 +21,8 @@ type :: progress_object
    real(R8P)    :: rate = 0._R8P      !< Smoothed rate, fraction of the range per second; 0 until known.
    real(R8P)    :: elapsed = 0._R8P   !< Time since the start, in seconds.
    real(R8P)    :: eta = -1._R8P      !< Estimated time to the end, in seconds; negative until known.
+   logical      :: indeterminate = .false. !< The total is unknown: `rate` is what is done per second, `fraction`,
+                                           !< `percent` are 0 and `eta` negative.
 endtype progress_object
 
 type, abstract :: field_object

@@ -31,8 +31,8 @@ item     := width (bar only) | colour | on_colour | style
 |---|---|---|
 | `{bar}` | the bar body: done part, partial block, remaining part | `width` keyword, or `{bar:n}` |
 | `{percent}` | the progress, `nnn%` | 4 |
-| `{count}` | the current value and `max_value`, `25/50` | that of `max_value`, twice, and the slash |
-| `{speed}` | the smoothed speed, in percent per second, `nnn.nn` | 6 |
+| `{count}` | the current value and `max_value`, `25/50`; what is done, `25`, if [indeterminate](./bar#initialize) | that of `max_value`, twice, and the slash; growing, if indeterminate |
+| `{speed}` | the smoothed speed, in percent per second, `nnn.nn`; what is done per second, if indeterminate | 6 |
 | `{eta}` | the estimated time to the end, `hh:mm:ss`, `--:--:--` until known | 8 |
 | `{elapsed}` | the time since the start, `hh:mm:ss` | 8 |
 | `{spinner}` | the current frame of the spinner of `spinner_string` | that of its frames |
@@ -65,6 +65,7 @@ A wrong template stops the program, with a message on standard error that names 
 | an unknown colour or style in a spec | `initialize` |
 | a width for a field other than `{bar}`, two `{bar}` | `initialize` |
 | `{spinner}` without `spinner_string` | `initialize` |
+| `{percent}` or `{eta}` in an indeterminate bar | `initialize` |
 | a field neither of forbear nor added with `add_field` | `start` |
 
 ## Fields of the program
@@ -99,6 +100,7 @@ character(len=:), allocatable     :: text
 | `rate` | `real(real64)` | smoothed rate, fraction of the range per second; 0 until known |
 | `elapsed` | `real(real64)` | seconds since the start |
 | `eta` | `real(real64)` | seconds to the end; negative until known |
+| `indeterminate` | `logical` | the total is unknown: `current` is not clamped, `rate` is what is done per second, `fraction` and `percent` are 0, `eta` negative |
 
 ```fortran
 call bar%initialize(template='... {residual} ...', ...)

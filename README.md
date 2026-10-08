@@ -25,7 +25,7 @@
 </tr>
 <tr>
 <td width="50%"><b>💬 Talk while it runs</b><br><sub><code>bar%write</code> prints a line above the running bar; <code>update(message=)</code> shows the residual of the step at its end. No broken lines. <a href="https://szaghi.github.io/forbear/manual/tutorial/06-terminal">Talking while the bar runs</a></sub></td>
-<td width="50%"><b>🪆 Nested loops</b><br><sub>One bar per loop level, each on its own line with <code>position</code>: time steps above, iterations below, cleared when done. <a href="https://szaghi.github.io/forbear/manual/tutorial/07-nested">Nested loops</a></sub></td>
+<td width="50%"><b>🪆 Nested and open-ended loops</b><br><sub>One bar per loop level, each on its own line with <code>position</code>; an <code>indeterminate</code> bar for a solver that runs until it converges; <code>finish</code> for a loop left early. <a href="https://szaghi.github.io/forbear/manual/tutorial/07-nested">Nested loops</a>, <a href="https://szaghi.github.io/forbear/manual/tutorial/10-unknown-ends">Unknown ends</a></sub></td>
 </tr>
 <tr>
 <td width="50%"><b>📜 Batch jobs and logs</b><br><sub>Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log. <code>FORBEAR_DISABLE=1</code> turns every bar off; <code>disabled=(rank /= 0)</code> under MPI. <a href="https://szaghi.github.io/forbear/manual/tutorial/08-logs">Batch jobs and logs</a></sub></td>

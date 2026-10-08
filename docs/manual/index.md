@@ -24,17 +24,18 @@ every chapter opens with a recording of it in a real terminal.
 | [7. Nested loops](./tutorial/07-nested) | one bar per loop level, each on its own line |
 | [8. Batch jobs and logs](./tutorial/08-logs) | the plain log of a batch job, turning bars off, MPI |
 | [9. Layout templates](./tutorial/09-templates) | a line laid out by a template, fields of the program |
+| [10. Unknown ends](./tutorial/10-unknown-ends) | a loop of unknown length, a loop left before its end |
 
 ```mermaid
 flowchart LR
   c1[1 first bar] --> c2[2 look] --> c3[3 colours] --> c4[4 reports] --> c5[5 spinners]
-  c5 --> c6[6 talking] --> c7[7 nested] --> c8[8 logs] --> c9[9 templates]
+  c5 --> c6[6 talking] --> c7[7 nested] --> c8[8 logs] --> c9[9 templates] --> c10[10 unknown ends]
 ```
 
 ## The cookbook
 
 [The cookbook](./cookbook) answers "how do I ...?" in a few lines each: a smooth bar, an ETA, a loop of a million
-iterations, a message above the bar, a bar for each loop of a nest, a quiet bar on the MPI ranks, ...
+iterations, a message above the bar, a bar for each loop of a nest, a quiet bar on the MPI ranks, a loop of unknown length, ...
 
 ## Building the examples
 

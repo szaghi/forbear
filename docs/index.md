@@ -42,8 +42,8 @@ features:
     link: /manual/tutorial/06-terminal
     linkText: Talking while the bar runs
   - icon: 🪆
-    title: Nested loops
-    details: "One bar per loop level, each on its own line: time steps above, iterations below, cleared when done."
+    title: Nested and open-ended loops
+    details: "One bar per loop level, each on its own line; a bar for a solver that runs until it converges; finish for a loop left early."
     link: /manual/tutorial/07-nested
     linkText: Nested loops
   - icon: 📜
