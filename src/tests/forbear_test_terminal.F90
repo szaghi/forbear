@@ -26,6 +26,9 @@ text = capture_close(u, 'test_terminal_1.txt')
 n = len(text)
 call check(count_text(text, ESC//'[?25l') == 4, 'frames: the cursor is hidden at every drawing')
 call check(count_text(text, ESC//'[K'//CR) == 4, 'frames: start, the redraw after write, two updates')
+! a frame wider than the terminal must be cut, not wrapped: autowrap is off while each frame is written
+call check(count_text(text, ESC//'[?7l') == 4, 'frames: autowrap off before every frame')
+call check(count_text(text, ESC//'[K'//CR//ESC//'[?7h') == 4, 'frames: autowrap on again after every frame')
 call check(index(text, ESC//'[31m') > 0, 'terminal: colours')
 call check(index(text, CR//ESC//'[2K'//'note'//LF//ESC//'[?25l') > 0, 'write: clear the line, write, draw again')
 call check(index(text, 'short'//ESC//'[K'//CR) > 0, 'message: erased to the end of the line')
@@ -39,7 +42,7 @@ call bar%start
 call bar%update(current=1._R8P)
 text = capture_close(u, 'test_terminal_2.txt')
 call check(count_text(text, ESC//'[?25l'//LF) == 2, 'position 1: every drawing goes one line down')
-call check(count_text(text, ESC//'[K'//CR//ESC//'[1A') == 2, 'position 1: and comes back up')
+call check(count_text(text, ESC//'[K'//CR//ESC//'[1A'//ESC//'[?7h') == 2, 'position 1: comes back up, autowrap on')
 call check(index(text, LF//ESC//'[2K'//CR//ESC//'[1A') > 0, 'position 1: cleared when complete')
 call check(index(text, ESC//'[?25h') == 0, 'position 1: the cursor stays hidden, the outer bar shows it')
 
@@ -53,7 +56,7 @@ text = capture_close(u, 'test_terminal_3.txt')
 n = len(text)
 call check(index(text, ESC//'[?25') == 0, 'hide_cursor=.false.: the cursor is neither hidden nor shown')
 call check(count_text(text, ESC//'[K'//CR) == 2, 'hide_cursor=.false.: still two drawings')
-call check(index(text, CR//LF//ESC//'[J') >= n - 5, 'hide_cursor=.false.: the end goes to the next line')
+call check(index(text, CR//ESC//'[?7h'//LF//ESC//'[J') >= n - 10, 'hide_cursor=.false.: the end goes to the next line')
 
 ! the percent is always apart from what precedes it, also at 100%
 u = capture_open('test_terminal_4.txt')

@@ -937,6 +937,9 @@ contains
 
    subroutine draw(self)
    !< Draw the last frame on the terminal, on its line, and come back to the current line.
+   !<
+   !< Autowrap is off while the frame is written (`ESC[?7l` ... `ESC[?7h`): a frame wider than the terminal is cut at its
+   !< right edge, instead of wrapping and leaving a copy of the bar on the line above at every drawing.
    class(bar_object), intent(inout) :: self     !< Bar.
    character(len=12)                :: position !< Position, as a string.
    character(len=:), allocatable    :: hide     !< Sequence hiding the cursor, if asked.
@@ -944,10 +947,13 @@ contains
    hide = '' ; if (self%hide_cursor) hide = ESC//'[?25l'
    if (self%position > 0) then
       write(position, '(I0)') self%position
-      write(self%output_unit, '(A)', advance='no') ucs4_string(input=hide//repeat(LF, self%position))//self%frame_// &
-                                                   ucs4_string(input=ESC//'[K'//CR//ESC//'['//trim(position)//'A')
+      write(self%output_unit, '(A)', advance='no') ucs4_string(input=hide//repeat(LF, self%position)//ESC//'[?7l')// &
+                                                   self%frame_//                                                   &
+                                                   ucs4_string(input=ESC//'[K'//CR//ESC//'['//trim(position)//'A'//   &
+                                                               ESC//'[?7h')
    else
-      write(self%output_unit, '(A)', advance='no') ucs4_string(input=hide)//self%frame_//ucs4_string(input=ESC//'[K'//CR)
+      write(self%output_unit, '(A)', advance='no') ucs4_string(input=hide//ESC//'[?7l')//self%frame_// &
+                                                   ucs4_string(input=ESC//'[K'//CR//ESC//'[?7h')
    endif
    flush(self%output_unit)
    endsubroutine draw

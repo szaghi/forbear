@@ -86,6 +86,15 @@ On a terminal the bar animates; anywhere else it writes a plain line every 10%, 
 [Terminals and logs](./terminals). A terminal must understand the carriage return and the ANSI sequences (colours,
 cursor movement, erase in line): every modern terminal does, Windows Terminal included.
 
+## Lines wider than the terminal
+
+forbear does not know how wide the terminal is: Fortran has no portable way to ask. A bar line wider than the terminal
+is cut at its right edge: forbear turns the terminal's line wrapping off while it writes a drawing, and on again right
+after, so that the text printed by `bar%write` still wraps. The line gets too wide with a long prefix or message, a
+large `width`, or East Asian wide characters and emoji, which take two columns each: `width=32` with
+`filled_char_string='㊂'` is a bar of 64 columns. To see the whole line, keep it within the terminal. Before forbear
+1.6.1, such a line wrapped, and every drawing left a copy of the bar on the line above.
+
 ## Unicode prefixes and the scale
 
 The scale is indented by the columns of the prefix, so that it sits above the bar: forbear counts the characters of the

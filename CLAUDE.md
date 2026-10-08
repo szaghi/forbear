@@ -99,7 +99,9 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   `create_spinner` has a large `select case` mapping each key to a hard-coded frame sequence.
 - **Rendering**: `update` decides whether the bar is due, then `update_rate` updates the smoothed rate and
   `build_frame` builds the line into `frame_` (UCS4, no control sequences). `render(element, plain)` drops the colours
-  in log mode. `draw` writes `ESC[?25l` + frame + `ESC[K` + CR, wrapped for `position>0` in LF×p … `ESC[pA`.
+  in log mode. `draw` writes `ESC[?25l` + `ESC[?7l` + frame + `ESC[K` + CR + `ESC[?7h`, wrapped for `position>0` in LF×p …
+  `ESC[pA`. Autowrap is off only while a frame is written: an over-wide line is cut instead of wrapping into a copy
+  per drawing (issue #10), and `write` text still wraps.
   `complete` handles 100 %: at position 0 it restores the cursor, writes a newline and `ESC[J`, then the date and
   summary lines; at position>0 it clears its own line. `write_message` (bound as `write`) clears the line, prints the
   text and redraws `frame_`.

@@ -89,7 +89,9 @@ wider than `width`. With `width=0` the bar body is empty and the line is the res
 
 On a terminal, every drawing starts with the ANSI sequence that hides the cursor (unless `hide_cursor=.false.`) and
 ends with "erase to the end of the line" and a carriage return: the next drawing overwrites it, and a shorter line
-leaves nothing behind. The end of the bar shows the cursor again. In a log, the line is written as it is, with no colours and no control sequences.
+leaves nothing behind. Line wrapping is off while a drawing is written, so a line wider than the terminal is cut at its
+right edge (see [Lines wider than the terminal](./limitations#lines-wider-than-the-terminal)). The end of the bar shows
+the cursor again. In a log, the line is written as it is, with no colours and no control sequences.
 
 ## start
 
