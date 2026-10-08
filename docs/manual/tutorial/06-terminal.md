@@ -1,51 +1,43 @@
-# 6. Sharing the terminal
+# 6. Talking while the bar runs
 
-`march` now prints the residual of its solution every 10 steps, and sends the bar to standard error, drawing it only at
-every 10%:
+![march printing checkpoints above the bar and the residual at its end](/gifs/march_6.gif){.gif}
+
+`march` now saves its solution every 10 steps, and wants to say so; and it wants to show the residual of every step. A
+`print` would not do: the bar line ends with a carriage return, so whatever is printed next overwrites the bar. forbear
+has two ways to talk while the bar runs:
 
 <<< @/examples/snippets/march_6-init.f90
 
 <<< @/examples/snippets/march_6-loop.f90
 
-In a terminal, both streams end up on the screen:
+While running:
+
+<<< @/examples/output/march_6-running.ansi{ansi}
+
+At the end:
 
 <<< @/examples/output/march_6.ansi{ansi}
 
-Each residual is printed over the bar: the bar line ends with a carriage return, so the cursor is at the beginning of
-that line, and the next output overwrites it. The bar then goes on in the line below. The order matters too: the line
-of step 10 is printed before the update of step 10, over the bar drawn last.
+- `bar%write(text)` prints a line *above* the bar: it clears the bar line, writes the text there, and draws the bar
+  again on the line below. The lines scroll up, the bar stays at the bottom. When the bar is not running (before
+  `start`, after 100%), or in a log, `write` just prints the line.
+- `update(current, message=text)` shows the text at the end of the bar line, in the colours of `message_color_fg`,
+  `message_color_bg` and `message_style`, until the next message. A shorter message leaves nothing of the longer one:
+  every drawing erases the rest of its line.
 
-## Separate streams
+`write` writes to the unit of the bar. To keep the results of a program apart from its bar, send the bar to standard
+error with `output_unit=error_unit` (see [The bar on standard error](../cookbook#the-bar-on-standard-error)).
 
-`output_unit=error_unit` sends the bar to standard error (the default is standard output). The two streams can then be
-split, and each one is clean: the results only,
+## How often the bar is drawn
 
-<<< @/examples/output/march_6-results.ansi{ansi}
-
-or the bar only, the results going to a file:
-
-<<< @/examples/output/march_6-bar.ansi{ansi}
-
-## Messages while the bar runs
-
-On one terminal, a message must wait for the bar to finish. `is_stdout_locked` is true from `start` until the bar
-reaches 100%; a small logger holds the messages until then:
-
-<<< @/examples/snippets/deferred-log.f90
-
-<<< @/examples/output/deferred.ansi{ansi}
-
-The whole program is in [the cookbook](../cookbook#messages-while-the-bar-runs).
-
-## Fewer drawings
-
-`frequency=10` draws the bar only when the progress enters a new multiple of 10% (and at 100%). Drawing costs
-little, but a loop of very short steps spends less time in it, and a log file of the bar (standard error redirected)
-gets 11 frames instead of 51. With the default `frequency=1` the bar is drawn at every update.
+A bar is not drawn at every update: at most once every `min_interval` seconds (0.1 by default, ten times a second), and
+always at 0% and 100%. A loop of a million fast iterations therefore spends its time in the loop, not in its bar; a loop
+of slow steps is drawn at every step. `frequency=f` draws only when the progress enters a new multiple of `f`%, for a
+bar that should move in coarse steps. A message passed to an update that is not drawn is shown at the next drawing.
 
 ::: tip What you learned
-Why other output breaks the bar; standard error; holding messages with `is_stdout_locked`; `frequency`.
-Reference: [Behaviour and limitations](/guide/limitations).
+`write` for lines above the bar, `message` for the end of the bar line; `min_interval` and `frequency`.
+Reference: [The bar object](/guide/bar#write), [Behaviour and limitations](/guide/limitations#how-often-the-bar-is-drawn).
 :::
 
-That is the end of the tutorial: the [cookbook](../cookbook) has short recipes for everyday tasks.
+Next: [7. Nested loops](./07-nested).

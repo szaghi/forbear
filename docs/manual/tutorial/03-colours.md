@@ -1,5 +1,7 @@
 # 3. Colours and styles
 
+![march with a coloured bar](/gifs/march_3.gif){.gif}
+
 Every element takes three more keywords: `<element>_color_fg` (the colour of the characters), `<element>_color_bg` (the
 colour behind them) and `<element>_style` (bold, italics, underline, ...). With the full block `█` for both parts and
 two colours, the bar becomes solid:

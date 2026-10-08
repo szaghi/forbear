@@ -44,10 +44,11 @@ Add forbear as a dependency in your project's `fpm.toml`:
 
 ```toml
 [dependencies]
-forbear = { git = "https://github.com/szaghi/forbear", branch = "master" }
+forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.3.0" }
 ```
 
-v1.2.0 and older releases have no `fpm.toml`: use the branch until the next release, then pin its tag.
+v1.2.0 and older releases have no `fpm.toml`. The ETA, the messages, nested bars, the log mode and the other
+features added after v1.3.0 need `branch = "master"` until the next release.
 
 `fpm build` fetches forbear and FACE. To build and test forbear itself:
 
@@ -58,7 +59,7 @@ fpm test
 
 ## Install script
 
-From the release after v1.2.0 on, every release ships a tarball and an `install.sh`, which downloads forbear, fetches
+From v1.3.0 on, every release ships a tarball and an `install.sh`, which downloads forbear, fetches
 FACE with `fobis fetch` and builds it with FoBiS:
 
 ```bash

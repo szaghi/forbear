@@ -31,7 +31,7 @@ graph LR
 
 | Name | Type | Attributes | Description |
 |------|------|------------|-------------|
-| `string` | character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:) | allocatable |  |
+| `string` | character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:) | allocatable |  |
 | `color_fg` | character(len=:) | allocatable |  |
 | `color_bg` | character(len=:) | allocatable |  |
 | `style` | character(len=:) | allocatable |  |
@@ -66,7 +66,6 @@ subroutine destroy(self)
 
 ```mermaid
 flowchart TD
-  assign_bar["assign_bar"] --> destroy["destroy"]
   destroy["destroy"] --> destroy["destroy"]
   initialize["initialize"] --> destroy["destroy"]
   initialize["initialize"] --> destroy["destroy"]
@@ -122,7 +121,7 @@ subroutine assign_element(lhs, rhs)
 
 **Attributes**: pure
 
-**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
+**Returns**: character(kind=[UCS4](/api/src/third_party/FACE/src/lib/face), len=:)
 
 ```fortran
 function output(self)
@@ -138,7 +137,7 @@ function output(self)
 
 ```mermaid
 flowchart TD
-  update["update"] --> output["output"]
+  render["render"] --> output["output"]
   output["output"] --> colorize["colorize"]
   style output fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```

@@ -1,5 +1,7 @@
 # 5. Spinners and counters
 
+![march with a spinner, then a spinner alone, then a counter](/gifs/march_5.gif){.gif}
+
 A spinner is a character that changes at every drawing of the bar: it shows that the program is alive. You choose it
 with `spinner_string`, the key of one of the [40 spinners](/guide/spinners) of forbear:
 
@@ -9,8 +11,8 @@ While running:
 
 <<< @/examples/output/march_5-bar.ansi{ansi}
 
-The spinner moves one frame at every `update` that redraws the bar: it is not driven by a clock, so it stands still
-while the program spends a long time between two updates. A string that is not the key of a spinner gives no
+The spinner moves one frame at every drawing of the bar: it is not driven by a clock of its own, so it stands still
+while the program spends a long time between two updates (Fortran has no portable threads to animate it meanwhile). A string that is not the key of a spinner gives no
 spinner, without a message.
 
 ## Without the bar

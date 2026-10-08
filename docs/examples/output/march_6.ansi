@@ -1,7 +1,7 @@
 $ march
-step  10, residual  9.77E-04...................]  10%
-step  20, residual  9.54E-07...................]  30%
-step  30, residual  9.31E-10...................]  50%
-step  40, residual  9.09E-13#######............]  70%
-step  50, residual  8.88E-16###############....]  90%
-march [########################################] 100%
+step 10: solution saved
+step 20: solution saved
+step 30: solution saved
+step 40: solution saved
+step 50: solution saved
+march [##############################] 100% [36mresidual 8.88E-16[0m

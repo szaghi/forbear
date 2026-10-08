@@ -1,4 +1,4 @@
-$ march 2> /dev/null
+$ stderr 2> /dev/null
 step  10, residual  9.77E-04
 step  20, residual  9.54E-07
 step  30, residual  9.31E-10

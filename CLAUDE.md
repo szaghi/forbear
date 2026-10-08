@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-forbear is a small pure-Fortran (F2008+) library for drawing progress bars and spinners on a terminal.
-The public API is a single class, `bar_object` (plus the `ASCII`/`UCS4` character kinds), re-exported by
-`src/lib/forbear.f90`. The README carries the full user-facing API reference for `initialize`, `start`, `update`,
-`destroy`, and `is_stdout_locked`.
+forbear is a small pure-Fortran (F2008+) library for drawing progress bars and spinners: animated on a terminal,
+plain lines in a log. The public API is a single class, `bar_object` (plus the `ASCII`/`UCS4` character kinds),
+re-exported by `src/lib/forbear.f90`. The user-facing reference is the VitePress site (`docs/guide/bar.md` for the
+API); the README is a landing page.
 
 ## Build and test
 
@@ -28,24 +28,31 @@ and spinners and passes as long as it exits 0. A wrong rendering does not fail i
 `<name>.result` file: `run_tests.sh` compares a test's trimmed stdout against `<name>.result` when one exists.
 Executables named `*_xfail_*` must exit non-zero, and names containing `mpi` run under `mpirun -np N`.
 
-## Documentation examples
+## Documentation examples and GIFs
 
 Every code sample and output in the tutorial and cookbook comes from a real program in `docs/examples/src/*.f90`.
 `bash scripts/docs_examples.sh` rebuilds `static-gnu`, compiles each program, runs it, and regenerates
-`docs/examples/snippets/` and `docs/examples/output/*.ansi`. Never edit those two directories by hand.
+`docs/examples/snippets/` and `docs/examples/output/*.ansi`. Never edit those two directories by hand. It takes about
+a minute, because each `march_*` step waits 40 ms, so that the GIFs are watchable.
 
 - Marker comments in the sources drive the generator. `!run [-s] [-f K] ID COMMAND` records a run: `-s` adds the exit
-  status, and `-f K` shows the screen at the K-th frame instead of the end. Frame 1 is the one drawn by `start`, frame
-  k+1 is update k, and frames keep counting across several bars in one program. `!region NAME … !endregion NAME`
-  marks a snippet, and `!as NAME` sets the command name.
-- `scripts/ansi_screen.py` replays the captured stream on a minimal terminal and keeps the final (or K-th) screen. It
-  handles carriage returns and SGR colours, and drops the cursor hide/show sequences. It also masks the progress
-  speed (`nn.nn`) and the dates (`yyyy/mm/dd hh:mm:ss`), so the output is identical from run to run.
-- Shiki's dual-theme ANSI renderer drops background colours, so examples that render in the docs must use foreground
-  colours only.
-- `docs/guide/limitations.md`, `guide/bar.md` (the `update` steps) and the tutorial and cookbook describe the exact
-  semantics of `update` (truncation, clamping, `frequency`, the number formats). Any change to `update` must update
-  them, then rerun `scripts/docs_examples.sh`.
+  status, and `-f K` shows the screen at the end of the K-th frame instead of the end of the run. A frame is a drawing
+  that ends with `ESC[K` + CR: `start`'s first drawing, each drawn update, and each redraw after `write`. Frames keep
+  counting across several bars in one program. `!region NAME … !endregion NAME` marks a snippet, and `!as NAME` sets
+  the command name.
+- Runs happen inside a pseudo-terminal (`script -qefc`, from util-linux), so forbear's auto-detection sees a terminal.
+  A redirection inside COMMAND, such as `march > run.log`, really is not a terminal, which is how the log mode is
+  shown. `FORBEAR_MIN_INTERVAL=0` is exported so that frame K does not depend on machine speed.
+- `scripts/ansi_screen.py` replays the stream on a minimal terminal: CR, LF, cursor up and down, `K`/`2K`/`J` erase,
+  and SGR colours. It keeps the final (or K-th) screen and masks the clock-dependent fields (speed `nn.nn`, ETA
+  `hh:mm:ss`, summary, dates), so the outputs are identical from run to run (verified by regenerating twice).
+- `bash scripts/docs_gifs.sh [name…]` records `docs/public/gifs/*.gif` with VHS, from `docs/gifs/<name>.tape`. Shared
+  settings live in `settings.tape` (Catppuccin Mocha, the docs theme's palette). The recordings use the tutorial
+  programs plus `docs/gifs/src/{hero,spinners}.f90`. GIFs are not reproducible byte for byte; commit them deliberately.
+- Shiki's dual-theme ANSI renderer drops background colours, so examples whose `.ansi` output renders in the docs
+  must use foreground colours only. The GIFs show backgrounds fine.
+- `docs/guide/limitations.md`, `guide/bar.md` (the `update` steps), `guide/terminals.md` and the tutorial and cookbook
+  describe the exact semantics of `update`. Any change to `update` must update them, then rerun both scripts.
 
 ## Dependencies
 
@@ -71,55 +78,66 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 - **`element_object`** is one coloured text fragment: a UCS4 string plus fg/bg/style. Its `output()` returns the
   string with the ANSI colours applied.
 - **`bar_object`** is built from fixed `element_object` components (prefix, suffix, brackets, empty/filled chars,
-  percent, speed, scale, date-time) and an allocatable `spinner(:)` array. `initialize` takes about 50 optional
-  keyword arguments, one `<component>_string/_color_fg/_color_bg/_style` group per element. Strings are `class(*)`,
-  so callers may pass default, ASCII or UCS4 literals.
-- **Spinners** are chosen by the *first frame character* passed as `spinner_string`: `create_spinner` has a large
-  `select case` that maps each character to a hard-coded frame sequence. Adding a spinner means adding a `case` there.
-- **Rendering** happens in `update(current)`. It builds a whole line that starts with an ANSI sequence hiding the
-  cursor and ends with `char(13)` (a carriage return, no newline), writes it with `advance='no'`, then flushes. At
-  100 % it restores the cursor and, if requested, prints the start/end timestamp. `start` prints the optional scale
-  line, then calls `update(min_value)`. `is_stdout_locked` reports whether a bar is in progress, so callers can hold
-  back other output to the same unit until it finishes.
+  percent, count, speed, ETA, message, scale, date-time, summary) and an allocatable `spinner(:)` array. `initialize`
+  takes about 70 optional keyword arguments, one `<component>_string/_color_fg/_color_bg/_style` group per element
+  plus the switches. Strings are `class(*)`, so callers may pass default, ASCII or UCS4 literals. There is no defined
+  assignment: intrinsic assignment copies the bar, and the components' own defined assignment handles them.
+- **Spinners** are chosen by a *key* passed as `spinner_string` (one of the frames, not always the first):
+  `create_spinner` has a large `select case` mapping each key to a hard-coded frame sequence.
+- **Rendering**: `update` decides whether the bar is due, then `update_rate` updates the smoothed rate and
+  `build_frame` builds the line into `frame_` (UCS4, no control sequences). `render(element, plain)` drops the colours
+  in log mode. `draw` writes `ESC[?25l` + frame + `ESC[K` + CR, wrapped for `position>0` in LF×p … `ESC[pA`.
+  `complete` handles 100 %: at position 0 it restores the cursor, writes a newline and `ESC[J`, then the date and
+  summary lines; at position>0 it clears its own line. `write_message` (bound as `write`) clears the line, prints the
+  text and redraws `frame_`.
+- **Modes**, resolved once in `initialize`: interactive comes from the `interactive` keyword, else
+  `FORBEAR_INTERACTIVE`, else `is_terminal(output_unit)`. That calls C `isatty` through `iso_c_binding`, and only
+  `output_unit`→fd 1 and `error_unit`→fd 2 can be terminals. `FORBEAR_DISABLE` (≠0) forces disabled. A
+  non-interactive bar at position>0 is disabled.
 
 ### Non-obvious behaviour in `update`
 
-- The run state lives in trailing-underscore components (`progress_drawn_`, `tic_`, `spinner_count_`,
-  `date_time_start_`, `is_complete_`). `start` resets it, and the first update after `start` starts the clocks. Never
-  reintroduce `save` locals: they would be shared by every bar.
+- The run state lives in trailing-underscore components (`progress_drawn_`, `fraction_drawn_`, `rate_`,
+  `rate_samples_`, `tic_`, `tic_start_`, `spinner_count_`, `date_time_start_`, `is_complete_`, `frame_`). `start`
+  resets it and takes the start time. Never reintroduce `save` locals: they would be shared by every bar.
 - Progress is `(current - min_value)/(max_value - min_value)`, clamped to [0, 1] and truncated with a 1e-9 % tolerance,
   so 100 % means done. Clamping keeps `REPEAT` counts non-negative. An empty range completes at `start`, and `start`
-  locks *before* its first update so that this completion can unlock.
-- Once complete, `update` returns immediately until the next `start`.
-- `frequency=1` redraws on every update (the spinner animates even when the percent is unchanged). `frequency>1`
-  redraws when progress enters a new multiple of it.
-- The speed (6 characters) and the scale labels (5) go through the private `compact_real(x, w)`. It fits any real
-  into exactly `w` characters, right-aligned, using the first form that fits: two decimals, one decimal, an integer,
-  `m.me<n>`, `me<n>`. It uses `F32.d` plus `adjustl`, not `F0.d`, because gfortran's `F0.d` drops the leading zero
-  (`.00`). The fixed width matters: a shorter redraw would leave stale characters on screen. Only a scale value from
-  about −1e100 down gives `*****`.
+  locks *before* its first update so that this completion can unlock. Once complete, `update` returns until the next
+  `start`.
+- When a drawing is due, on a terminal:
+  - 0 % and 100 % are always drawn;
+  - otherwise at least `min_interval` must have passed since the last drawing (default 0.1 s; the
+    `FORBEAR_MIN_INTERVAL` variable replaces the default);
+  - with `frequency>1`, progress must also have entered a new multiple of it.
+
+  In a log, a line is written at every new multiple of 10 % (of `frequency`, if >1), with no time throttle.
+- The speed is an exponential moving average, weight `smoothing` (0.3) on the latest inter-drawing rate.
+  `smoothing=0` gives the mean since the start. The ETA is `(1-fraction)/rate_`.
+- With `partial_blocks`, the partial cell takes the filled fg colour and the *empty* bg colour, so a track drawn with
+  `empty_char_color_bg` has no seam. The glyphs are UTF-8 byte literals (`PARTIAL_BLOCKS`). Do not build them with
+  `char(code, UCS4)`: gfortran writes UCS4 characters above 255 as `?` to non-UTF-8 units. The byte strings work
+  because every terminal just receives the bytes.
+- Every number in the line has a fixed width, so the line never shrinks and `ESC[K` only matters for messages. The
+  speed (6 characters) and the scale labels (5) go through `compact_real(x, w)`, which uses the first form that fits:
+  two decimals, one decimal, an integer, `m.me<n>`, `me<n>`. It writes `F32.d` plus `adjustl`, because gfortran's
+  `F0.d` drops the leading zero. The ETA uses `hms` (8 characters, days beyond 100 h); the summary uses `duration`.
 - `width=0` makes a spinner-only or counter-only display, with no bar body. `add_scale_bar` requires `width >= 22`
   and otherwise raises `error stop`.
 
-## In-progress tooling migration (staged, not yet committed)
+## Tooling
 
-The index currently stages a move from Travis/FORD to GitHub Actions, VitePress and git-cliff. `.github/`,
-`docs/.vitepress`, `docs/package.json`, `cliff.toml`, `scripts/release.sh`, `scripts/compute-coverage.sh`, and the
-`CONTRIBUTING.md` → `docs/guide/contributing.md` symlink are all staged. The legacy pieces are still present:
-`.travis.yml`, `doc/` (FORD), `wiki/`, and the `makedoc`/`makecoverage-analysis` rules in `fobos`. Current
-state:
-
-- The workflows run `FoBiS.py fetch` (gated on `.deps_config.ini`) to get FACE; the release tarball does not
-  contain it, and `install.sh` fetches it.
-- `run-coverage-analysis` runs `fobis rule --ex makecoverage-analysis`. That rule removes FACE's coverage data, then
-  calls `scripts/compute-coverage.sh`, which writes `docs/public/coverage.json` (`{"pct":"…"}`). That file is a
-  generated artifact: do not commit it.
+- CI (`.github/workflows/ci.yml`) runs `FoBiS.py fetch` (gated on `src/third_party/.deps_config.ini`), then the
+  coverage action. That action runs `fobis rule --ex makecoverage-analysis`, which removes FACE's coverage data and
+  calls `scripts/compute-coverage.sh` to write `docs/public/coverage.json` (`{"pct":"…"}`). That file is a generated
+  artifact: do not commit it. The release tarball does not contain FACE; `install.sh` fetches it.
 - The docs mirror FLAP's layout. "Start here" and the reference live in `docs/guide/`, the tutorial
   (`manual/tutorial/0N-*.md`) and the cookbook live in `docs/manual/`, and `docs/api/` is generated by `formal` from
-  `docs/ford.md`. Build the site with `cd docs && npm install && npm run docs:build`; the `predocs` hook regenerates the
-  API first.
-- Apart from `makecoverage-analysis`, the `fobos` rules still use the deprecated `FoBiS.py rule -ex …` / `-mode` / `-coverage` forms.
+  `docs/ford.md` and committed. Build the site with `cd docs && npm install && npm run docs:build`; the `predocs` hook
+  regenerates the API first. The custom theme (`docs/.vitepress/theme/`) uses the Catppuccin Latte palette in light
+  mode and Mocha in dark mode, the GIFs' palette, plus the `img.gif` and `.showcase` styles.
+- Apart from `makecoverage-analysis`, the `fobos` rules still use the deprecated `FoBiS.py rule -ex …` / `-mode` /
+  `-coverage` forms. The legacy `.travis.yml`, `doc/` (FORD) and `wiki/` are still present.
 
 Releases: run `scripts/release.sh --patch|--minor|--major|vX.Y.Z` from `master`. It regenerates `CHANGELOG.md`
 with git-cliff, writes `VERSION` (and the `fpm.toml` version, if the manifest declares one), commits, tags and
-pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.2.0`.
+pushes. The tag push triggers `release.yml`. Existing tags go up to `v1.3.0`; the seven features of the 2026 update (write, logs, ETA, count, summary, partial blocks, positions) are after it.

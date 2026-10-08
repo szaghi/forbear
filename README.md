@@ -9,30 +9,30 @@
 [![coverage](https://img.shields.io/endpoint?url=https://szaghi.github.io/forbear/coverage.json)](https://github.com/szaghi/forbear/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-GPLv3%20%7C%20BSD%20%7C%20MIT-blue.svg)](#copyrights)
 
-> Progress bars and spinners for long-running Fortran programs, in pure Fortran 2008:
-> one object, three calls — `initialize`, `start`, `update` — and the bar redraws its line in place.
-> The `e` is mute: say *forbar*.
+> Progress bars, spinners, ETA and messages for long-running Fortran programs, in pure Fortran 2008:
+> one object, three calls — `initialize`, `start`, `update`. On a terminal the bar animates in place;
+> in the log of a batch job it writes clean lines. The `e` is mute: say *forbar*.
 
-<img src="media/taste.gif" alt="forbear progress bars and spinners in a terminal" width="760">
+<img src="docs/public/gifs/hero.gif" alt="a pretend CFD run: a mesh bar, then nested time-step and Newton bars, with checkpoints printed above, a residual and the ETA, and a closing summary" width="760">
 
-<sub>Bars, counters and spinners drawn by the test program of forbear.</sub>
+<sub>A (pretend) CFD run: nested bars, messages above the bar, ETA and summary. Every frame is drawn by forbear.</sub>
 
 <div>
 <table>
 <tr>
-<td width="50%"><b>📊 A bar in three calls</b><br><sub><code>initialize</code> sets its look and range, <code>start</code> draws it, <code>update</code> redraws it at every step; at 100% it ends its line and gives the terminal back. <a href="https://szaghi.github.io/forbear/manual/tutorial/01-first-bar">A first bar</a></sub></td>
-<td width="50%"><b>🧩 Built from elements</b><br><sub>Prefix, brackets, filled and empty characters, suffix: each element is a string of your choice, Unicode included (<code>█</code>, <code>░</code>, <code>▕</code>, ...). <a href="https://szaghi.github.io/forbear/guide/bar">The bar object</a></sub></td>
+<td width="50%"><b>📊 A bar in three calls</b><br><sub><code>initialize</code> sets its look and range, <code>start</code> draws it, <code>update</code> redraws it, at most ten times a second; at 100% it ends its line and gives the terminal back. <a href="https://szaghi.github.io/forbear/manual/tutorial/01-first-bar">A first bar</a></sub></td>
+<td width="50%"><b>⏱️ ETA, speed, count, summary</b><br><sub>A smoothed speed and the time to the end, the count of steps done, start and end time, a closing line with duration and throughput. <a href="https://szaghi.github.io/forbear/manual/tutorial/04-reports">What the bar reports</a></sub></td>
 </tr>
 <tr>
-<td width="50%"><b>🎨 Colours and styles</b><br><sub>A foreground colour, a background colour and a style for every element, by name: 17 colours, 16 styles, through <a href="https://github.com/szaghi/FACE">FACE</a>. <a href="https://szaghi.github.io/forbear/guide/styling">Colours and styles</a></sub></td>
-<td width="50%"><b>⏱️ What the bar reports</b><br><sub>Progress in percent, progress speed, start and end time, a scale with the range of the run: one switch each. <a href="https://szaghi.github.io/forbear/manual/tutorial/04-reports">What the bar reports</a></sub></td>
+<td width="50%"><b>💬 Talk while it runs</b><br><sub><code>bar%write</code> prints a line above the running bar; <code>update(message=)</code> shows the residual of the step at its end. No broken lines. <a href="https://szaghi.github.io/forbear/manual/tutorial/06-terminal">Talking while the bar runs</a></sub></td>
+<td width="50%"><b>🪆 Nested loops</b><br><sub>One bar per loop level, each on its own line with <code>position</code>: time steps above, iterations below, cleared when done. <a href="https://szaghi.github.io/forbear/manual/tutorial/07-nested">Nested loops</a></sub></td>
 </tr>
 <tr>
-<td width="50%"><b>🌀 40 spinners</b><br><sub>Braille dots, blocks, arcs, moons: next to the bar, or alone with <code>width=0</code>; a bare percentage counter too. <a href="https://szaghi.github.io/forbear/guide/spinners">Spinners</a></sub></td>
-<td width="50%"><b>🖥️ Sharing the terminal</b><br><sub>Send the bar to standard error with <code>output_unit</code>, draw it only every <i>n</i>% with <code>frequency</code>, hold your messages while <code>is_stdout_locked()</code>. <a href="https://szaghi.github.io/forbear/manual/tutorial/06-terminal">Sharing the terminal</a></sub></td>
+<td width="50%"><b>📜 Batch jobs and logs</b><br><sub>Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log. <code>FORBEAR_DISABLE=1</code> turns every bar off; <code>disabled=(rank /= 0)</code> under MPI. <a href="https://szaghi.github.io/forbear/manual/tutorial/08-logs">Batch jobs and logs</a></sub></td>
+<td width="50%"><b>🎨 Smooth, coloured, Unicode</b><br><sub>Eighth-of-a-cell partial blocks, 17 colours and 16 styles for every element through <a href="https://github.com/szaghi/FACE">FACE</a>, any Unicode string, 40 spinners. <a href="https://szaghi.github.io/forbear/guide/spinners">Spinners</a></sub></td>
 </tr>
 <tr>
-<td width="50%"><b>🛠️ Standard Fortran, small</b><br><sub>Fortran 2008, four modules and one small dependency (FACE, ANSI colours); built with FoBiS or fpm. <a href="https://szaghi.github.io/forbear/guide/install">Installation</a></sub></td>
+<td width="50%"><b>🛠️ Standard Fortran, small</b><br><sub>Fortran 2008, four modules and one small dependency (FACE, ANSI colours) fetched by <code>fobis fetch</code> or fpm. <a href="https://szaghi.github.io/forbear/guide/install">Installation</a></sub></td>
 <td width="50%"><b>🔓 Multi-licensed</b><br><sub>GPL v3 for FOSS projects; BSD 2-Clause, BSD 3-Clause or MIT for closed source and commercial ones: pick the license that fits. <a href="#copyrights">Copyrights</a></sub></td>
 </tr>
 </table>
@@ -80,28 +80,27 @@ progress |++++++++++++++++++++++++++++++++| 100%
 
 ## Grows with your program
 
-One `initialize` adds what the bar reports: here the percentage, the speed, the start and end time and a scale, each
-in its own colour, for the `march` solver of the
-[tutorial](https://szaghi.github.io/forbear/manual/tutorial/01-first-bar):
+The same calls scale to what a solver needs: an ETA, the residual of every step at the end of the bar, checkpoints
+printed above it. From the [tutorial](https://szaghi.github.io/forbear/manual/tutorial/06-terminal):
 
 ```fortran
 call bar%initialize(prefix_string='march ', bracket_left_string='[', bracket_right_string='] ', &
-                    filled_char_string='#', empty_char_string='.',                             &
-                    add_progress_percent=.true., progress_percent_color_fg='yellow',           &
-                    add_progress_speed=.true., progress_speed_color_fg='green',                &
-                    add_date_time=.true., date_time_color_fg='magenta',                        &
-                    add_scale_bar=.true., scale_bar_color_fg='blue',                           &
-                    width=40, max_value=real(steps, R8P))
+                    filled_char_string='#', empty_char_string='.', add_progress_percent=.true., &
+                    message_color_fg='cyan', width=30, max_value=real(steps, R8P))
+call bar%start
+do step = 1, steps
+   call advance
+   residual = residual / 2._R8P
+   if (mod(step, 10) == 0) then
+      write(text, '(A,I0,A)') 'step ', step, ': solution saved'
+      call bar%write(trim(text))                            ! a line above the bar
+   endif
+   write(text, '(A,ES9.2)') 'residual', residual
+   call bar%update(current=real(step, R8P), message=trim(text)) ! the end of the bar line
+enddo
 ```
 
-```console
-$ march
-      [ 0.00 (min)                  (max) 50.00]
-march [########################################] 100% ( nn.nn%/s)
-[yyyy/mm/dd hh:mm:ss - yyyy/mm/dd hh:mm:ss]
-```
-
-The speed and the dates change from a run to the next, and are shown as placeholders.
+<img src="docs/public/gifs/march_6.gif" alt="march printing checkpoints above the bar and the residual at its end" width="760">
 
 New to forbear? The [tutorial](https://szaghi.github.io/forbear/manual/tutorial/01-first-bar) grows a progress bar
 step by step; the [cookbook](https://szaghi.github.io/forbear/manual/cookbook) has short recipes. Every example is a
@@ -132,10 +131,11 @@ Add to your `fpm.toml`:
 
 ```toml
 [dependencies]
-forbear = { git = "https://github.com/szaghi/forbear", branch = "master" }
+forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.3.0" }
 ```
 
-v1.2.0 and older releases have no `fpm.toml`: use the branch until the next release, then pin its tag.
+v1.2.0 and older releases have no `fpm.toml`. The ETA, the messages, nested bars, the log mode and the other
+features added after v1.3.0 need `branch = "master"` until the next release.
 
 A Fortran 2008 compiler is required; the examples of the documentation are built with gfortran 16, and the `fobos`
 file has modes for Intel and PGI too (see [Installation](https://szaghi.github.io/forbear/guide/install)).

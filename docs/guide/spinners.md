@@ -4,6 +4,8 @@ title: Spinners
 
 # Spinners
 
+![eighteen spinners animating, one per line](/gifs/spinners.gif){.gif}
+
 `spinner_string` chooses a spinner by its key: pass one of the strings of the first column. The key is one of the
 frames of the spinner, not always the first. The spinner moves one frame at every drawing of the bar, and starts again
 after the last frame. A string that is not a key gives no spinner, without a message.

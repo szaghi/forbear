@@ -1,5 +1,7 @@
 # 1. A first bar
 
+![march with its first progress bar](/gifs/march_1.gif){.gif}
+
 `march` advances its solution for 50 time steps, and each step takes a while: long enough for whoever runs it to
 wonder how far it has come. A progress bar answers, in three steps: **initialize** the bar, **start** it, **update**
 it at every time step.
@@ -22,7 +24,7 @@ At the end:
 <<< @/examples/output/march_1.ansi{ansi}
 
 Each update rewrites the same line: it ends with a carriage return instead of a new line, so the next one overwrites
-it. When the progress reaches 100%, `update` ends the line and the program prints below it as usual: the message after
+it; a fast loop is not slowed down by its bar, which is drawn at most ten times a second. When the progress reaches 100%, `update` ends the line and the program prints below it as usual: the message after
 the loop needs no special care.
 
 ## The range

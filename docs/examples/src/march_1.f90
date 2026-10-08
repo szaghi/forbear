@@ -3,7 +3,7 @@
 !run march_1 march
 program march
 !< Tutorial, chapter 1: a first progress bar.
-use, intrinsic :: iso_fortran_env, only : R8P=>real64
+use, intrinsic :: iso_fortran_env, only : I8P=>int64, R8P=>real64
 use forbear, only : bar_object
 implicit none
 type(bar_object) :: bar   ! the progress bar
@@ -23,13 +23,14 @@ print '(A,I0,A)', 'march: ', steps, ' time steps done'
 
 contains
    subroutine advance
-   !< Advance the solution of one time step (here: just spend some time).
-   real(R8P) :: x
-   integer   :: i
-   x = 0._R8P
-   do i = 1, 2000000
-      x = x + sqrt(real(i, R8P))
+   !< Advance the solution of one time step (here: wait 40 ms, as a real computation would take).
+   integer(I8P) :: start ! clock at the start
+   integer(I8P) :: now   ! clock now
+   integer(I8P) :: rate  ! clock counts per second
+   call system_clock(start, rate)
+   do
+      call system_clock(now)
+      if (now - start >= rate / 25) exit
    enddo
-   if (x < 0._R8P) print *, x
    endsubroutine advance
 endprogram march

@@ -17,12 +17,14 @@ and truncated to an integer percent: 99.9% shows as 99%, and the bar is complete
 - The bar completes once: it ends its line at 100%, and further updates do nothing until the next `start`.
 - An empty range (`max_value <= min_value`) completes the bar at `start`.
 
-## Frequency
+## How often the bar is drawn
 
-With `frequency=1` (the default) the bar is drawn at every update, even when the percent has not changed: the spinner
-moves at every update. With `frequency=f` larger than 1 it is drawn when the progress enters a new multiple of `f`,
-and at 100%: a loop of 7 steps (14%, 28%, 42%, ...) with `frequency=10` is drawn at every step, since each one enters a
-new ten. The first drawing, at `start`, is always made.
+On a terminal, the bar is drawn at 0%, at 100%, and in between at most once every `min_interval` seconds (0.1 by
+default): a loop of a million fast iterations is not slowed down by its bar. With `frequency=1` (the default) every
+update due is drawn, even when the percent has not changed: the spinner moves at every drawing. With `frequency=f`
+larger than 1 the bar is drawn when the progress enters a new multiple of `f`, and at 100%: a loop of 7 steps (14%,
+28%, 42%, ...) with `frequency=10` is drawn at every step, since each one enters a new ten. A message passed to an
+update that is not drawn is shown at the next drawing.
 
 ## Number formats
 
@@ -38,18 +40,18 @@ would leave the end of the previous drawing on screen. A number takes the most p
 | one digit and exponent | `1e100` | `1e10`, `1e300` |
 
 Negative numbers take one more character for the sign. Only a scale value from about −1e100 down does not fit, and shows as
-`*****`. The speed is the one between the last two drawings, not an average.
+`*****`. The ETA has eight characters, `hh:mm:ss` below 100 hours and days beyond (`12.5 d`); the duration of the
+summary is in seconds below a minute (`2.53 s`), `hh:mm:ss` beyond.
 
 `add_scale_bar` needs `width` of at least 22: a narrower bar stops the program in `initialize`, with an `error stop`.
 
 ## Several bars, one terminal
 
-Every bar keeps its own state (timer, spinner, start time): bars one after another, nested or interleaved, do not
-disturb each other's numbers. They do share the terminal: two bars drawn on the same unit at the same time overwrite
-each other's line. Draw them on different units, or one after another.
-
-A bar is not thread safe: update it from one thread. Under MPI, every process that updates a bar draws it on the same
-terminal: draw from one process only.
+Every bar keeps its own state (timer, speed, spinner, start time): bars one after another, nested or interleaved, do
+not disturb each other's numbers. Two bars running at the same time need their own lines: give each one a `position`
+(see [Nested loops](/manual/tutorial/07-nested)). A bar at a position larger than 0 is drawn with "cursor down" and
+"cursor up" sequences, so the lines below the current one must belong to the bars: print through the `write` of the
+bar at position 0.
 
 ## initialize resets everything
 
@@ -64,15 +66,15 @@ A colour or style name that is not in [the lists](./styling), or a `spinner_stri
 
 ## Other output while the bar runs
 
-The bar line ends with a carriage return: anything written to the same terminal before the bar is complete is drawn
-over it. Send the bar to standard error with `output_unit=error_unit`, or hold the messages while `is_stdout_locked()`
-is true: see [Sharing the terminal](/manual/tutorial/06-terminal).
+The bar line ends with a carriage return: anything written to the same terminal by `print` or `write` statements is
+drawn over the bar. Print through `bar%write` instead, or send the bar to standard error with
+`output_unit=error_unit`: see [Talking while the bar runs](/manual/tutorial/06-terminal).
 
 ## Terminals, files and batch jobs
 
-The bar needs a terminal that understands the carriage return and the ANSI escape sequences (colours, hidden cursor).
-Written to a file, as in the log of a batch job, the bar is every frame one after another, carriage returns and
-escape sequences included: in a batch job, send it to standard error and discard it, or do not draw it.
+On a terminal the bar animates; anywhere else it writes a plain line every 10%, with no control sequences: see
+[Terminals and logs](./terminals). A terminal must understand the carriage return and the ANSI sequences (colours,
+cursor movement, erase in line): every modern terminal does, Windows Terminal included.
 
 ## Unicode prefixes and the scale
 

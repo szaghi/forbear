@@ -1,4 +1,5 @@
 $ march
-      [[34m 0.00 (min)                  (max) 50.00[0m]
-march [########################################] [33m100%[0m[32m ( nn.nn%/s)[0m
+      [[34m 0.00 (min)        (max) 50.00[0m]
+march [##############################] [33m100%[0m[36m 50/50[0m[32m ( nn.nn%/s)[0m[34m ETA hh:mm:ss[0m
 [35m[yyyy/mm/dd hh:mm:ss - yyyy/mm/dd hh:mm:ss][0m
+[32m[done in n.nn s, nn.nn/s][0m

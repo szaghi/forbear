@@ -12,12 +12,13 @@ use forbear, only : bar_object, ASCII, UCS4
 
 | Method | What it does |
 |---|---|
-| [`initialize`](#initialize) | Set up the bar: its elements, its range, what it reports. Resets every other setting. |
+| [`initialize`](#initialize) | Set up the bar: its elements, its range, what it reports, where and how it draws. Resets every other setting. |
 | [`start`](#start) | Print the scale (if asked), draw the bar at 0%, take over the terminal line. |
-| [`update`](#update) | Compute the progress of the current value, redraw the bar; at 100% end its line. |
-| [`is_stdout_locked`](#is-stdout-locked) | True while the bar is running, from `start` to 100%. |
+| [`update`](#update) | Compute the progress of the current value, redraw the bar when due; at 100% end its line. |
+| [`write`](#write) | Print a line above the running bar. |
+| [`is_stdout_locked`](#is-stdout-locked) | True while the bar is running on a terminal, from `start` to 100%. |
 | [`destroy`](#destroy) | Reset the bar to its defaults. |
-| `=` | Copy a bar. |
+| `=` | Copy a bar (intrinsic assignment). |
 
 ## initialize
 
@@ -37,41 +38,55 @@ setting not passed takes its default, whatever the bar had before.
 | Suffix | `suffix_string` (none) | `suffix_color_fg`, `suffix_color_bg`, `suffix_style` |
 | Left bracket | `bracket_left_string` (none) | `bracket_left_color_fg`, `bracket_left_color_bg`, `bracket_left_style` |
 | Right bracket | `bracket_right_string` (none) | `bracket_right_color_fg`, `bracket_right_color_bg`, `bracket_right_style` |
-| Done part | `filled_char_string` (`*`) | `filled_char_color_fg`, `filled_char_color_bg`, `filled_char_style` |
-| Remaining part | `empty_char_string` (`-`) | `empty_char_color_fg`, `empty_char_color_bg`, `empty_char_style` |
+| Done part | `filled_char_string` (`*`; `█` with `partial_blocks`) | `filled_char_color_fg`, `filled_char_color_bg`, `filled_char_style` |
+| Remaining part | `empty_char_string` (`-`; a space with `partial_blocks`) | `empty_char_color_fg`, `empty_char_color_bg`, `empty_char_style` |
 | Spinner | `spinner_string` (none): the key of a [spinner](./spinners) | `spinner_color_fg`, `spinner_color_bg`, `spinner_style` |
+| Message | given by [`update`](#update) | `message_color_fg`, `message_color_bg`, `message_style` |
 
 **Reports.** Each one is off by default and has the same three colour keywords.
 
 | Switch | Adds | Colour keywords |
 |---|---|---|
 | `add_progress_percent` | the progress, `nnn%` | `progress_percent_color_fg`, `progress_percent_color_bg`, `progress_percent_style` |
-| `add_progress_speed` | the progress speed, ` (nnn.nn%/s)`, the number in [six characters](./limitations#number-formats) | `progress_speed_color_fg`, `progress_speed_color_bg`, `progress_speed_style` |
-| `add_date_time` | at the end, a line `[start - end]`, `yyyy/mm/dd hh:mm:ss` each | `date_time_color_fg`, `date_time_color_bg`, `date_time_style` |
+| `add_progress_count` | the count, ` current/max`, integers with whole-number bounds | `progress_count_color_fg`, `progress_count_color_bg`, `progress_count_style` |
+| `add_progress_speed` | the smoothed speed, ` (nnn.nn%/s)`, the number in [six characters](./limitations#number-formats) | `progress_speed_color_fg`, `progress_speed_color_bg`, `progress_speed_style` |
+| `add_eta` | the estimated time to the end, ` ETA hh:mm:ss` | `eta_color_fg`, `eta_color_bg`, `eta_style` |
 | `add_scale_bar` | at the start, a line with `min_value` and `max_value` above the bar | `scale_bar_color_fg`, `scale_bar_color_bg`, `scale_bar_style` |
+| `add_date_time` | at the end, a line `[start - end]`, `yyyy/mm/dd hh:mm:ss` each | `date_time_color_fg`, `date_time_color_bg`, `date_time_style` |
+| `add_summary` | at the end, a line `[done in <duration>, <mean speed>/s]` | `summary_color_fg`, `summary_color_bg`, `summary_style` |
 
-**Numbers.**
+**Numbers and switches.**
 
 | Keyword | Type | Default | Meaning |
 |---|---|---|---|
 | `width` | `integer(int32)` | 32 | Characters between the brackets; 0 for no bar body. At least 22 with `add_scale_bar`, or the program stops (`error stop`). |
 | `min_value` | `real(real64)` | 0 | Start of the range. |
 | `max_value` | `real(real64)` | 1 | End of the range. |
-| `frequency` | `integer(int32)` | 1 | With 1, draw at every update; with `f > 1`, draw when the progress, in percent, enters a new multiple of `f` (and at 100%). |
+| `partial_blocks` | `logical` | `.false.` | Draw the done part with full and partial blocks, eight steps per character. |
+| `min_interval` | `real(real64)` | 0.1 | Minimum time between two drawings on a terminal, in seconds; `FORBEAR_MIN_INTERVAL` replaces the default. |
+| `frequency` | `integer(int32)` | 1 | With 1, draw at every update due; with `f > 1`, only when the progress enters a new multiple of `f`% (and at 100%). In a log, a line every `f`% (every 10% with 1). |
+| `smoothing` | `real(real64)` | 0.3 | Weight of the last speed in its moving average: 1 the momentary speed, 0 the average since the start. |
+| `position` | `integer(int32)` | 0 | Line of the bar, counted below the current one; a bar at a position larger than 0 is cleared when it completes. |
+| `interactive` | `logical` | detected | Draw for a terminal (`.true.`) or write a plain log (`.false.`). Not passed: `FORBEAR_INTERACTIVE`, else whether `output_unit` is a terminal. See [Terminals and logs](./terminals). |
+| `disabled` | `logical` | `.false.` | Draw nothing; `write` still prints. `FORBEAR_DISABLE` turns every bar off. |
 | `output_unit` | `integer(int32)` | standard output | The unit the bar is written to, e.g. `error_unit`. |
 
 ## The line
 
-`update` draws one line, in this order, and ends it with a carriage return:
+`update` draws one line, in this order:
 
 ```
-prefix  bracket_left  filled × n  empty × (width − n)  bracket_right  suffix  spinner  percent  speed
+prefix  bracket_left  done part  remaining part  bracket_right  suffix  spinner  percent  count  speed  ETA  message
 ```
 
-`n` is `nint(progress / 100 * width)`. The filled and empty strings are repeated as they are: with more than one
-character each, the bar is wider than `width`. With `width=0` the bar body is empty and the line is the rest: a spinner
-or a percentage alone. Every drawing starts with the ANSI sequence that hides the cursor; the end of the bar shows it
-again.
+The done part has `nint(progress / 100 * width)` characters; with `partial_blocks`, `int(fraction * width)` full blocks
+and a partial block for the eighths of the next character, in the foreground of `filled_char` and the background of
+`empty_char`. The filled and empty strings are repeated as they are: with more than one character each, the bar is
+wider than `width`. With `width=0` the bar body is empty and the line is the rest: a spinner or a percentage alone.
+
+On a terminal, every drawing starts with the ANSI sequence that hides the cursor and ends with "erase to the end of the
+line" and a carriage return: the next drawing overwrites it, and a shorter line leaves nothing behind. The end of the
+bar shows the cursor again. In a log, the line is written as it is, with no colours and no control sequences.
 
 ## start
 
@@ -79,25 +94,40 @@ again.
 call bar%start
 ```
 
-Resets the run state of the bar (timer, spinner, completion), prints the scale line (with `add_scale_bar`), marks the
-terminal as taken (`is_stdout_locked` becomes true) and draws the bar at `min_value`. The timer of the speed and the
-start time of `add_date_time` are taken at this first drawing. A bar can be started again after it has completed.
+Resets the run state of the bar (timer, speed, spinner, message, completion) and takes the start time. Unless the bar
+is disabled, it prints the scale line (with `add_scale_bar`, at position 0 only), marks the terminal as taken
+(`is_stdout_locked` becomes true, on a terminal) and draws the bar at `min_value`. A bar can be started again after it
+has completed.
 
 ## update
 
 ```fortran
-call bar%update(current=value)   ! value: real(real64)
+call bar%update(current=value [, message=text])   ! value: real(real64); text: any string
 ```
 
-1. If the bar is complete, nothing happens.
-2. The progress is `(current - min_value) / (max_value - min_value)`, clamped to [0, 1], truncated to an integer
+1. If the bar is disabled or complete, nothing happens.
+2. A `message`, if passed, replaces the one shown at the end of the line.
+3. The progress is `(current - min_value) / (max_value - min_value)`, clamped to [0, 1], truncated to an integer
    percent: 100% only when `current` reaches `max_value`.
-3. The line is redrawn according to `frequency` (and always at 100%): the spinner moves one frame, the speed is the
-   progress made since the previous drawing over the time elapsed since then.
-4. At 100% the cursor is shown again and the line ended; with `add_date_time` the start and end line is printed; the
-   bar is complete and `is_stdout_locked` becomes false.
+4. On a terminal, the bar is drawn when the update is due: always at 0% and 100%; otherwise if at least `min_interval`
+   seconds have passed since the last drawing and, with `frequency > 1`, the progress has entered a new multiple of
+   `frequency`. In a log, a line is written when the progress enters a new multiple of 10% (of `frequency`%).
+5. At each drawing, the spinner moves one frame and the speed is updated: the progress made since the previous drawing,
+   over the time elapsed since then, averaged with `smoothing`.
+6. At 100% the bar is complete: on a terminal, the cursor is shown again and the line ended (a bar at a position larger
+   than 0 is cleared instead); the start and end line and the summary are printed, if asked; `is_stdout_locked` becomes
+   false.
 
-See [Behaviour and limitations](./limitations) for the details.
+## write
+
+```fortran
+call bar%write(text)   ! text: any string
+```
+
+While the bar runs on a terminal, `write` clears the bar line, writes the text in its place and draws the bar again on
+the line below: the text scrolls up with the output, the bar stays at the bottom. Otherwise (before `start`, after
+100%, in a log, with the bar disabled) it writes the text as a line of the unit of the bar. With nested bars, call the
+`write` of the bar at position 0.
 
 ## is_stdout_locked
 
@@ -106,8 +136,8 @@ logical :: running
 running = bar%is_stdout_locked()
 ```
 
-True from `start` until the bar reaches 100%: while it is true, anything written to the terminal is drawn over the bar
-(see [Sharing the terminal](/manual/tutorial/06-terminal)). It reports the state of the bar, and locks nothing.
+True from `start` until the bar reaches 100%, on a terminal: while it is true, anything written to the terminal but
+through `write` is drawn over the bar. It reports the state of the bar, and locks nothing.
 
 ## destroy
 
@@ -115,8 +145,8 @@ True from `start` until the bar reaches 100%: while it is true, anything written
 call bar%destroy
 ```
 
-Frees the strings and resets the defaults: `width=32`, range [0, 1], `frequency=1`, standard output, no reports.
-`initialize` calls it first.
+Frees the strings and resets the defaults: `width=32`, range [0, 1], `frequency=1`, `min_interval=0.1`,
+`smoothing=0.3`, position 0, standard output, no reports. `initialize` calls it first.
 
 ## Character kinds
 

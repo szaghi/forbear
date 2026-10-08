@@ -31,8 +31,18 @@ The default range is [0, 1]: pass the fraction done.
 
 <<< @/examples/output/many.ansi{ansi}
 
-The range starts one before the first record, so that the bar starts at 0%. With the default `frequency=1` the bar is
-drawn at every update: a million drawings cost more than the loop itself, while `frequency=5` draws it 21 times.
+The range starts one before the first record, so that the bar starts at 0%. Updating at every iteration is cheap: the
+bar is drawn at most ten times a second (`min_interval`), whatever the number of iterations. `frequency=5` draws it
+only at every 5%, which also keeps the log of a batch job to 21 lines.
+
+## A smooth bar
+
+<<< @/examples/snippets/march_2s-init.f90
+
+<<< @/examples/output/march_2s.ansi{ansi}
+
+*While running.* Eight steps per character. For a visible track, give the empty part a background colour,
+`empty_char_color_bg`.
 
 ## A Unicode bar
 
@@ -50,7 +60,7 @@ drawn at every update: a million drawings cost more than the loop itself, while 
 
 *While running.* Full blocks in two foreground colours. The colour and style names are in [Colours and styles](/guide/styling).
 
-## Percent, speed, start and end time, scale
+## Percent, count, speed, ETA, scale, times, summary
 
 <<< @/examples/snippets/march_4-init.f90
 
@@ -81,24 +91,57 @@ bar the program stops:
 
 <<< @/examples/snippets/march_5-counter.f90
 
+## Lines above the bar, a message at its end
+
+<<< @/examples/snippets/march_6-loop.f90
+
+<<< @/examples/output/march_6.ansi{ansi}
+
+`bar%write` prints above the running bar; `message=` shows the text at the end of the bar line until the next one. A
+plain `print` would be drawn over the bar.
+
+## A bar for each loop of a nest
+
+<<< @/examples/snippets/march_7-init.f90
+
+<<< @/examples/snippets/march_7-loop.f90
+
+<<< @/examples/output/march_7-running.ansi{ansi}
+
+*While running.* The inner bar, at `position=1`, is cleared when it completes and drawn again by its next `start`.
+
 ## The bar on standard error
 
-<<< @/examples/snippets/march_6-init.f90
+<<< @/examples/snippets/stderr-init.f90
 
-Standard output keeps only the results of the program:
+Standard output keeps only the results of the program,
 
-<<< @/examples/output/march_6-results.ansi{ansi}
+<<< @/examples/output/stderr-results.ansi{ansi}
 
-`frequency=10` draws the bar only at every 10%: a log of standard error gets fewer frames.
+and standard error only the bar:
 
-## Messages while the bar runs
+<<< @/examples/output/stderr-bar.ansi{ansi}
 
-A message printed while the bar runs is drawn over it (see [Sharing the terminal](./tutorial/06-terminal)). Hold the
-messages until the bar has finished:
+## A clean log in a batch job
 
-<<< @/examples/snippets/deferred.f90
+Nothing to do: when the output of the bar is not a terminal, the bar writes a plain line every 10%.
 
-<<< @/examples/output/deferred.ansi{ansi}
+<<< @/examples/output/march_8-log.ansi{ansi}
+
+`interactive=.false.` (or `FORBEAR_INTERACTIVE=0`) forces this mode on a terminal too; see
+[Terminals and logs](/guide/terminals).
+
+## No bars at all
+
+Turn every bar of a program off from its environment, without recompiling; `write` still prints:
+
+<<< @/examples/output/march_8-disabled.ansi{ansi}
+
+In code, `disabled=.true.`; under MPI, draw the bar of one process only:
+
+```fortran
+call bar%initialize(max_value=real(steps, R8P), disabled=(rank /= 0)) ! rank from MPI_Comm_rank
+```
 
 ## Several bars one after another
 
@@ -112,5 +155,4 @@ prefix: the copy is lost, and those bars have the defaults.
 
 <<< @/examples/snippets/sequence-copy.f90
 
-Every bar keeps its own state, but two bars drawn on the same terminal at the same time overwrite each other's line
-(see [Behaviour and limitations](/guide/limitations#several-bars-one-terminal)).
+Two bars running at the same time need their own lines: see [A bar for each loop of a nest](#a-bar-for-each-loop-of-a-nest).

@@ -14,13 +14,15 @@ const docs = [
   {
     text: 'Tutorial',
     items: [
-      { text: 'Overview',                  link: '/manual/' },
-      { text: '1. A first bar',            link: '/manual/tutorial/01-first-bar' },
-      { text: '2. The look of the bar',    link: '/manual/tutorial/02-look' },
-      { text: '3. Colours and styles',     link: '/manual/tutorial/03-colours' },
-      { text: '4. What the bar reports',   link: '/manual/tutorial/04-reports' },
-      { text: '5. Spinners and counters',  link: '/manual/tutorial/05-spinners' },
-      { text: '6. Sharing the terminal',   link: '/manual/tutorial/06-terminal' },
+      { text: 'Overview',                         link: '/manual/' },
+      { text: '1. A first bar',                   link: '/manual/tutorial/01-first-bar' },
+      { text: '2. The look of the bar',           link: '/manual/tutorial/02-look' },
+      { text: '3. Colours and styles',            link: '/manual/tutorial/03-colours' },
+      { text: '4. What the bar reports',          link: '/manual/tutorial/04-reports' },
+      { text: '5. Spinners and counters',         link: '/manual/tutorial/05-spinners' },
+      { text: '6. Talking while the bar runs',    link: '/manual/tutorial/06-terminal' },
+      { text: '7. Nested loops',                  link: '/manual/tutorial/07-nested' },
+      { text: '8. Batch jobs and logs',           link: '/manual/tutorial/08-logs' },
     ],
   },
   {
@@ -36,6 +38,7 @@ const docs = [
       { text: 'The bar object',             link: '/guide/bar' },
       { text: 'Colours and styles',         link: '/guide/styling' },
       { text: 'Spinners',                   link: '/guide/spinners' },
+      { text: 'Terminals and logs',         link: '/guide/terminals' },
       { text: 'Behaviour and limitations',  link: '/guide/limitations' },
     ],
   },
@@ -52,6 +55,7 @@ export default withMermaid({
   title: 'forbear',
   description: 'Fortran (progress) B(e)ar environment',
   base: '/forbear/',
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/forbear/logo.svg' }]],
 
   markdown: {
     math: true,
@@ -65,6 +69,7 @@ export default withMermaid({
   },
 
   themeConfig: {
+    logo: '/logo.svg',
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Start here', link: '/guide/', activeMatch: '^/guide/(index|install)' },
@@ -73,7 +78,7 @@ export default withMermaid({
       {
         text: 'Reference',
         link: '/guide/features',
-        activeMatch: '^/guide/(features|bar|styling|spinners|limitations)',
+        activeMatch: '^/guide/(features|bar|styling|spinners|terminals|limitations)',
       },
       { text: 'API', link: '/api/' },
       {

@@ -1,2 +1,2 @@
-$ march > results.txt
+$ stderr > results.txt
 march [########################################] 100%
