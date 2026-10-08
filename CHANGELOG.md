@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 Versions follow [Semantic Versioning](https://semver.org/).
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.0] — 2026-10-08
+### Added
+- **bar**: Add ETA, messages, nested bars and a plain log mode
+
+
+### Fixed
+- **bar**: Build with ifx and nvfortran; add tests and compiler matrix
+
+
 ## [1.3.0] — 2026-10-08
 ### Documentation
 - Migrate to VitePress with tutorial, cookbook and reference
