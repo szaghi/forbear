@@ -39,10 +39,9 @@ The whole program is in [the cookbook](../cookbook#messages-while-the-bar-runs).
 
 ## Fewer drawings
 
-`frequency=10` draws the bar only when the progress is a multiple of 10% (and at 100%). Drawing costs little, but a
-loop of very short steps spends less time in it, and a log file of the bar (standard error redirected) gets 11 frames
-instead of 51. The progress must actually *hit* those multiples: a loop of 7 steps goes 14%, 29%, 43%, ... and its
-bar jumps from 0% to 100%.
+`frequency=10` draws the bar only when the progress enters a new multiple of 10% (and at 100%). Drawing costs
+little, but a loop of very short steps spends less time in it, and a log file of the bar (standard error redirected)
+gets 11 frames instead of 51. With the default `frequency=1` the bar is drawn at every update.
 
 ::: tip What you learned
 Why other output breaks the bar; standard error; holding messages with `is_stdout_locked`; `frequency`.

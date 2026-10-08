@@ -106,8 +106,7 @@ The speed and the dates change from a run to the next, and are shown as placehol
 New to forbear? The [tutorial](https://szaghi.github.io/forbear/manual/tutorial/01-first-bar) grows a progress bar
 step by step; the [cookbook](https://szaghi.github.io/forbear/manual/cookbook) has short recipes. Every example is a
 compiled, runnable program in [`docs/examples/src`](docs/examples/src), shown with its real output in the
-documentation. Before using forbear in a loop of more than 200 iterations, read
-[Behaviour and limitations](https://szaghi.github.io/forbear/guide/limitations).
+documentation.
 
 ## Install
 

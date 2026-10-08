@@ -32,6 +32,12 @@ type :: bar_object
    logical                           :: add_date_time        !< Add date and time.
    logical                           :: is_stdout_locked_    !< Flag to store standard output status.
    integer(I4P)                      :: output_unit = stdout !< Output unit to display bar
+   ! run state, reset by start
+   integer(I4P)                      :: progress_drawn_ = -1     !< Progress at the last drawing, in percent; -1 before the first.
+   integer(I8P)                      :: tic_ = 0_I8P             !< Timer count at the last drawing.
+   integer(I4P)                      :: spinner_count_ = 0       !< Spinner frame at the last drawing.
+   character(len=18)                 :: date_time_start_ = ''    !< Start date/time.
+   logical                           :: is_complete_ = .false.   !< Flag set when the bar has reached 100%.
    contains
       ! public methods
       procedure, pass(self) :: destroy          !< Destroy bar.
@@ -79,6 +85,11 @@ contains
    self%add_progress_speed = .false.
    self%add_date_time = .false.
    self%is_stdout_locked_ = .false.
+   self%progress_drawn_ = -1_I4P
+   self%tic_ = 0_I8P
+   self%spinner_count_ = 0_I4P
+   self%date_time_start_ = ''
+   self%is_complete_ = .false.
    endsubroutine destroy
 
    subroutine initialize(self,                                                                                               &
@@ -202,9 +213,13 @@ contains
    !< Start bar.
    class(bar_object), intent(inout) :: self !< Bar.
 
+   self%progress_drawn_ = -1_I4P
+   self%spinner_count_ = 0_I4P
+   self%is_complete_ = .false.
    if (self%add_scale_bar) call add_scale_bar
-   call self%update(current=self%min_value)
+   ! lock before the first update: an empty range completes the bar at once, and the update must unlock it
    self%is_stdout_locked_ = .true.
+   call self%update(current=self%min_value)
    contains
       subroutine add_scale_bar()
       !< Add scale to the bar.
@@ -223,30 +238,41 @@ contains
 
    subroutine update(self, current)
    !< Update bar.
-   class(bar_object), intent(inout)          :: self              !< Bar.
-   real(R8P),         intent(in)             :: current           !< Current value.
-   integer(I4P)                              :: progress          !< Progress, in percent.
-   integer(I4P), save                        :: progress_previous !< Previous progress, in percent.
-   integer(I8P), save                        :: tic_toc(1:2)      !< Tic-toc timer.
-   integer(I4P), save                        :: spinner_count     !< Spinner count.
-   character(len=18), save                   :: date_time_start   !< Start date/time.
-   character(len=18)                         :: date_time         !< Current date/time.
-   integer(I8P)                              :: count_rate        !< Timer count rate.
-   integer(I4P)                              :: f_chars           !< Number of filled characters of bar.
-   character(len=4,  kind=UCS4)              :: progress_percent  !< Progress in percent.
-   character(len=12, kind=UCS4)              :: progress_speed    !< Progress speed in percent.
-   character(len=1,  kind=UCS4), parameter   :: bar_end=char(13)  !< Last bar char, carriage return.
-   character(len=:,  kind=UCS4), allocatable :: bar               !< Bar line.
+   !<
+   !< The progress is the fraction of the range done, clamped to [0, 1], truncated to an integer percent: it reaches
+   !< 100% only when `current` reaches `max_value`. The bar is drawn when the progress enters a new multiple of
+   !< `frequency` (at every update with `frequency=1`) and at 100%; once at 100%, it is complete and further updates
+   !< do nothing until the next `start`.
+   class(bar_object), intent(inout)          :: self             !< Bar.
+   real(R8P),         intent(in)             :: current          !< Current value.
+   integer(I4P)                              :: progress         !< Progress, in percent.
+   real(R8P)                                 :: fraction         !< Fraction of the range done, in [0, 1].
+   real(R8P)                                 :: elapsed          !< Time elapsed since the last drawing, in seconds.
+   real(R8P)                                 :: speed            !< Progress speed, in percent per second.
+   character(len=18)                         :: date_time        !< Current date/time.
+   integer(I8P)                              :: tic              !< Timer count.
+   integer(I8P)                              :: count_rate       !< Timer count rate.
+   integer(I4P)                              :: f_chars          !< Number of filled characters of bar.
+   character(len=4,  kind=UCS4)              :: progress_percent !< Progress in percent.
+   character(len=12, kind=UCS4)              :: progress_speed   !< Progress speed in percent.
+   character(len=1,  kind=UCS4), parameter   :: bar_end=char(13) !< Last bar char, carriage return.
+   character(len=:,  kind=UCS4), allocatable :: bar              !< Bar line.
 
-   progress = nint(current / (self%max_value - self%min_value) * 100)
-   if (progress == 0) then
-      progress_previous = 0
-      spinner_count = 0
-      call system_clock(tic_toc(1), count_rate)
-      if (self%add_date_time) call date_and_time(date=date_time_start(1:8), time=date_time_start(9:))
+   if (self%is_complete_) return
+   if (self%max_value > self%min_value) then
+      fraction = max(0._R8P, min(1._R8P, (current - self%min_value) / (self%max_value - self%min_value)))
+   else
+      fraction = 1._R8P ! empty range: nothing to do
    endif
-   if (mod(progress, self%frequency) == 0 .or. progress == 100) then
-      call system_clock(tic_toc(2), count_rate)
+   ! truncate, so that 100% means done; the tolerance absorbs round-off, e.g. 20 sums of 0.05 giving 0.999...
+   progress = int(fraction * 100._R8P + 1.e-9_R8P, I4P)
+   if (self%progress_drawn_ < 0) then ! first update since start: start the clocks
+      call system_clock(self%tic_)
+      if (self%add_date_time) call date_and_time(date=self%date_time_start_(1:8), time=self%date_time_start_(9:))
+   endif
+   if (self%frequency <= 1 .or. self%progress_drawn_ < 0 .or. progress == 100 .or. &
+       progress / self%frequency > self%progress_drawn_ / self%frequency) then
+      call system_clock(tic, count_rate)
       f_chars = nint(progress / 100._R8P * self%width)
       bar = achar(27)//'[?25l' ! hide cursor
       bar = bar//self%prefix%output()
@@ -256,9 +282,9 @@ contains
       bar = bar//self%bracket_right%output()
       bar = bar//self%suffix%output()
       if (allocated(self%spinner)) then
-         spinner_count = spinner_count + 1
-         if (spinner_count > size(self%spinner, dim=1)) spinner_count = 1
-         bar = bar//self%spinner(spinner_count)%output()
+         self%spinner_count_ = self%spinner_count_ + 1
+         if (self%spinner_count_ > size(self%spinner, dim=1)) self%spinner_count_ = 1
+         bar = bar//self%spinner(self%spinner_count_)%output()
       endif
       if (self%add_progress_percent) then
          write(progress_percent, '(I3,A)') progress, '%'
@@ -266,29 +292,33 @@ contains
          bar = bar//self%progress_percent%output()
       endif
       if (self%add_progress_speed) then
-         write(progress_speed, '(A,F6.2,A)') ' (', (progress - progress_previous) / &
-                                                  (real(tic_toc(2) - tic_toc(1), kind=R8P) / count_rate), '%/s)'
+         elapsed = real(tic - self%tic_, kind=R8P) / real(count_rate, kind=R8P)
+         speed = 0._R8P
+         if (self%progress_drawn_ >= 0 .and. elapsed > 0._R8P) speed = (progress - self%progress_drawn_) / elapsed
+         write(progress_speed, '(A,F6.2,A)') ' (', speed, '%/s)'
          self%progress_speed%string = progress_speed
          bar = bar//self%progress_speed%output()
       endif
       bar = bar//bar_end
       write(self%output_unit, '(A)', advance='no') bar
       flush(self%output_unit)
-      progress_previous = progress
-      tic_toc(1) = tic_toc(2)
+      self%progress_drawn_ = progress
+      self%tic_ = tic
    endif
-   if (progress >= 100) then
+   if (progress == 100) then
       if (self%add_date_time) then
          call date_and_time(date=date_time(1:8), time=date_time(9:))
-         self%date_time%string = '['//date_time_start(1:4)//'/'//date_time_start(5:6)//'/'//date_time_start(7:8)//      &
-                                 ' '//date_time_start(9:10)//':'//date_time_start(11:12)//':'//date_time_start(13:14)// &
-                               ' - '//date_time(1:4)//'/'//date_time(5:6)//'/'//date_time(7:8)//                        &
+         self%date_time%string = '['//self%date_time_start_(1:4)//'/'//self%date_time_start_(5:6)//'/'//              &
+                                 self%date_time_start_(7:8)//' '//self%date_time_start_(9:10)//':'//                   &
+                                 self%date_time_start_(11:12)//':'//self%date_time_start_(13:14)//                     &
+                               ' - '//date_time(1:4)//'/'//date_time(5:6)//'/'//date_time(7:8)//                       &
                                  ' '//date_time(9:10)//':'//date_time(11:12)//':'//date_time(13:14)//']'
          write(self%output_unit, '(A)') achar(27)//'[?25h' ! restore cursor
          write(self%output_unit, '(A)') self%date_time%output()
       else
          write(self%output_unit, '(A)') achar(27)//'[?25h'! restore cursor
       endif
+      self%is_complete_ = .true.
       self%is_stdout_locked_ = .false.
    endif
    endsubroutine update
@@ -331,6 +361,12 @@ contains
    lhs%add_progress_speed = rhs%add_progress_speed
    lhs%add_date_time = rhs%add_date_time
    lhs%is_stdout_locked_ = rhs%is_stdout_locked_
+   lhs%output_unit = rhs%output_unit
+   lhs%progress_drawn_ = rhs%progress_drawn_
+   lhs%tic_ = rhs%tic_
+   lhs%spinner_count_ = rhs%spinner_count_
+   lhs%date_time_start_ = rhs%date_time_start_
+   lhs%is_complete_ = rhs%is_complete_
    endsubroutine assign_bar
 
    subroutine create_spinner(self, string, color_fg, color_bg, style)

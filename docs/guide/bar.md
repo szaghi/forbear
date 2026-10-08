@@ -55,9 +55,9 @@ setting not passed takes its default, whatever the bar had before.
 | Keyword | Type | Default | Meaning |
 |---|---|---|---|
 | `width` | `integer(int32)` | 32 | Characters between the brackets; 0 for no bar body. At least 22 with `add_scale_bar`, or the program stops (`error stop`). |
-| `min_value` | `real(real64)` | 0 | Start of the range. Keep it 0: see [Limitations](./limitations#the-range). |
+| `min_value` | `real(real64)` | 0 | Start of the range. |
 | `max_value` | `real(real64)` | 1 | End of the range. |
-| `frequency` | `integer(int32)` | 1 | Draw the bar only when the progress, in percent, is a multiple of it (and at 100%). |
+| `frequency` | `integer(int32)` | 1 | With 1, draw at every update; with `f > 1`, draw when the progress, in percent, enters a new multiple of `f` (and at 100%). |
 | `output_unit` | `integer(int32)` | standard output | The unit the bar is written to, e.g. `error_unit`. |
 
 ## The line
@@ -79,9 +79,9 @@ again.
 call bar%start
 ```
 
-Prints the scale line (with `add_scale_bar`), then draws the bar at `min_value` and marks the terminal as taken
-(`is_stdout_locked` becomes true). The timer of the speed and the start time of `add_date_time` are taken here, since
-the progress is 0.
+Resets the run state of the bar (timer, spinner, completion), prints the scale line (with `add_scale_bar`), marks the
+terminal as taken (`is_stdout_locked` becomes true) and draws the bar at `min_value`. The timer of the speed and the
+start time of `add_date_time` are taken at this first drawing. A bar can be started again after it has completed.
 
 ## update
 
@@ -89,15 +89,15 @@ the progress is 0.
 call bar%update(current=value)   ! value: real(real64)
 ```
 
-1. The progress is `nint(current / (max_value - min_value) * 100)`, an integer percent.
-2. At 0%, the timer, the spinner and the start time are reset.
-3. If the progress is a multiple of `frequency`, or 100, the line is redrawn: the spinner moves one frame, the speed is
-   the progress made since the previous drawing over the time elapsed since then.
-4. At 100% or more, the cursor is shown again and the line ended; with `add_date_time` the start and end line is
-   printed; `is_stdout_locked` becomes false.
+1. If the bar is complete, nothing happens.
+2. The progress is `(current - min_value) / (max_value - min_value)`, clamped to [0, 1], truncated to an integer
+   percent: 100% only when `current` reaches `max_value`.
+3. The line is redrawn according to `frequency` (and always at 100%): the spinner moves one frame, the speed is the
+   progress made since the previous drawing over the time elapsed since then.
+4. At 100% the cursor is shown again and the line ended; with `add_date_time` the start and end line is printed; the
+   bar is complete and `is_stdout_locked` becomes false.
 
-The progress must stay within 0 and 100: a `current` above `max_value` makes `n` larger than `width`, and the program
-stops with a run time error. See [Behaviour and limitations](./limitations).
+See [Behaviour and limitations](./limitations) for the details.
 
 ## is_stdout_locked
 

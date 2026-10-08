@@ -9,7 +9,7 @@ Every feature of forbear, where the tutorial teaches it and where the reference 
 | Feature | How | Tutorial | Reference |
 |---|---|---|---|
 | A progress bar | `initialize`, `start`, `update` | [1](/manual/tutorial/01-first-bar) | [The bar object](./bar) |
-| Range of the bar | `max_value` (`min_value` must stay 0) | [1](/manual/tutorial/01-first-bar#the-range) | [Limitations](./limitations#the-range) |
+| Range of the bar | `min_value`, `max_value` | [1](/manual/tutorial/01-first-bar#the-range) | [Limitations](./limitations#the-range) |
 | Prefix and suffix | `prefix_string`, `suffix_string` | [2](/manual/tutorial/02-look) | [The line](./bar#the-line) |
 | Brackets | `bracket_left_string`, `bracket_right_string` | [2](/manual/tutorial/02-look) | [The line](./bar#the-line) |
 | Bar characters and width | `filled_char_string`, `empty_char_string`, `width` | [2](/manual/tutorial/02-look) | [The line](./bar#the-line) |

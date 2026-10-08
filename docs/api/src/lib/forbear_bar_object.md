@@ -55,6 +55,11 @@ graph LR
 | `add_date_time` | logical |  |  |
 | `is_stdout_locked_` | logical |  |  |
 | `output_unit` | integer(kind=I4P) |  |  |
+| `progress_drawn_` | integer(kind=I4P) |  |  |
+| `tic_` | integer(kind=I8P) |  |  |
+| `spinner_count_` | integer(kind=I4P) |  |  |
+| `date_time_start_` | character(len=18) |  |  |
+| `is_complete_` | logical |  |  |
 
 #### Type-Bound Procedures
 

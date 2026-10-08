@@ -27,16 +27,11 @@ the loop needs no special care.
 
 ## The range
 
-The progress is the current value over the length of the range, in percent, rounded to an integer. With the default
-range [0, 1] you pass the fraction done; with `max_value=real(steps, R8P)` you pass the step itself. Two rules keep the
-bar correct:
-
-- keep `min_value` at 0, and shift your counter instead (see [A loop that does not start at 1](../cookbook#a-loop-of-many-iterations));
-- never pass a value beyond `max_value`: past 100% the bar no longer fits its width and the program stops with a run
-  time error.
-
-A loop of more than 200 iterations needs one more line: see [the cookbook](../cookbook#a-loop-of-many-iterations) and
-[Behaviour and limitations](/guide/limitations).
+The progress is the fraction of the range done, in percent, truncated to an integer: the bar shows 100% only when
+`current` reaches `max_value`. With the default range [0, 1] you pass the fraction done; with
+`max_value=real(steps, R8P)` you pass the step itself; with `min_value` too, a counter that does not start at 1 (see
+[A loop of many iterations](../cookbook#a-loop-of-many-iterations)). A value outside the range is clamped, and once
+the bar has reached 100% further updates do nothing.
 
 ::: tip What you learned
 The three steps `initialize`, `start`, `update`; the range of the bar.

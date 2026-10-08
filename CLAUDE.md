@@ -43,9 +43,9 @@ Every code sample and output in the tutorial and cookbook comes from a real prog
   speed (`nn.nn`) and the dates (`yyyy/mm/dd hh:mm:ss`), so the output is identical from run to run.
 - Shiki's dual-theme ANSI renderer drops background colours, so examples that render in the docs must use foreground
   colours only.
-- The pages document the library's real edge behaviour in `docs/guide/limitations.md` (the 200-step rounding, the
-  `min_value` and `max_value` overflow, the shared `save` state, field overflows). If you fix one of these in
-  `forbear_bar_object.F90`, update that page and the tutorial and cookbook passages that link to it.
+- `docs/guide/limitations.md`, `guide/bar.md` (the `update` steps) and the tutorial and cookbook describe the exact
+  semantics of `update` (truncation, clamping, `frequency`, the format limits). Any change to `update` must update
+  them, then rerun `scripts/docs_examples.sh`.
 
 ## Dependencies
 
@@ -81,13 +81,17 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 
 ### Non-obvious behaviour in `update`
 
-- The timer, previous progress, spinner counter and start date are **`save` locals**, not components of the bar. All
-  `bar_object` instances share them, so two bars updated alternately corrupt each other's speed and spinner state.
-  They are reset only when the computed progress is exactly 0.
-- Progress is computed as `nint(current / (max_value - min_value) * 100)`, without subtracting `min_value`.
-  If progress goes past about 100 + 50/width %, `REPEAT` gets a negative count and the program aborts. That happens
-  when `min_value /= 0`, or when `current > max_value`. Because of the rounding, every update from 99.5 % on counts as
-  100 %: in a loop of more than 200 steps, each of the last updates prints the completed bar again on a new line.
+- The run state lives in trailing-underscore components (`progress_drawn_`, `tic_`, `spinner_count_`,
+  `date_time_start_`, `is_complete_`). `start` resets it, and the first update after `start` starts the clocks. Never
+  reintroduce `save` locals: they would be shared by every bar.
+- Progress is `(current - min_value)/(max_value - min_value)`, clamped to [0, 1] and truncated with a 1e-9 % tolerance,
+  so 100 % means done. Clamping keeps `REPEAT` counts non-negative. An empty range completes at `start`, and `start`
+  locks *before* its first update so that this completion can unlock.
+- Once complete, `update` returns immediately until the next `start`.
+- `frequency=1` redraws on every update (the spinner animates even when the percent is unchanged). `frequency>1`
+  redraws when progress enters a new multiple of it.
+- Remaining format limits: the speed is `F6.2`, so it shows `******` above 999.99 %/s, and the scale labels are
+  `F5.2`, so they show `*****` from 100 upwards.
 - `width=0` makes a spinner-only or counter-only display, with no bar body. `add_scale_bar` requires `width >= 22`
   and otherwise raises `error stop`.
 

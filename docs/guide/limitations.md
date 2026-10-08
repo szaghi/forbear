@@ -9,35 +9,20 @@ source; the workarounds are in your program, not in the library.
 
 ## The range
 
-The progress is `nint(current / (max_value - min_value) * 100)`: an integer percent, rounded to the nearest.
+The progress is the fraction of the range done, `(current - min_value) / (max_value - min_value)`, clamped to [0, 1]
+and truncated to an integer percent: 99.9% shows as 99%, and the bar is complete only when `current` reaches
+`max_value` (a tolerance of 10⁻⁹ percent absorbs the round-off of a sum such as twenty steps of 0.05).
 
-**Keep `min_value` at 0.** The formula does not subtract `min_value` from `current`: with a range [1000, 2000] the
-first update already reports 100%. Measure your counter from its start instead, as in
-[A loop of many iterations](/manual/cookbook#a-loop-of-many-iterations).
-
-**Never pass `current` beyond `max_value`.** Past 100% (a little past: from `100 + 50 / width` percent) the done part
-is longer than the bar, and the program stops with a run time error, also without run time checks:
-
-```
-Fortran runtime error: Argument NCOPIES of REPEAT intrinsic is negative (its value is -3)
-```
-
-**More than 200 updates.** Rounding makes the progress 100% from 99.5% on: in a loop of more than 200 iterations, the
-last ones each end the bar again and print it on a new line.
-
-<<< @/examples/snippets/many_naive.f90
-
-<<< @/examples/output/many_naive.ansi{ansi}
-
-Pass an integer percent computed by truncation, which reaches 100 only at the last iteration: see
-[A loop of many iterations](/manual/cookbook#a-loop-of-many-iterations). For the same reason, the updates whose
-progress rounds to 0% (the first iterations of a loop of more than 200) each reset the timer and the spinner.
+- A `current` outside the range is clamped: below `min_value` the bar shows 0%, above `max_value` 100%.
+- The bar completes once: it ends its line at 100%, and further updates do nothing until the next `start`.
+- An empty range (`max_value <= min_value`) completes the bar at `start`.
 
 ## Frequency
 
-With `frequency=f` the bar is drawn only when the progress is a multiple of `f`, or 100. The progress must hit those
-multiples: a loop of 7 steps goes 14%, 29%, 43%, 57%, 71%, 86%, 100%, and with `frequency=10` its bar jumps from 0% to
-100%.
+With `frequency=1` (the default) the bar is drawn at every update, even when the percent has not changed: the spinner
+moves at every update. With `frequency=f` larger than 1 it is drawn when the progress enters a new multiple of `f`,
+and at 100%: a loop of 7 steps (14%, 28%, 42%, ...) with `frequency=10` is drawn at every step, since each one enters a
+new ten. The first drawing, at `start`, is always made.
 
 ## Numbers that do not fit
 
@@ -47,14 +32,14 @@ multiples: a loop of 7 steps goes 14%, 29%, 43%, 57%, 71%, 86%, 100%, and with `
   show as `*****`. The scale is useful for ranges such as [0, 1] or [0, 50]; for a larger one, use the percentage.
 - `add_scale_bar` needs `width` of at least 22: a narrower bar stops the program in `initialize`, with an `error stop`.
 
-## One bar at a time
+## Several bars, one terminal
 
-The timer of the speed, the progress at the previous drawing, the frame of the spinner and the start time live in
-the `update` procedure, not in the bar: every `bar_object` of the program shares them. Bars one after another are
-fine; two bars running at the same time (nested loops, interleaved updates) corrupt each other's speed and spinner.
+Every bar keeps its own state (timer, spinner, start time): bars one after another, nested or interleaved, do not
+disturb each other's numbers. They do share the terminal: two bars drawn on the same unit at the same time overwrite
+each other's line. Draw them on different units, or one after another.
 
-For the same reason `update` is not thread safe: call it from one thread. Under MPI, every process that calls it draws
-its own bar on the same terminal: draw from one process only.
+A bar is not thread safe: update it from one thread. Under MPI, every process that updates a bar draws it on the same
+terminal: draw from one process only.
 
 ## initialize resets everything
 

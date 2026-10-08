@@ -66,8 +66,7 @@ This is a whole program: initialize the bar, start it, update it at every step.
 <<< @/examples/output/minimal.ansi{ansi}
 
 Learn forbear step by step in the [tutorial](/manual/tutorial/01-first-bar), find quick answers in the
-[cookbook](/manual/cookbook), look up every keyword in the [reference](/guide/features). Read
-[Behaviour and limitations](/guide/limitations) before using forbear in a loop of more than 200 iterations.
+[cookbook](/manual/cookbook), look up every keyword in the [reference](/guide/features).
 
 ## Authors
 

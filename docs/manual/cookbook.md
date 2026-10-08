@@ -27,22 +27,12 @@ The default range is [0, 1]: pass the fraction done.
 
 ## A loop of many iterations {#a-loop-of-many-iterations}
 
-The progress is rounded to an integer percent, and from 99.5% on it already counts as 100%: in a loop of more than 200
-iterations, the last ones each print the completed bar again, on a new line.
-
-<<< @/examples/snippets/many_naive.f90
-
-<<< @/examples/output/many_naive.ansi{ansi}
-
-Pass the integer percent instead, computed by truncation, which reaches 100 only at the last iteration; and update the
-bar only when it changes. The same lines handle a counter that does not start at 1 (`min_value` must stay 0):
-
-<<< @/examples/snippets/many-percent.f90
+<<< @/examples/snippets/many-range.f90
 
 <<< @/examples/output/many.ansi{ansi}
 
-The product `100 * (i - first + 1)` is computed in 64-bit integers: in default integers it overflows from about 21
-million iterations.
+The range starts one before the first record, so that the bar starts at 0%. With the default `frequency=1` the bar is
+drawn at every update: a million drawings cost more than the loop itself, while `frequency=5` draws it 21 times.
 
 ## A Unicode bar
 
@@ -122,5 +112,5 @@ prefix: the copy is lost, and those bars have the defaults.
 
 <<< @/examples/snippets/sequence-copy.f90
 
-Never run two bars at the same time, nested or interleaved: they share their timer and spinner state (see
-[Behaviour and limitations](/guide/limitations#one-bar-at-a-time)).
+Every bar keeps its own state, but two bars drawn on the same terminal at the same time overwrite each other's line
+(see [Behaviour and limitations](/guide/limitations#several-bars-one-terminal)).
