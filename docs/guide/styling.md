@@ -6,9 +6,11 @@ title: Colours and styles
 
 Every element of the bar takes a foreground colour (`<element>_color_fg`), a background colour (`<element>_color_bg`)
 and a style (`<element>_style`), by name. The names are those of [FACE](https://github.com/szaghi/FACE), which writes
-them as ANSI escape sequences; they are case insensitive (`red`, `RED`, `Red`).
+them as ANSI escape sequences; they are case insensitive (`red`, `RED`, `Red`). A colour may also be a 24-bit value,
+`#rrggbb`.
 
-A name that is not in these lists stops the program in `initialize`, with a message that names it.
+A name that is not in these lists, or a malformed `#rrggbb`, stops the program in `initialize`, with a message that
+names it.
 
 ## Colours
 
@@ -34,7 +36,13 @@ The same 17 names for the foreground and the background:
 | `cyan_intense` | 96 | 106 |
 | `white_intense` | 97 | 107 |
 
-How a colour looks depends on the palette of the terminal.
+How a named colour looks depends on the palette of the terminal.
+
+### 24-bit colours
+
+`#rrggbb`, three hexadecimal pairs in any case (`#2EF5C0`, `#2ef5c0`), is written as `ESC[38;2;r;g;bm` in the
+foreground and `ESC[48;2;r;g;bm` in the background: the exact colour, whatever the palette of the terminal. Most modern
+terminals support it; one that does not shows an approximation, or no colour. The short form `#rgb` is not accepted.
 
 ## Styles
 
@@ -54,6 +62,30 @@ One style for each element:
 The `_off` names (`bold_off`, `italics_off`, `underline_off`, `inverse_off`, `strikethrough_off`, `framed_off`,
 `encircled_off`, `overlined_off`) exist too, but have no use here: every element ends with a reset of all colours and
 styles. Many terminals do not support `framed_on`, `encircled_on` and `overlined_on`.
+
+## Zones
+
+`bar_zones` colours each filled cell of the bar body by its position, as the tachometer of a car turns amber, then red,
+towards the end of its scale. It is a list of `limit:colour` items separated by blanks:
+
+- the limit is a fraction of the body, in (0, 1], increasing from item to item;
+- the colour is a name or `#rrggbb`, and replaces the foreground colour of `filled_char` (its background and style
+  stay).
+
+A filled cell takes the colour of the first zone whose limit reaches the end of the cell: with `width=40` and
+`'0.7:… 0.88:… 1:…'`, cells 1–28, 29–35 and 36–40. Cells beyond the last limit keep the `filled_char` colour; empty
+cells keep the `empty_char` colours. The partial block of `partial_blocks` takes the colour of its cell, and so do the
+block of an [indeterminate](./bar#initialize) bar and its full body at the end. A log has no colours: the zones change
+nothing there.
+
+A wrong item stops the program in `initialize`, with a message that names it: no colon, a limit that is not a number,
+not in (0, 1] or not above the previous one, an unknown colour.
+
+<<< @/examples/snippets/zones-init.f90
+
+At 80%, the dark `empty_char` cells are the unlit segments:
+
+<<< @/examples/output/zones.ansi{ansi}
 
 ## Example
 

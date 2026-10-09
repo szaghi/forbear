@@ -63,3 +63,8 @@ main = "forbear_test_suspend.F90"
 name = "forbear_test_template"
 source-dir = "src/tests"
 main = "forbear_test_template.F90"
+
+[[test]]
+name = "forbear_test_zones"
+source-dir = "src/tests"
+main = "forbear_test_zones.F90"

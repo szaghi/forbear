@@ -39,14 +39,18 @@ graph LR
 - [add_token](#add-token)
 - [default_layout](#default-layout)
 - [parse_template](#parse-template)
+- [parse_zones](#parse-zones)
 - [resolve_fields](#resolve-fields)
 - [complete](#complete)
 - [draw](#draw)
 - [update_rate](#update-rate)
 - [create_spinner](#create-spinner)
 - [template_error](#template-error)
+- [zones_error](#zones-error)
 - [is_stdout_locked](#is-stdout-locked)
 - [bar_body](#bar-body)
+- [cell_zone](#cell-zone)
+- [lit_cells](#lit-cells)
 - [progress_state](#progress-state)
 - [width_before_bar](#width-before-bar)
 - [compact_real](#compact-real)
@@ -127,6 +131,8 @@ graph LR
 | `date_time` | type([element_object](/api/src/lib/forbear_element_object#element-object)) |  |  |
 | `summary` | type([element_object](/api/src/lib/forbear_element_object#element-object)) |  |  |
 | `spinner` | type([element_object](/api/src/lib/forbear_element_object#element-object)) | allocatable |  |
+| `zone_limit` | real(kind=R8P) | allocatable |  |
+| `zone_char` | type([element_object](/api/src/lib/forbear_element_object#element-object)) | allocatable |  |
 | `width` | integer(kind=I4P) |  |  |
 | `min_value` | real(kind=R8P) |  |  |
 | `max_value` | real(kind=R8P) |  |  |
@@ -184,6 +190,9 @@ graph LR
 | `add_token` | pass(self) |  |
 | `bar_body` | pass(self) |  |
 | `build_frame` | pass(self) |  |
+| `cell_zone` | pass(self) |  |
+| `lit_cells` | pass(self) |  |
+| `parse_zones` | pass(self) |  |
 | `default_layout` | pass(self) |  |
 | `parse_template` | pass(self) |  |
 | `measure` | pass(self) |  |
@@ -230,7 +239,7 @@ flowchart TD
 ### initialize
 
 ```fortran
-subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit)
+subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit, bar_zones)
 ```
 
 **Arguments**
@@ -312,6 +321,7 @@ subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, pre
 | `indeterminate` | logical | in | optional |  |
 | `log_interval` | real(kind=R8P) | in | optional |  |
 | `output_unit` | integer(kind=I4P) | in | optional |  |
+| `bar_zones` | character(len=*) | in | optional |  |
 
 **Call graph**
 
@@ -327,6 +337,7 @@ flowchart TD
   initialize["initialize"] --> initialize["initialize"]
   initialize["initialize"] --> is_terminal["is_terminal"]
   initialize["initialize"] --> parse_template["parse_template"]
+  initialize["initialize"] --> parse_zones["parse_zones"]
   initialize["initialize"] --> ucs4_string["ucs4_string"]
   style initialize fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
@@ -636,6 +647,30 @@ flowchart TD
   style parse_template fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
+### parse_zones
+
+```fortran
+subroutine parse_zones(self, zones)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | inout |  |  |
+| `zones` | character(len=*) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  initialize["initialize"] --> parse_zones["parse_zones"]
+  parse_zones["parse_zones"] --> is_color["is_color"]
+  parse_zones["parse_zones"] --> next_item["next_item"]
+  parse_zones["parse_zones"] --> zones_error["zones_error"]
+  style parse_zones fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
 ### resolve_fields
 
 ```fortran
@@ -781,6 +816,27 @@ flowchart TD
   style template_error fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
+### zones_error
+
+```fortran
+subroutine zones_error(what, zones)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `what` | character(len=*) | in |  |  |
+| `zones` | character(len=*) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  parse_zones["parse_zones"] --> zones_error["zones_error"]
+  style zones_error fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
 ## Functions
 
 ### is_stdout_locked
@@ -821,9 +877,66 @@ function bar_body(self, progress, fraction, plain) result(body)
 ```mermaid
 flowchart TD
   build_frame["build_frame"] --> bar_body["bar_body"]
+  bar_body["bar_body"] --> cell_zone["cell_zone"]
+  bar_body["bar_body"] --> lit_cells["lit_cells"]
   bar_body["bar_body"] --> render["render"]
   bar_body["bar_body"] --> ucs4_string["ucs4_string"]
   style bar_body fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
+### cell_zone
+
+**Attributes**: pure
+
+**Returns**: `integer(kind=I4P)`
+
+```fortran
+function cell_zone(self, cell) result(zone)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | in |  |  |
+| `cell` | integer(kind=I4P) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  bar_body["bar_body"] --> cell_zone["cell_zone"]
+  lit_cells["lit_cells"] --> cell_zone["cell_zone"]
+  style cell_zone fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
+### lit_cells
+
+**Attributes**: pure
+
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
+
+```fortran
+function lit_cells(self, first, last, plain) result(cells)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | in |  |  |
+| `first` | integer(kind=I4P) | in |  |  |
+| `last` | integer(kind=I4P) | in |  |  |
+| `plain` | logical | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  bar_body["bar_body"] --> lit_cells["lit_cells"]
+  lit_cells["lit_cells"] --> cell_zone["cell_zone"]
+  lit_cells["lit_cells"] --> render["render"]
+  style lit_cells fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
 ### progress_state
@@ -1154,6 +1267,7 @@ flowchart TD
   bar_body["bar_body"] --> render["render"]
   build_frame["build_frame"] --> render["render"]
   complete["complete"] --> render["render"]
+  lit_cells["lit_cells"] --> render["render"]
   styled["styled"] --> render["render"]
   width_before_bar["width_before_bar"] --> render["render"]
   render["render"] --> output["output"]

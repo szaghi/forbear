@@ -13,7 +13,8 @@ While running:
 <<< @/examples/output/march_3.ansi{ansi}
 
 - Colours and styles are names: `red`, `green_intense`, `bold_on`, ... in any case. There are 17 colours, the same for
-  the foreground and the background, and 16 styles: the full list is in [Colours and styles](/guide/styling).
+  the foreground and the background, and 16 styles: the full list is in [Colours and styles](/guide/styling). A colour
+  may also be a 24-bit `#rrggbb`, the same on every terminal palette.
 - A name that is not in the list stops the program in `initialize`, with a message that names it: a typo cannot go
   unnoticed.
 - Each element takes one style.

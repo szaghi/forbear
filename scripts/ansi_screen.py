@@ -44,8 +44,17 @@ def render(text: str, frame: int = 0) -> list[str]:
             params, final = match.groups()
             count = int(params) if params.isdigit() else 1
             if final == "m":
-                for code in params.split(";"):
+                codes = params.split(";")
+                k = 0
+                while k < len(codes):
+                    code = codes[k]
+                    # 38/48 take their arguments: 5;n (256 colours) or 2;r;g;b (24-bit), whose zeros are no resets
+                    if code in ("38", "48") and k + 1 < len(codes):
+                        width = {"5": 2, "2": 4}.get(codes[k + 1], 1)
+                        code = ";".join(codes[k : k + 1 + width])
+                        k += width
                     sgr = () if code in ("", "0") else (*sgr, code)
+                    k += 1
             elif final == "A":
                 row = max(0, row - count)
             elif final == "B":

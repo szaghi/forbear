@@ -39,7 +39,9 @@ Portability lessons from ifx and nvfortran:
 - keep every line, comments included, within 132 columns;
 - never write `'\'` (nvfortran treats backslash as an escape in literals): use `achar(92)`;
 - never import an unused `R8P=>…` alias into a private module: nvfortran leaked `forbear_element_object`'s
-  `R8P=>real32` into `forbear_bar_object`.
+  `R8P=>real32` into `forbear_bar_object`;
+- never grow an array of `element_object` with a constructor (`a = [a, e]`): nvfortran corrupted the strings of its
+  elements. Count first, allocate once, assign element by element (`parse_zones`).
 
 ## Documentation examples and GIFs
 
@@ -113,6 +115,10 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   Prefix and suffix tokens keep only colours: `build_frame` reads `self%prefix%string`/`self%suffix%string` at every
   drawing, so a program may change them while the bar runs (v1.6.0 copied them, and silently broke that).
   Mistakes stop the program: template syntax, field names, colour, style and spinner names.
+- **Colour zones**: `bar_zones='limit:colour …'` (`parse_zones`) fills `zone_limit(:)`/`zone_char(:)`, copies of
+  `filled_char` with another fg. Every lit cell of `bar_body` goes through `lit_cells` (runs of one zone), the partial
+  block and the indeterminate pulse included; `cell_zone` gives a cell the first zone whose limit reaches its end edge.
+  Colours may be FACE 24-bit `#rrggbb`; `scripts/ansi_screen.py` keeps `38;2;r;g;b` whole (its zeros are no resets).
 - **Modes**, resolved once in `initialize`: interactive comes from the `interactive` keyword, else
   `FORBEAR_INTERACTIVE`, else `is_terminal(output_unit)`. That calls C `isatty` through `iso_c_binding`, and only
   `output_unit`→fd 1 and `error_unit`→fd 2 can be terminals. `FORBEAR_DISABLE` (≠0) forces disabled. A

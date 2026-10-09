@@ -74,6 +74,8 @@ type :: bar_object
    type(element_object)              :: date_time            !< Date and time.
    type(element_object)              :: summary              !< Summary printed when the bar completes.
    type(element_object), allocatable :: spinner(:)           !< Spinner.
+   real(R8P),            allocatable :: zone_limit(:)        !< Upper limits of the colour zones of the body, in (0, 1].
+   type(element_object), allocatable :: zone_char(:)         !< Filled char, in the colour of each zone.
    integer(I4P)                      :: width                !< With of the bar.
    real(R8P)                         :: min_value            !< Minimum value.
    real(R8P)                         :: max_value            !< Maximum value.
@@ -131,6 +133,9 @@ type :: bar_object
       procedure, pass(self), private :: add_token      !< Add a token to the layout.
       procedure, pass(self), private :: bar_body       !< Return the body of the bar.
       procedure, pass(self), private :: build_frame    !< Build the frame of the current progress.
+      procedure, pass(self), private :: cell_zone      !< Return the colour zone of a cell of the body.
+      procedure, pass(self), private :: lit_cells      !< Return filled cells of the body, in the colours of their zones.
+      procedure, pass(self), private :: parse_zones    !< Build the colour zones of the body.
       procedure, pass(self), private :: default_layout !< Build the layout the keywords describe.
       procedure, pass(self), private :: parse_template !< Build the layout of a template.
       procedure, pass(self), private :: measure        !< Return the progress of a current value.
@@ -171,6 +176,8 @@ contains
       enddo
       deallocate (self%spinner)
    endif
+   if (allocated(self%zone_limit)) deallocate(self%zone_limit)
+   if (allocated(self%zone_char)) deallocate(self%zone_char)
    self%width = 32
    self%min_value = 0._R8P
    self%max_value = 1._R8P
@@ -228,7 +235,8 @@ contains
                          add_summary, summary_color_fg, summary_color_bg, summary_style,                                     &
                          message_color_fg, message_color_bg, message_style,                                                  &
                          width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position,          &
-                         interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit)
+                         interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit,   &
+                         bar_zones)
    !< Initialize bar.
    !<
    !< Every setting not passed takes its default. The display mode is resolved here: `interactive` if passed, else the
@@ -236,7 +244,8 @@ contains
    !< environment variable `FORBEAR_DISABLE` (any value but 0) disables every bar; `FORBEAR_MIN_INTERVAL` and
    !< `FORBEAR_LOG_INTERVAL` replace the defaults of `min_interval` and `log_interval`. With `indeterminate`, the total
    !< is unknown: `current` counts what is done, from `min_value`, and the bar ends with `finish`; it has no percent, ETA
-   !< or scale (asking for them stops the program).
+   !< or scale (asking for them stops the program). `bar_zones` colours each filled cell of the body by its position, as
+   !< `limit:colour` items separated by blanks, e.g. `'0.7:#2EF5C0 0.88:#FFB000 1:#FF3B30'`.
    class(bar_object), intent(inout)         :: self                      !< Bar.
    class(*),          intent(in), optional  :: prefix_string             !< Prefix string.
    character(len=*),  intent(in), optional  :: prefix_color_fg           !< Prefix foreground color.
@@ -312,6 +321,7 @@ contains
    logical,           intent(in), optional  :: indeterminate             !< The total is unknown.
    real(R8P),         intent(in), optional  :: log_interval              !< Maximum time between two lines of a log.
    integer(I4P),      intent(in), optional  :: output_unit               !< Output unit to display bar
+   character(len=*),  intent(in), optional  :: bar_zones                 !< Colour zones of the body, `limit:colour …`.
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
    character(len=:),            allocatable :: env                       !< Value of an environment variable.
@@ -346,6 +356,7 @@ contains
                                    style=empty_char_style)
    call self%filled_char%initialize(string=filled_char_string_, color_fg=filled_char_color_fg, color_bg=filled_char_color_bg,&
                                     style=filled_char_style)
+   if (present(bar_zones)) call self%parse_zones(bar_zones)
    call self%create_spinner(string=spinner_string, color_fg=spinner_color_fg, color_bg=spinner_color_bg, style=spinner_style)
    if (present(add_scale_bar)) self%add_scale_bar = add_scale_bar
    call self%scale_bar%initialize(color_fg=scale_bar_color_fg, color_bg=scale_bar_color_bg, style=scale_bar_style)
@@ -731,7 +742,7 @@ contains
 
    if (self%indeterminate) then ! a block going back and forth, one cell per drawing; full at the end, empty in a log
       if (self%is_complete_) then
-         body = repeat(render(self%filled_char, plain), self%width)
+         body = self%lit_cells(1_I4P, self%width, plain)
       elseif (plain) then
          body = repeat(render(self%empty_char, plain), self%width)
       else
@@ -739,17 +750,21 @@ contains
          travel = self%width - block
          k = 0 ; if (travel > 0) k = mod(self%pulse_ - 1_I4P, 2_I4P * travel)
          if (k > travel) k = 2_I4P * travel - k
-         body = repeat(render(self%empty_char, plain), k)//repeat(render(self%filled_char, plain), block)// &
+         body = repeat(render(self%empty_char, plain), k)//self%lit_cells(k + 1_I4P, k + block, plain)// &
                 repeat(render(self%empty_char, plain), travel - k)
       endif
    elseif (self%partial_blocks) then
       cells = fraction * self%width
       full = min(self%width, int(cells, I4P))
       eighths = int((cells - full) * 8._R8P, I4P)
-      body = repeat(render(self%filled_char, plain), full)
+      body = self%lit_cells(1_I4P, full, plain)
       rest = self%width - full
       if (eighths > 0 .and. rest > 0) then
-         glyph = self%filled_char
+         if (self%cell_zone(full + 1_I4P) > 0) then
+            glyph = self%zone_char(self%cell_zone(full + 1_I4P))
+         else
+            glyph = self%filled_char
+         endif
          glyph%string = ucs4_string(input=PARTIAL_BLOCKS(eighths))
          glyph%color_bg = self%empty_char%color_bg ! the rest of the cell looks as an empty one
          body = body//render(glyph, plain)
@@ -758,9 +773,54 @@ contains
       body = body//repeat(render(self%empty_char, plain), rest)
    else
       full = nint(progress / 100._R8P * self%width)
-      body = repeat(render(self%filled_char, plain), full)//repeat(render(self%empty_char, plain), self%width - full)
+      body = self%lit_cells(1_I4P, full, plain)//repeat(render(self%empty_char, plain), self%width - full)
    endif
    endfunction bar_body
+
+   pure function cell_zone(self, cell) result(zone)
+   !< Return the colour zone of a cell of the body, the first whose limit reaches the end of the cell; 0 if none.
+   class(bar_object), intent(in) :: self !< Bar.
+   integer(I4P),      intent(in) :: cell !< Cell, from 1 to the width.
+   integer(I4P)                  :: zone !< Zone; 0 for the filled_char colours.
+   real(R8P)                     :: edge !< End of the cell, as a fraction of the body.
+
+   zone = 0
+   if (.not.allocated(self%zone_limit)) return
+   edge = real(cell, R8P) / max(1_I4P, self%width)
+   do zone=1, size(self%zone_limit, dim=1)
+      if (edge <= self%zone_limit(zone) + 1.e-9_R8P) return
+   enddo
+   zone = 0
+   endfunction cell_zone
+
+   pure function lit_cells(self, first, last, plain) result(cells)
+   !< Return the filled cells `first` to `last` of the body, each in the colour of its zone, a run of cells at a time.
+   class(bar_object), intent(in)            :: self  !< Bar.
+   integer(I4P),      intent(in)            :: first !< First cell.
+   integer(I4P),      intent(in)            :: last  !< Last cell.
+   logical,           intent(in)            :: plain !< Write without colors.
+   character(len=:, kind=UCS4), allocatable :: cells !< Rendered cells.
+   integer(I4P)                             :: zone  !< Zone of a run of cells.
+   integer(I4P)                             :: c     !< First cell of a run.
+   integer(I4P)                             :: r     !< Last cell of a run.
+
+   cells = UCS4_''
+   c = first
+   do while (c <= last)
+      zone = self%cell_zone(c)
+      r = c
+      do while (r < last)
+         if (self%cell_zone(r + 1_I4P) /= zone) exit
+         r = r + 1_I4P
+      enddo
+      if (zone > 0) then
+         cells = cells//repeat(render(self%zone_char(zone), plain), r - c + 1_I4P)
+      else
+         cells = cells//repeat(render(self%filled_char, plain), r - c + 1_I4P)
+      endif
+      c = r + 1_I4P
+   enddo
+   endfunction lit_cells
 
    pure subroutine measure(self, current, fraction, progress)
    !< Return the progress of a current value: the fraction of the range done, clamped to [0, 1], and the percent,
@@ -1016,6 +1076,68 @@ contains
       call self%add_token(kind, style=style, name=name)
       endsubroutine parse_field
    endsubroutine parse_template
+
+   subroutine parse_zones(self, zones)
+   !< Build the colour zones of the body from `limit:colour` items separated by blanks: the limit is a fraction of the
+   !< body in (0, 1], increasing from item to item; the colour a name or `#rrggbb`. A filled cell takes the colour of
+   !< the first zone whose limit reaches its end, and keeps the filled_char colours beyond the last one.
+   class(bar_object), intent(inout) :: self   !< Bar.
+   character(len=*),  intent(in)    :: zones  !< Zones.
+   character(len=:), allocatable    :: rest   !< Items still to parse.
+   character(len=:), allocatable    :: item   !< An item.
+   real(R8P)                        :: limit  !< Limit of a zone.
+   integer(I4P)                     :: colon  !< Position of the colon of an item.
+   integer(I4P)                     :: n      !< Number of zones.
+   integer(I4P)                     :: iostat !< Status of a read.
+
+   ! first the limits, checking every item; then the chars, allocated once: nvfortran corrupts the strings of an array
+   ! of elements grown by an array constructor, [self%zone_char, self%filled_char]
+   allocate(self%zone_limit(0))
+   rest = trim(adjustl(zones))
+   do while (len(rest) > 0)
+      call next_item
+      if (colon < 2 .or. colon == len(item)) call zones_error('an item "'//item//'" that is not limit:colour', zones)
+      iostat = 1
+      if (verify(item(:colon - 1), '0123456789.') == 0) read(item(:colon - 1), *, iostat=iostat) limit
+      if (iostat /= 0) call zones_error('a wrong limit "'//item(:colon - 1)//'"', zones)
+      if (limit <= 0._R8P .or. limit > 1._R8P) call zones_error('a limit "'//item(:colon - 1)//'" not in (0, 1]', zones)
+      n = size(self%zone_limit, dim=1)
+      if (n > 0) then
+         if (limit <= self%zone_limit(n)) call zones_error('a limit "'//item(:colon - 1)//'" not above the previous', zones)
+      endif
+      if (.not.is_color(item(colon + 1:))) call zones_error('an unknown colour "'//item(colon + 1:)//'"', zones)
+      self%zone_limit = [self%zone_limit, limit]
+   enddo
+   n = size(self%zone_limit, dim=1)
+   if (n == 0) then
+      deallocate(self%zone_limit)
+      return
+   endif
+   allocate(self%zone_char(n))
+   rest = trim(adjustl(zones))
+   n = 0
+   do while (len(rest) > 0)
+      call next_item
+      n = n + 1
+      self%zone_char(n) = self%filled_char
+      self%zone_char(n)%color_fg = item(colon + 1:)
+   enddo
+   contains
+      subroutine next_item()
+      !< Take the next item off the rest, and find its colon.
+      integer(I4P) :: blank !< Position of the blank after the item.
+
+      blank = index(rest, ' ')
+      if (blank > 0) then
+         item = rest(:blank - 1)
+         rest = trim(adjustl(rest(blank + 1:)))
+      else
+         item = rest
+         rest = ''
+      endif
+      colon = index(item, ':')
+      endsubroutine next_item
+   endsubroutine parse_zones
 
    subroutine resolve_fields(self)
    !< Find the fields of the program that the template names: a name with no field stops the program.
@@ -1741,6 +1863,15 @@ contains
    write(stderr, '(A)') 'forbear: '//what//' in template "'//template//'", see https://szaghi.github.io/forbear/guide/templates'
    error stop 'forbear: wrong template'
    endsubroutine template_error
+
+   subroutine zones_error(what, zones)
+   !< Stop the program on wrong colour zones.
+   character(len=*), intent(in) :: what  !< What is wrong.
+   character(len=*), intent(in) :: zones !< Zones, as given.
+
+   write(stderr, '(A)') 'forbear: '//what//' in bar_zones "'//zones//'", see https://szaghi.github.io/forbear/guide/styling#zones'
+   error stop 'forbear: wrong bar_zones'
+   endsubroutine zones_error
 
    pure function token_kind(name) result(kind)
    !< Return the kind of token of a field name: a field of forbear, or one of the program.

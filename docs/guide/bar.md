@@ -66,6 +66,7 @@ setting not passed takes its default, whatever the bar had before.
 | `min_value` | `real(real64)` | 0 | Start of the range. |
 | `max_value` | `real(real64)` | 1 | End of the range. |
 | `partial_blocks` | `logical` | `.false.` | Draw the done part with full and partial blocks, eight steps per character. |
+| `bar_zones` | `character(*)` | none | Colour each filled cell by its position: `limit:colour` items, e.g. `'0.7:green 0.9:yellow 1:red'`. See [Zones](./styling#zones). |
 | `min_interval` | `real(real64)` | 0.1 | Minimum time between two drawings on a terminal, in seconds; `FORBEAR_MIN_INTERVAL` replaces the default. |
 | `log_interval` | `real(real64)` | 0 | In a log, also write a line when this many seconds have passed since the last one; 0 for none. `FORBEAR_LOG_INTERVAL` replaces the default. On a terminal it does nothing. |
 | `frequency` | `integer(int32)` | 1 | With 1, draw at every update due; with `f > 1`, only when the progress enters a new multiple of `f`% (and at 100%). In a log, a line every `f`% (every 10% with 1). |
@@ -88,7 +89,8 @@ prefix  bracket_left  done part  remaining part  bracket_right  suffix  spinner 
 
 The done part has `nint(progress / 100 * width)` characters; with `partial_blocks`, `int(fraction * width)` full blocks
 and a partial block for the eighths of the next character, in the foreground of `filled_char` and the background of
-`empty_char`. The filled and empty strings are repeated as they are: with more than one character each, the bar is
+`empty_char`. With [`bar_zones`](./styling#zones), each filled cell, the partial one included, takes the foreground of
+its zone. The filled and empty strings are repeated as they are: with more than one character each, the bar is
 wider than `width`. With `width=0` the bar body is empty and the line is the rest: a spinner or a percentage alone.
 
 The prefix and the suffix can change while the bar runs: assign `bar%prefix%string` or `bar%suffix%string` (any

@@ -76,7 +76,8 @@ of its line.
 
 ## Mistakes stop the program
 
-A colour or style name that is not in [the lists](./styling), a `spinner_string` that is not the key of a
+A colour or style name that is not in [the lists](./styling) (or a malformed `#rrggbb`), wrong
+[`bar_zones`](./styling#zones), a `spinner_string` that is not the key of a
 [spinner](./spinners), a wrong [template](./templates): `initialize` stops the program (`error stop`), after a message on
 standard error that names the mistake. Before forbear 1.6 the names were ignored without a message, and a typo left an
 element without its colour.
@@ -92,7 +93,8 @@ drawn over the bar. Print through `bar%write` instead, wrap output you do not co
 
 On a terminal the bar animates; anywhere else it writes a plain line every 10%, with no control sequences: see
 [Terminals and logs](./terminals). A terminal must understand the carriage return and the ANSI sequences (colours,
-cursor movement, erase in line): every modern terminal does, Windows Terminal included.
+cursor movement, erase in line): every modern terminal does, Windows Terminal included. 24-bit `#rrggbb` colours need
+a terminal with true colour; most modern ones have it, some (macOS Terminal.app, old consoles) approximate or drop them.
 
 ## Lines wider than the terminal
 
