@@ -53,7 +53,7 @@ features:
     linkText: Batch jobs and logs
   - icon: 🎨
     title: Smooth, coloured, Unicode
-    details: "Eighth-of-a-cell partial blocks, 17 colours, 24-bit #rrggbb and 16 styles for every element, colour zones, rising ramps and a scanner pulse, any Unicode string, 40 spinners."
+    details: "Eighth-of-a-cell partial blocks, 17 colours, 24-bit #rrggbb and 16 styles for every element, colour zones, rising ramps, a scanner pulse, seven-segment digits and dashboard themes, any Unicode string, 40 spinners."
     link: /guide/styling
     linkText: Colours and styles
 ---
@@ -74,6 +74,15 @@ Initialize the bar, start it, update it at every step: this is a whole program.
 
 <<< @/examples/output/minimal.ansi{ansi}
 
+## A 1980s dashboard
+
+Segments lit and unlit, a redline, a rising tachometer, a scanner and seven-segment numbers: `theme`, `bar_zones`,
+`bar_profile`, `pulse_trail` and `digits`.
+
+![three bars at once: a blue-green segmented bar with a redline, an amber rising ramp, a red scanner, seven-segment numbers](/gifs/dashboard.gif){.gif}
+
+All of it in [chapter 11 of the tutorial](/manual/tutorial/11-dashboard).
+
 ## 40 spinners
 
 Every spinner of forbear is a bar too: here eighteen of them, each one a bar on its own line.
@@ -81,6 +90,151 @@ Every spinner of forbear is a bar too: here eighteen of them, each one a bar on 
 ![eighteen spinners animating, one per line](/gifs/spinners.gif){.gif}
 
 The whole catalogue is in [Spinners](/guide/spinners).
+
+## Gallery
+
+Every kind of output forbear draws, each the real output of a program of the docs (on a terminal, at the end of the
+run or while running); the title leads to its recipe in the [cookbook](/manual/cookbook).
+
+### The bar
+
+**[The smallest bar](/manual/cookbook#the-smallest-bar)**
+
+<<< @/examples/output/minimal.ansi{ansi}
+
+**[A bar over the steps of a loop](/manual/cookbook#a-bar-over-the-steps-of-a-loop)**
+
+<<< @/examples/output/march_1.ansi{ansi}
+
+**[A loop of many iterations](/manual/cookbook#a-loop-of-many-iterations)**
+
+<<< @/examples/output/many.ansi{ansi}
+
+**[A smooth bar](/manual/cookbook#a-smooth-bar)**
+
+<<< @/examples/output/march_2s.ansi{ansi}
+
+**[A Unicode bar](/manual/cookbook#a-unicode-bar)**
+
+<<< @/examples/output/march_2u.ansi{ansi}
+
+### Colours and dashboard looks
+
+**[A coloured, solid bar](/manual/cookbook#a-coloured-solid-bar)**
+
+<<< @/examples/output/march_3.ansi{ansi}
+
+**[Exact colours, #rrggbb](/manual/cookbook#exact-colours)**
+
+<<< @/examples/output/hex.ansi{ansi}
+
+**[A redline: colours by position](/manual/cookbook#a-redline-colours-by-position)**
+
+<<< @/examples/output/zones.ansi{ansi}
+
+**[A rising ramp](/manual/cookbook#a-rising-ramp)**
+
+<<< @/examples/output/ramp.ansi{ansi}
+
+**[Seven-segment numbers](/manual/cookbook#seven-segment-numbers)**
+
+<<< @/examples/output/digits.ansi{ansi}
+
+**[Three dashboard themes](/manual/cookbook#a-dashboard-look-in-one-keyword)**
+
+<<< @/examples/output/themes.ansi{ansi}
+
+### What the bar reports
+
+**[Percent, count, speed, ETA, scale, times, summary](/manual/cookbook#percent-count-speed-eta-scale-times-summary)**
+
+<<< @/examples/output/march_4.ansi{ansi}
+
+**[A prefix that names the phase](/manual/cookbook#a-prefix-that-names-the-phase)**
+
+<<< @/examples/output/phases.ansi{ansi}
+
+### Spinners and counters
+
+**[A spinner next to the bar](/manual/cookbook#a-spinner-next-to-the-bar)**
+
+<<< @/examples/output/march_5-bar.ansi{ansi}
+
+**[A spinner alone](/manual/cookbook#a-spinner-alone)**
+
+<<< @/examples/output/march_5-spinner.ansi{ansi}
+
+**[A percentage alone](/manual/cookbook#a-percentage-alone)**
+
+<<< @/examples/output/march_5-counter.ansi{ansi}
+
+### Talking while the bar runs
+
+**[Lines above the bar, a message at its end](/manual/cookbook#lines-above-the-bar-a-message-at-its-end)**
+
+<<< @/examples/output/march_6.ansi{ansi}
+
+**[Output of a library while the bar runs](/manual/cookbook#output-of-a-library-while-the-bar-runs)**
+
+<<< @/examples/output/march_6p.ansi{ansi}
+
+### Many bars
+
+**[A bar for each loop of a nest](/manual/cookbook#a-bar-for-each-loop-of-a-nest)**
+
+<<< @/examples/output/march_7-running.ansi{ansi}
+
+**[Several bars one after another](/manual/cookbook#several-bars-one-after-another)**
+
+<<< @/examples/output/sequence.ansi{ansi}
+
+### Layouts and fields
+
+**[A layout of your own](/manual/cookbook#a-layout-of-your-own)**
+
+<<< @/examples/output/layout-running.ansi{ansi}
+
+**[A field of your own](/manual/cookbook#a-field-of-your-own)**
+
+<<< @/examples/output/march_9.ansi{ansi}
+
+### Unknown ends
+
+**[A loop of unknown length](/manual/cookbook#a-loop-of-unknown-length)**
+
+<<< @/examples/output/march_10-running.ansi{ansi}
+
+**[A scanner for a loop of unknown length](/manual/cookbook#a-scanner-for-a-loop-of-unknown-length)**
+
+<<< @/examples/output/scanner.ansi{ansi}
+
+**[Leaving a loop early](/manual/cookbook#leaving-a-loop-early)**
+
+<<< @/examples/output/march_10.ansi{ansi}
+
+### Logs, batch jobs and other units
+
+**[A clean log in a batch job](/manual/cookbook#a-clean-log-in-a-batch-job)**
+
+<<< @/examples/output/march_8-log.ansi{ansi}
+
+**[A log line every so often](/manual/cookbook#a-log-line-every-ten-minutes)**
+
+<<< @/examples/output/march_8l.ansi{ansi}
+
+**[No bars at all](/manual/cookbook#no-bars-at-all)**
+
+<<< @/examples/output/march_8-disabled.ansi{ansi}
+
+**[The bar on standard error](/manual/cookbook#the-bar-on-standard-error)**
+
+<<< @/examples/output/stderr-bar.ansi{ansi}
+
+### Mistakes stop the program
+
+**[A scale on a narrow bar](/manual/cookbook#percent-count-speed-eta-scale-times-summary)**
+
+<<< @/examples/output/scale_narrow.ansi{ansi}
 
 ## Where next
 

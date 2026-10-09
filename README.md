@@ -29,7 +29,11 @@
 </tr>
 <tr>
 <td width="50%"><b>📜 Batch jobs and logs</b><br><sub>Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log, and a line every ten minutes with <code>FORBEAR_LOG_INTERVAL=600</code>. <code>FORBEAR_DISABLE=1</code> turns every bar off; <code>disabled=(rank /= 0)</code> under MPI. <a href="https://szaghi.github.io/forbear/manual/tutorial/08-logs">Batch jobs and logs</a></sub></td>
-<td width="50%"><b>🎨 Smooth, coloured, Unicode</b><br><sub>Eighth-of-a-cell partial blocks, 17 colours, 24-bit <code>#rrggbb</code> and 16 styles for every element through <a href="https://github.com/szaghi/FACE">FACE</a>, colour zones, rising ramps and a scanner pulse, any Unicode string, 40 spinners. <a href="https://szaghi.github.io/forbear/guide/spinners">Spinners</a></sub></td>
+<td width="50%"><b>🎨 Smooth, coloured, Unicode</b><br><sub>Eighth-of-a-cell partial blocks, 17 colours, 24-bit <code>#rrggbb</code> and 16 styles for every element through <a href="https://github.com/szaghi/FACE">FACE</a>, colour zones, rising ramps, a scanner pulse, seven-segment digits and dashboard themes, any Unicode string, 40 spinners. <a href="https://szaghi.github.io/forbear/guide/spinners">Spinners</a></sub></td>
+</tr>
+<tr>
+<td width="50%"><b>🚘 A 1980s dashboard</b><br><sub>Lit and unlit segments, a redline (<code>bar_zones</code>), a rising tachometer (<code>bar_profile='ramp'</code>), a KITT scanner (<code>pulse_trail</code>), seven-segment numbers (<code>digits='segment'</code>), or all of it in one keyword: <code>theme='vfd'</code>, <code>'amber'</code>, <code>'kitt'</code>. <a href="https://szaghi.github.io/forbear/manual/tutorial/11-dashboard">A 1980s dashboard</a></sub></td>
+<td width="50%"><b>🖼️ A gallery of every output</b><br><sub>Every kind of bar, spinner, counter, log and message forbear draws, each the real output of a program of the docs, with the recipe that draws it. <a href="https://szaghi.github.io/forbear/#gallery">Gallery</a></sub></td>
 </tr>
 <tr>
 <td width="50%"><b>🛠️ Standard Fortran, small</b><br><sub>Fortran 2008, four modules and one small dependency (FACE, ANSI colours) fetched by <code>fobis fetch</code> or fpm. <a href="https://szaghi.github.io/forbear/guide/install">Installation</a></sub></td>
@@ -38,7 +42,11 @@
 </table>
 </div>
 
-**[Full documentation](https://szaghi.github.io/forbear/)** · [Tutorial](https://szaghi.github.io/forbear/manual/tutorial/01-first-bar) · [Cookbook](https://szaghi.github.io/forbear/manual/cookbook) · [API reference](https://szaghi.github.io/forbear/api/)
+<img src="docs/public/gifs/dashboard.gif" alt="three bars at once: a blue-green segmented bar with a redline, an amber rising ramp, a red scanner, seven-segment numbers" width="760">
+
+<sub>The 1980s dashboard looks: <code>theme</code>, <code>bar_zones</code>, <code>bar_profile</code>, <code>pulse_trail</code>, <code>digits</code>.</sub>
+
+**[Full documentation](https://szaghi.github.io/forbear/)** · [Gallery](https://szaghi.github.io/forbear/#gallery) · [Tutorial](https://szaghi.github.io/forbear/manual/tutorial/01-first-bar) · [Cookbook](https://szaghi.github.io/forbear/manual/cookbook) · [API reference](https://szaghi.github.io/forbear/api/)
 
 </div>
 

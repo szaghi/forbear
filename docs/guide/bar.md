@@ -41,8 +41,8 @@ setting not passed takes its default, whatever the bar had before.
 | Suffix | `suffix_string` (none) | `suffix_color_fg`, `suffix_color_bg`, `suffix_style` |
 | Left bracket | `bracket_left_string` (none) | `bracket_left_color_fg`, `bracket_left_color_bg`, `bracket_left_style` |
 | Right bracket | `bracket_right_string` (none) | `bracket_right_color_fg`, `bracket_right_color_bg`, `bracket_right_style` |
-| Done part | `filled_char_string` (`*`; `█` with `partial_blocks`) | `filled_char_color_fg`, `filled_char_color_bg`, `filled_char_style` |
-| Remaining part | `empty_char_string` (`-`; a space with `partial_blocks`) | `empty_char_color_fg`, `empty_char_color_bg`, `empty_char_style` |
+| Done part | `filled_char_string` (`*`; `█` with `partial_blocks`; `▌` with a [theme](./styling#themes)) | `filled_char_color_fg`, `filled_char_color_bg`, `filled_char_style` |
+| Remaining part | `empty_char_string` (`-`; a space with `partial_blocks`; `▌` with a theme) | `empty_char_color_fg`, `empty_char_color_bg`, `empty_char_style` |
 | Spinner | `spinner_string` (none): the key of a [spinner](./spinners) | `spinner_color_fg`, `spinner_color_bg`, `spinner_style` |
 | Message | given by [`update`](#update) | `message_color_fg`, `message_color_bg`, `message_style` |
 
@@ -68,6 +68,9 @@ setting not passed takes its default, whatever the bar had before.
 | `partial_blocks` | `logical` | `.false.` | Draw the done part with full and partial blocks, eight steps per character. |
 | `bar_profile` | `character(*)` | `'flat'` | The glyph of each cell: `'flat'`, the filled and empty strings; `'ramp'`, blocks rising along the body. See [Profiles](#profiles). |
 | `pulse_trail` | `character(*)` | none | With `indeterminate`: the moving block becomes a one-cell head with a trail of fading colours, e.g. `'red_intense red black_intense'`. See [Pulse trail](#pulse-trail). |
+| `digits` | `character(*)` | `'plain'` | `'segment'` writes the digits of the percent, count, ETA and elapsed time as seven-segment digits; the font must have them. See [Segment digits](#segment-digits). |
+| `digits_unlit_color` | `character(*)` | none | With `digits='segment'`, the padding of the numbers as unlit `🯸`s in this colour. |
+| `theme` | `character(*)` | none | The colours and glyphs of a 1980s dashboard display, `'vfd'`, `'amber'` or `'kitt'`, for every keyword not passed. See [Themes](./styling#themes). |
 | `bar_zones` | `character(*)` | none | Colour each filled cell by its position: `limit:colour` items, e.g. `'0.7:green 0.9:yellow 1:red'`. See [Zones](./styling#zones). |
 | `min_interval` | `real(real64)` | 0.1 | Minimum time between two drawings on a terminal, in seconds; `FORBEAR_MIN_INTERVAL` replaces the default. |
 | `log_interval` | `real(real64)` | 0 | In a log, also write a line when this many seconds have passed since the last one; 0 for none. `FORBEAR_LOG_INTERVAL` replaces the default. On a terminal it does nothing. |
@@ -94,6 +97,16 @@ and a partial block for the eighths of the next character, in the foreground of 
 `empty_char`. With [`bar_zones`](./styling#zones), each filled cell, the partial one included, takes the foreground of
 its zone. The filled and empty strings are repeated as they are: with more than one character each, the bar is
 wider than `width`. With `width=0` the bar body is empty and the line is the rest: a spinner or a percentage alone.
+
+The prefix and the suffix can change while the bar runs: assign `bar%prefix%string` or `bar%suffix%string` (any
+string, as `prefix_string`), and the next drawing shows it, in the colours set by `initialize` (or by the template).
+For instance, the name of the phase of a solver: `bar%prefix%string = 'assemble '`.
+
+On a terminal, every drawing starts with the ANSI sequence that hides the cursor (unless `hide_cursor=.false.`) and
+ends with "erase to the end of the line" and a carriage return: the next drawing overwrites it, and a shorter line
+leaves nothing behind. Line wrapping is off while a drawing is written, so a line wider than the terminal is cut at its
+right edge (see [Lines wider than the terminal](./limitations#lines-wider-than-the-terminal)). The end of the bar shows
+the cursor again. In a log, the line is written as it is, with no colours and no control sequences.
 
 ### Profiles
 
@@ -128,15 +141,27 @@ On the way back:
 
 <<< @/examples/output/scanner.ansi{ansi}
 
-The prefix and the suffix can change while the bar runs: assign `bar%prefix%string` or `bar%suffix%string` (any
-string, as `prefix_string`), and the next drawing shows it, in the colours set by `initialize` (or by the template).
-For instance, the name of the phase of a solver: `bar%prefix%string = 'assemble '`.
+### Segment digits
 
-On a terminal, every drawing starts with the ANSI sequence that hides the cursor (unless `hide_cursor=.false.`) and
-ends with "erase to the end of the line" and a carriage return: the next drawing overwrites it, and a shorter line
-leaves nothing behind. Line wrapping is off while a drawing is written, so a line wider than the terminal is cut at its
-right edge (see [Lines wider than the terminal](./limitations#lines-wider-than-the-terminal)). The end of the bar shows
-the cursor again. In a log, the line is written as it is, with no colours and no control sequences.
+`digits='segment'` writes the digits of the percent, the count, the ETA and the elapsed time as seven-segment digits,
+`🯰🯱🯲🯳🯴🯵🯶🯷🯸🯹`, as the speedometer of a dashboard; colons, slashes, points and the `%` stay as they are. Each number has
+a fixed width, padded on the left with blanks: with `digits_unlit_color`, the padding becomes unlit `🯸`s in that
+colour, as the unlit segments of a display. The speed and the summary keep plain digits (their compact forms have
+letters), and so does a log, so that it can be searched.
+
+::: warning The font must have them
+The seven-segment digits are U+1FBF0–U+1FBF9, in the Symbols for Legacy Computing block (Unicode 13, 2020). Cascadia
+Code and Cascadia Mono, Iosevka, JuliaMono and GNU Unifont have them; DejaVu Sans Mono, Menlo, Consolas and most
+default terminal fonts do not, and show empty boxes or a fallback font whose digits may be wider, which shifts the
+line. forbear cannot know the font of the terminal: use `digits='segment'` only where you know it. This site ships
+the ten digits as a web font, so the outputs below look right whatever your fonts.
+:::
+
+<<< @/examples/snippets/digits-init.f90
+
+At 5%:
+
+<<< @/examples/output/digits.ansi{ansi}
 
 ## start
 
@@ -232,7 +257,8 @@ call bar%destroy
 ```
 
 Frees the strings and resets the defaults: `width=32`, range [0, 1], `frequency=1`, `min_interval=0.1`,
-`smoothing=0.3`, position 0, standard output, no reports. `initialize` calls it first.
+`log_interval=0`, `smoothing=0.3`, position 0, standard output, `hide_cursor=.true.`, no reports, a flat profile, plain
+digits, no zones, no pulse trail. `initialize` calls it first.
 
 ## Character kinds
 

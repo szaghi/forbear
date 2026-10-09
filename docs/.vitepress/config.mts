@@ -25,6 +25,7 @@ const docs = [
       { text: '8. Batch jobs and logs',           link: '/manual/tutorial/08-logs' },
       { text: '9. Layout templates',              link: '/manual/tutorial/09-templates' },
       { text: '10. Unknown ends',                 link: '/manual/tutorial/10-unknown-ends' },
+      { text: '11. A 1980s dashboard',            link: '/manual/tutorial/11-dashboard' },
     ],
   },
   {

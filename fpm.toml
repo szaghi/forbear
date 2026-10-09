@@ -78,3 +78,8 @@ main = "forbear_test_profile.F90"
 name = "forbear_test_scanner"
 source-dir = "src/tests"
 main = "forbear_test_scanner.F90"
+
+[[test]]
+name = "forbear_test_dashboard"
+source-dir = "src/tests"
+main = "forbear_test_dashboard.F90"

@@ -189,6 +189,7 @@ function is_color(name)
 ```mermaid
 flowchart TD
   initialize["initialize"] --> is_color["is_color"]
+  initialize["initialize"] --> is_color["is_color"]
   parse_trail["parse_trail"] --> is_color["is_color"]
   parse_zones["parse_zones"] --> is_color["is_color"]
   is_color["is_color"] --> colorize["colorize"]

@@ -1,5 +1,17 @@
+/* seven-segment digits (U+1FBF0-9) of digits='segment': few fonts have them, so the site ships them, 712 bytes cut from
+   Cascadia Mono and renamed as its licence requires (public/fonts/forbear-segments-OFL.txt); only those code points
+   use it, so the browser downloads it on the pages that show them */
+@font-face {
+  font-family: 'Forbear Segments';
+  src: url('/fonts/forbear-segments.woff2') format('woff2');
+  unicode-range: U+1FBF0-1FBF9;
+  font-display: swap;
+}
+
 /* forbear: the colours of the terminal recordings (Catppuccin: Latte in light mode, Mocha in dark mode) */
 :root {
+  --vp-font-family-mono: 'Forbear Segments', ui-monospace, 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New',
+    monospace;
   --vp-c-brand-1: #179299;
   --vp-c-brand-2: #1e66f5;
   --vp-c-brand-3: #137a80;

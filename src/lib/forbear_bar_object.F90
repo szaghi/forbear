@@ -18,7 +18,10 @@ character(len=1), parameter :: LF  = achar(10) !< Line feed.
 ! UTF-8 encoded, as every literal of the sources: written byte by byte, the terminal shows the characters
 character(len=*), parameter :: FULL_BLOCK = '█'                                          !< Full block.
 character(len=*), parameter :: PARTIAL_BLOCKS(1:7) = ['▏', '▎', '▍', '▌', '▋', '▊', '▉'] !< Blocks of 1/8 to 7/8.
-character(len=*), parameter :: RAMP_BLOCKS(1:8) = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'] !< Blocks of 1/8 to 8/8 high.
+! seven-segment digits 0 to 9, U+1FBF0-9: 4 bytes each, so the lines stay within 132 bytes
+character(len=*), parameter :: SEGMENT_DIGITS(0:9) = ['🯰', '🯱', '🯲', '🯳', '🯴', &
+                                                      '🯵', '🯶', '🯷', '🯸', '🯹']
+character(len=*), parameter :: RAMP_BLOCKS(1:8) = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'] !< 1/8 to 8/8 high.
 
 ! profiles of the bar body: the glyph of each cell
 integer(I4P), parameter :: PROFILE_FLAT = 0 !< The filled and empty strings, the same in every cell.
@@ -99,6 +102,8 @@ type :: bar_object
    logical                           :: add_summary          !< Add a summary line at the end.
    logical                           :: partial_blocks       !< Draw the bar with partial blocks, 8 steps per character.
    integer(I4P)                      :: profile              !< Profile of the body: PROFILE_FLAT, PROFILE_RAMP.
+   logical                           :: segment_digits       !< Write the digits of the numbers as seven-segment digits.
+   character(len=:), allocatable     :: digits_unlit_color   !< Colour of the unlit 8s that pad the numbers; '' none.
    logical                           :: indeterminate        !< The total is unknown: `current` counts what is done.
    logical                           :: is_interactive_      !< Flag set when the bar is drawn on a terminal.
    logical                           :: is_disabled_         !< Flag set when the bar draws nothing.
@@ -145,6 +150,7 @@ type :: bar_object
       procedure, pass(self), private :: unlit_cells    !< Return empty cells of the body.
       procedure, pass(self), private :: parse_zones    !< Build the colour zones of the body.
       procedure, pass(self), private :: parse_trail    !< Build the trail of the pulse of an indeterminate body.
+      procedure, pass(self), private :: numeral        !< Return a number of the line, plain or in seven-segment digits.
       procedure, pass(self), private :: scanner_body   !< Return the body of an indeterminate bar with a pulse trail.
       procedure, pass(self), private :: default_layout !< Build the layout the keywords describe.
       procedure, pass(self), private :: parse_template !< Build the layout of a template.
@@ -207,6 +213,8 @@ contains
    self%add_summary = .false.
    self%partial_blocks = .false.
    self%profile = PROFILE_FLAT
+   self%segment_digits = .false.
+   self%digits_unlit_color = ''
    self%indeterminate = .false.
    self%is_interactive_ = .false.
    self%is_disabled_ = .false.
@@ -248,7 +256,7 @@ contains
                          message_color_fg, message_color_bg, message_style,                                                  &
                          width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position,          &
                          interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit,   &
-                         bar_zones, bar_profile, pulse_trail)
+                         bar_zones, bar_profile, pulse_trail, digits, digits_unlit_color, theme)
    !< Initialize bar.
    !<
    !< Every setting not passed takes its default. The display mode is resolved here: `interactive` if passed, else the
@@ -261,7 +269,10 @@ contains
    !< every cell as a block rising along the body, lit in the filled colours, unlit in the empty ones (`black_intense`
    !< if not given), blank in a log; the filled and empty strings are not used, and `partial_blocks` stops the program.
    !< `pulse_trail` (indeterminate only) makes the pulse a one-cell head with a trail of the positions it left, one colour
-   !< per step back, brightest first, e.g. `'#C0281E #7A1912 #4A0F0B'`: a scanner.
+   !< per step back, brightest first, e.g. `'#C0281E #7A1912 #4A0F0B'`: a scanner. `digits='segment'` writes the digits
+   !< of the percent, count, ETA and elapsed time as seven-segment digits (U+1FBF0-9: the font must have them), their
+   !< padding as unlit 8s in `digits_unlit_color` if given; a log keeps plain digits. `theme` (`vfd`, `amber`, `kitt`)
+   !< gives the colours and glyphs of a 1980s dashboard display to every keyword not passed.
    class(bar_object), intent(inout)         :: self                      !< Bar.
    class(*),          intent(in), optional  :: prefix_string             !< Prefix string.
    character(len=*),  intent(in), optional  :: prefix_color_fg           !< Prefix foreground color.
@@ -340,19 +351,41 @@ contains
    character(len=*),  intent(in), optional  :: bar_zones                 !< Colour zones of the body, `limit:colour …`.
    character(len=*),  intent(in), optional  :: bar_profile               !< Profile of the body: `flat`, `ramp`.
    character(len=*),  intent(in), optional  :: pulse_trail               !< Colours of the trail of the pulse, `colour …`.
+   character(len=*),  intent(in), optional  :: digits                    !< Digits of the numbers: `plain`, `segment`.
+   character(len=*),  intent(in), optional  :: digits_unlit_color        !< Colour of the unlit 8s padding the numbers.
+   character(len=*),  intent(in), optional  :: theme                     !< Dashboard theme: `vfd`, `amber`, `kitt`.
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
    character(len=:),            allocatable :: env                       !< Value of an environment variable.
    character(len=:),            allocatable :: empty_color_fg_           !< Foreground of the empty char, local variable.
+   character(len=:),            allocatable :: lit_                      !< Theme: colour of the lit segments; '' none.
+   character(len=:),            allocatable :: unlit_                    !< Theme: colour of the unlit segments.
+   character(len=:),            allocatable :: accent_                   !< Theme: colour of the numbers.
+   character(len=:),            allocatable :: accent_unlit_             !< Theme: colour of the unlit 8s of the numbers.
+   character(len=:),            allocatable :: trail_                    !< Theme: trail of the pulse.
    real(R8P)                                :: env_real                  !< Real value of an environment variable.
    integer(I4P)                             :: iostat                    !< Status of a read.
    logical                                  :: is_partial                !< Draw with partial blocks.
 
    is_partial = .false. ; if (present(partial_blocks)) is_partial = partial_blocks
+   lit_ = '' ; unlit_ = '' ; accent_ = '' ; accent_unlit_ = '' ; trail_ = ''
+   if (present(theme)) then ! a lit colour, its unlit shade, an accent for the numbers, the shades of the pulse trail
+      select case(theme)
+      case('vfd')   ; call set_theme('#2EF5C0', '#0E342C', '#FFB000', '#3A2800', '#1FB08A #137057 #0B3F31')
+      case('amber') ; call set_theme('#FFB000', '#3A2800', '#FFB000', '#3A2800', '#C08400 #7A5400 #3F2B00')
+      case('kitt')  ; call set_theme('#FF3B30', '#3C0C0A', '#FFB000', '#3A2800', '#C0281E #7A1912 #4A0F0B')
+      case default
+         write(stderr, '(A)') 'forbear: unknown theme "'//theme//'", vfd, amber or kitt, '// &
+                              'see https://szaghi.github.io/forbear/guide/styling#themes'
+         error stop 'forbear: unknown theme'
+      endselect
+   endif
    if (present(empty_char_string)) then
       empty_char_string_ = ucs4_string(input=empty_char_string)
    elseif (is_partial) then
       empty_char_string_ = UCS4_' '
+   elseif (len(lit_) > 0) then
+      empty_char_string_ = ucs4_string(input='▌') ! a segment, with the gap of its right half
    else
       empty_char_string_ = UCS4_'-'
    endif
@@ -360,6 +393,8 @@ contains
       filled_char_string_ = ucs4_string(input=FULL_BLOCK)
    elseif (present(filled_char_string)) then
       filled_char_string_ = ucs4_string(input=filled_char_string)
+   elseif (len(lit_) > 0) then
+      filled_char_string_ = ucs4_string(input='▌')
    else
       filled_char_string_ = UCS4_'*'
    endif
@@ -375,6 +410,25 @@ contains
          error stop 'forbear: unknown bar_profile'
       endselect
    endif
+   if (present(digits)) then
+      select case(digits)
+      case('plain')   ; self%segment_digits = .false.
+      case('segment') ; self%segment_digits = .true.
+      case default
+         write(stderr, '(A)') 'forbear: unknown digits "'//digits//'", plain or segment, '// &
+                              'see https://szaghi.github.io/forbear/guide/bar#segment-digits'
+         error stop 'forbear: unknown digits'
+      endselect
+   endif
+   if (len(accent_unlit_) > 0) self%digits_unlit_color = accent_unlit_
+   if (present(digits_unlit_color)) then
+      if (.not.is_color(digits_unlit_color)) then
+         write(stderr, '(A)') 'forbear: unknown colour "'//digits_unlit_color//'" in digits_unlit_color, '// &
+                              'see https://szaghi.github.io/forbear/guide/styling'
+         error stop 'forbear: unknown colour or style name'
+      endif
+      self%digits_unlit_color = trim(adjustl(digits_unlit_color))
+   endif
    if (self%profile == PROFILE_RAMP .and. is_partial) then
       write(stderr, '(A)') 'forbear: bar_profile="ramp" draws its own blocks, without partial_blocks, '// &
                            'see https://szaghi.github.io/forbear/guide/bar#initialize'
@@ -382,41 +436,51 @@ contains
    endif
    if (present(empty_char_color_fg)) then
       empty_color_fg_ = empty_char_color_fg
+   elseif (len(unlit_) > 0) then
+      empty_color_fg_ = unlit_
    elseif (self%profile == PROFILE_RAMP) then
       empty_color_fg_ = 'black_intense' ! the unlit cells must look unlit
    else
       empty_color_fg_ = ''
    endif
-   call self%prefix%initialize(string=prefix_string, color_fg=prefix_color_fg, color_bg=prefix_color_bg, style=prefix_style)
-   call self%suffix%initialize(string=suffix_string, color_fg=suffix_color_fg, color_bg=suffix_color_bg, style=suffix_style)
+   call self%prefix%initialize(string=prefix_string, color_fg=pick(prefix_color_fg, lit_), color_bg=prefix_color_bg, &
+                               style=pick(prefix_style, merge('bold_on', '       ', len(lit_) > 0)))
+   call self%suffix%initialize(string=suffix_string, color_fg=pick(suffix_color_fg, lit_), color_bg=suffix_color_bg, &
+                               style=suffix_style)
    call self%bracket_left%initialize(string=bracket_left_string, color_fg=bracket_left_color_fg, color_bg=bracket_left_color_bg,&
                                      style=bracket_left_style)
    call self%bracket_right%initialize(string=bracket_right_string, color_fg=bracket_right_color_fg,&
                                       color_bg=bracket_right_color_bg, style=bracket_right_style)
    call self%empty_char%initialize(string=empty_char_string_, color_fg=empty_color_fg_, color_bg=empty_char_color_bg,&
                                    style=empty_char_style)
-   call self%filled_char%initialize(string=filled_char_string_, color_fg=filled_char_color_fg, color_bg=filled_char_color_bg,&
+   call self%filled_char%initialize(string=filled_char_string_, color_fg=pick(filled_char_color_fg, lit_), &
+                                    color_bg=filled_char_color_bg,&
                                     style=filled_char_style)
    if (present(bar_zones)) call self%parse_zones(bar_zones)
-   if (present(pulse_trail)) call self%parse_trail(pulse_trail)
-   call self%create_spinner(string=spinner_string, color_fg=spinner_color_fg, color_bg=spinner_color_bg, style=spinner_style)
+   if (present(pulse_trail)) then
+      call self%parse_trail(pulse_trail)
+   elseif (len(trail_) > 0 .and. present(indeterminate)) then
+      if (indeterminate) call self%parse_trail(trail_)
+   endif
+   call self%create_spinner(string=spinner_string, color_fg=pick(spinner_color_fg, lit_), color_bg=spinner_color_bg, &
+                            style=spinner_style)
    if (present(add_scale_bar)) self%add_scale_bar = add_scale_bar
-   call self%scale_bar%initialize(color_fg=scale_bar_color_fg, color_bg=scale_bar_color_bg, style=scale_bar_style)
+   call self%scale_bar%initialize(color_fg=pick(scale_bar_color_fg, accent_), color_bg=scale_bar_color_bg, style=scale_bar_style)
    if (present(add_progress_percent)) self%add_progress_percent = add_progress_percent
-   call self%progress_percent%initialize(color_fg=progress_percent_color_fg, color_bg=progress_percent_color_bg,&
+   call self%progress_percent%initialize(color_fg=pick(progress_percent_color_fg, accent_), color_bg=progress_percent_color_bg,&
                                          style=progress_percent_style)
    if (present(add_progress_count)) self%add_progress_count = add_progress_count
-   call self%progress_count%initialize(color_fg=progress_count_color_fg, color_bg=progress_count_color_bg,&
+   call self%progress_count%initialize(color_fg=pick(progress_count_color_fg, accent_), color_bg=progress_count_color_bg,&
                                        style=progress_count_style)
    if (present(add_progress_speed)) self%add_progress_speed = add_progress_speed
-   call self%progress_speed%initialize(color_fg=progress_speed_color_fg, color_bg=progress_speed_color_bg,&
+   call self%progress_speed%initialize(color_fg=pick(progress_speed_color_fg, accent_), color_bg=progress_speed_color_bg,&
                                        style=progress_speed_style)
    if (present(add_eta)) self%add_eta = add_eta
-   call self%eta%initialize(color_fg=eta_color_fg, color_bg=eta_color_bg, style=eta_style)
+   call self%eta%initialize(color_fg=pick(eta_color_fg, accent_), color_bg=eta_color_bg, style=eta_style)
    if (present(add_date_time)) self%add_date_time = add_date_time
-   call self%date_time%initialize(color_fg=date_time_color_fg, color_bg=date_time_color_bg, style=date_time_style)
+   call self%date_time%initialize(color_fg=pick(date_time_color_fg, accent_), color_bg=date_time_color_bg, style=date_time_style)
    if (present(add_summary)) self%add_summary = add_summary
-   call self%summary%initialize(color_fg=summary_color_fg, color_bg=summary_color_bg, style=summary_style)
+   call self%summary%initialize(color_fg=pick(summary_color_fg, accent_), color_bg=summary_color_bg, style=summary_style)
    call self%message%initialize(color_fg=message_color_fg, color_bg=message_color_bg, style=message_style)
    if (present(width)) self%width = width
    if (present(min_value))    self%min_value = min_value
@@ -472,6 +536,17 @@ contains
       error stop 'forbear: pulse_trail without indeterminate'
    endif
    if (self%add_scale_bar .and. self%width < 22) error stop 'error: for adding scale bar the bar width must be at least 22 chars'
+   contains
+      subroutine set_theme(lit, unlit, accent, accent_unlit, trail)
+      !< Set the colours of a theme.
+      character(len=*), intent(in) :: lit          !< Lit segments.
+      character(len=*), intent(in) :: unlit        !< Unlit segments.
+      character(len=*), intent(in) :: accent       !< Numbers.
+      character(len=*), intent(in) :: accent_unlit !< Unlit 8s of the numbers.
+      character(len=*), intent(in) :: trail        !< Shades of the pulse trail.
+
+      lit_ = lit ; unlit_ = unlit ; accent_ = accent ; accent_unlit_ = accent_unlit ; trail_ = trail
+      endsubroutine set_theme
    endsubroutine initialize
 
    pure function is_stdout_locked(self) result(is_locked)
@@ -724,16 +799,16 @@ contains
          endif
       case(TOKEN_PERCENT)
          write(percent, '(I3,A)') progress, '%'
-         text = percent ; if (token%decorated) text = ' '//text ! the space keeps 100% apart from what precedes it
-         frame = frame//styled(token, text, plain)
+         if (token%decorated) frame = frame//styled(token, ' ', plain) ! keeps 100% apart from what precedes it
+         frame = frame//self%numeral(token, percent, plain)
       case(TOKEN_COUNT)
          if (self%indeterminate) then
             text = done_text(self%min_value, fraction)
          else
             text = count_text(self%min_value, self%max_value, fraction)
          endif
-         if (token%decorated) text = ' '//text
-         frame = frame//styled(token, text, plain)
+         if (token%decorated) frame = frame//styled(token, ' ', plain)
+         frame = frame//self%numeral(token, text, plain)
       case(TOKEN_SPEED)
          if (self%indeterminate) then ! what is done per second
             text = compact_real(self%rate_, 6_I4P) ; if (token%decorated) text = ' ('//text//'/s)'
@@ -749,10 +824,10 @@ contains
          else
             text = '--:--:--'
          endif
-         if (token%decorated) text = ' ETA '//text
-         frame = frame//styled(token, text, plain)
+         if (token%decorated) frame = frame//styled(token, ' ETA ', plain)
+         frame = frame//self%numeral(token, text, plain)
       case(TOKEN_ELAPSED)
-         frame = frame//styled(token, hms(elapsed), plain)
+         frame = frame//self%numeral(token, hms(elapsed), plain)
       case(TOKEN_MESSAGE)
          token%style%string = self%message%string
          if (.not.token%decorated) then
@@ -882,6 +957,45 @@ contains
       c = r + 1_I4P
    enddo
    endfunction lit_cells
+
+   function numeral(self, token, text, plain) result(output)
+   !< Return a number of the line in the colours of its token: as it is, or with seven-segment digits and its leading
+   !< blanks (the padding of its fixed width) as unlit 8s in `digits_unlit_color`, if given.
+   class(bar_object),  intent(in)           :: self   !< Bar.
+   type(token_object), intent(inout)        :: token  !< Token.
+   character(len=*),   intent(in)           :: text   !< Number, as text.
+   logical,            intent(in)           :: plain  !< Without colours: a log keeps plain digits.
+   character(len=:, kind=UCS4), allocatable :: output !< Rendered number.
+   character(len=:),            allocatable :: lit    !< The number, in seven-segment digits.
+   type(token_object)                       :: unlit  !< The padding, as unlit 8s.
+   integer(I4P)                             :: pad    !< Leading blanks.
+   integer(I4P)                             :: c      !< Counter.
+
+   if (.not.self%segment_digits .or. plain) then
+      output = styled(token, text, plain)
+      return
+   endif
+   pad = verify(text, ' ') - 1 ; if (pad < 0) pad = len(text)
+   lit = ''
+   do c=pad + 1, len(text)
+      if (index('0123456789', text(c:c)) > 0) then
+         lit = lit//SEGMENT_DIGITS(iachar(text(c:c)) - iachar('0'))
+      else
+         lit = lit//text(c:c)
+      endif
+   enddo
+   output = UCS4_''
+   if (pad > 0) then
+      if (len(self%digits_unlit_color) > 0) then
+         unlit = token
+         unlit%style%color_fg = self%digits_unlit_color
+         output = styled(unlit, repeat(SEGMENT_DIGITS(8), pad), plain)
+      else
+         output = styled(token, repeat(' ', pad), plain)
+      endif
+   endif
+   output = output//styled(token, lit, plain)
+   endfunction numeral
 
    pure function scanner_body(self, plain) result(body)
    !< Return the body of an indeterminate bar with a pulse trail: a one-cell head going back and forth, and behind it the
@@ -1977,6 +2091,19 @@ contains
       text = trim(adjustl(compact_real(done, 6_I4P)))
    endif
    endfunction done_text
+
+   pure function pick(value, default) result(chosen)
+   !< Return a keyword if passed, else its default (a theme's, or '' for none).
+   character(len=*), intent(in), optional :: value   !< Keyword.
+   character(len=*), intent(in)           :: default !< Default.
+   character(len=:), allocatable          :: chosen  !< Value chosen.
+
+   if (present(value)) then
+      chosen = value
+   else
+      chosen = trim(default)
+   endif
+   endfunction pick
 
    pure function pulse_phase(drawing, travel) result(phase)
    !< Return the offset of the pulse at a drawing of an indeterminate body: one cell per drawing, back and forth.

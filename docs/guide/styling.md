@@ -87,6 +87,34 @@ At 80%, the dark `empty_char` cells are the unlit segments:
 
 <<< @/examples/output/zones.ansi{ansi}
 
+## Themes
+
+`theme` gives a bar the look of a 1980s dashboard display in one keyword: the segments of the bar, lit and unlit, and
+the colours of every element. Every keyword passed explicitly wins over the theme, so a theme is a starting point:
+
+| Theme | Looks like | Lit | Unlit | Numbers | Pulse trail |
+|---|---|---|---|---|---|
+| `vfd` | a vacuum fluorescent display, blue-green | `#2EF5C0` | `#0E342C` | `#FFB000` | `#1FB08A #137057 #0B3F31` |
+| `amber` | an amber liquid crystal display | `#FFB000` | `#3A2800` | `#FFB000` | `#C08400 #7A5400 #3F2B00` |
+| `kitt` | the red scanner of a talking car | `#FF3B30` | `#3C0C0A` | `#FFB000` | `#C0281E #7A1912 #4A0F0B` |
+
+A theme sets:
+
+- the filled and empty strings to `▌`, a segment with the gap of its right half (unless `partial_blocks`);
+- the filled colour to *lit* and the empty colour to *unlit*, which a [ramp](./bar#profiles) uses too;
+- the prefix, suffix and spinner to *lit*, the prefix in bold;
+- the percent, count, speed, ETA, scale, date and summary to *numbers*;
+- the unlit 8s of [segment digits](./bar#segment-digits) to `#3A2800`;
+- on an [indeterminate](./bar#initialize) bar, the [pulse trail](./bar#pulse-trail).
+
+It sets no [zones](#zones), no profile and no segment digits: add them as you like. An unknown theme stops the program.
+
+<<< @/examples/snippets/themes-init.f90
+
+Three bars, one per theme, the second with a ramp:
+
+<<< @/examples/output/themes.ansi{ansi}
+
 ## Example
 
 <<< @/examples/snippets/march_3-init.f90

@@ -77,11 +77,12 @@ of its line.
 ## Mistakes stop the program
 
 A colour or style name that is not in [the lists](./styling) (or a malformed `#rrggbb`), wrong
-[`bar_zones`](./styling#zones), an unknown [`bar_profile`](./bar#profiles) or a ramp with `partial_blocks`, a
-[`pulse_trail`](./bar#pulse-trail) on a bar that is not indeterminate, a `spinner_string` that is not the key of a
+[`bar_zones`](./styling#zones), an unknown [`bar_profile`](./bar#profiles), [`digits`](./bar#segment-digits) or
+[`theme`](./styling#themes), a ramp with `partial_blocks`, a [`pulse_trail`](./bar#pulse-trail) on a bar that is not
+indeterminate, an indeterminate bar with a percent, an ETA or a scale, a `spinner_string` that is not the key of a
 [spinner](./spinners), a wrong [template](./templates): `initialize` stops the program (`error stop`), after a message
-on standard error that names the mistake. Before forbear 1.6 the names were ignored without a message, and a typo left
-an element without its colour.
+on standard error that names the mistake (a field of a template that the program never added stops it in `start`).
+Before forbear 1.6 the names were ignored without a message, and a typo left an element without its colour.
 
 ## Other output while the bar runs
 
@@ -96,6 +97,13 @@ On a terminal the bar animates; anywhere else it writes a plain line every 10%, 
 [Terminals and logs](./terminals). A terminal must understand the carriage return and the ANSI sequences (colours,
 cursor movement, erase in line): every modern terminal does, Windows Terminal included. 24-bit `#rrggbb` colours need
 a terminal with true colour; most modern ones have it, some (macOS Terminal.app, old consoles) approximate or drop them.
+
+## Seven-segment digits need a font
+
+`digits='segment'` writes U+1FBF0–U+1FBF9, which few fonts have (Cascadia Code and Mono, Iosevka, JuliaMono, GNU
+Unifont do; DejaVu Sans Mono, Menlo and Consolas do not). Without them a terminal shows empty boxes, or digits from a
+fallback font that may be wider than a cell and shift the rest of the line. forbear cannot detect the font: the
+default is plain digits, and a log always has them. See [Segment digits](./bar#segment-digits).
 
 ## Lines wider than the terminal
 

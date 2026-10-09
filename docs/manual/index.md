@@ -25,11 +25,12 @@ every chapter opens with a recording of it in a real terminal.
 | [8. Batch jobs and logs](./tutorial/08-logs) | the plain log of a batch job, turning bars off, MPI |
 | [9. Layout templates](./tutorial/09-templates) | a line laid out by a template, fields of the program |
 | [10. Unknown ends](./tutorial/10-unknown-ends) | a loop of unknown length, a loop left before its end |
+| [11. A 1980s dashboard](./tutorial/11-dashboard) | 24-bit colours, colour zones, a ramp, a scanner, seven-segment digits, themes |
 
 ```mermaid
 flowchart LR
   c1[1 first bar] --> c2[2 look] --> c3[3 colours] --> c4[4 reports] --> c5[5 spinners]
-  c5 --> c6[6 talking] --> c7[7 nested] --> c8[8 logs] --> c9[9 templates] --> c10[10 unknown ends]
+  c5 --> c6[6 talking] --> c7[7 nested] --> c8[8 logs] --> c9[9 templates] --> c10[10 unknown ends] --> c11[11 dashboard]
 ```
 
 ## The cookbook

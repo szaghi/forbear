@@ -52,6 +52,7 @@ graph LR
 - [bar_body](#bar-body)
 - [cell_zone](#cell-zone)
 - [lit_cells](#lit-cells)
+- [numeral](#numeral)
 - [scanner_body](#scanner-body)
 - [unlit_cells](#unlit-cells)
 - [progress_state](#progress-state)
@@ -59,6 +60,7 @@ graph LR
 - [compact_real](#compact-real)
 - [count_text](#count-text)
 - [done_text](#done-text)
+- [pick](#pick)
 - [pulse_phase](#pulse-phase)
 - [ramp_level](#ramp-level)
 - [display_width](#display-width)
@@ -79,6 +81,7 @@ graph LR
 | `LF` | character(len=1) | parameter |  |
 | `FULL_BLOCK` | character(len=*) | parameter |  |
 | `PARTIAL_BLOCKS` | character(len=*) | parameter |  |
+| `SEGMENT_DIGITS` | character(len=*) | parameter |  |
 | `RAMP_BLOCKS` | character(len=*) | parameter |  |
 | `PROFILE_FLAT` | integer(kind=I4P) | parameter |  |
 | `PROFILE_RAMP` | integer(kind=I4P) | parameter |  |
@@ -159,6 +162,8 @@ graph LR
 | `add_summary` | logical |  |  |
 | `partial_blocks` | logical |  |  |
 | `profile` | integer(kind=I4P) |  |  |
+| `segment_digits` | logical |  |  |
+| `digits_unlit_color` | character(len=:) | allocatable |  |
 | `indeterminate` | logical |  |  |
 | `is_interactive_` | logical |  |  |
 | `is_disabled_` | logical |  |  |
@@ -205,6 +210,7 @@ graph LR
 | `unlit_cells` | pass(self) |  |
 | `parse_zones` | pass(self) |  |
 | `parse_trail` | pass(self) |  |
+| `numeral` | pass(self) |  |
 | `scanner_body` | pass(self) |  |
 | `default_layout` | pass(self) |  |
 | `parse_template` | pass(self) |  |
@@ -252,7 +258,7 @@ flowchart TD
 ### initialize
 
 ```fortran
-subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit, bar_zones, bar_profile, pulse_trail)
+subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, prefix_style, suffix_string, suffix_color_fg, suffix_color_bg, suffix_style, bracket_left_string, bracket_left_color_fg, bracket_left_color_bg, bracket_left_style, bracket_right_string, bracket_right_color_fg, bracket_right_color_bg, bracket_right_style, empty_char_string, empty_char_color_fg, empty_char_color_bg, empty_char_style, filled_char_string, filled_char_color_fg, filled_char_color_bg, filled_char_style, spinner_string, spinner_color_fg, spinner_color_bg, spinner_style, add_scale_bar, scale_bar_color_fg, scale_bar_color_bg, scale_bar_style, add_progress_percent, progress_percent_color_fg, progress_percent_color_bg, progress_percent_style, add_progress_count, progress_count_color_fg, progress_count_color_bg, progress_count_style, add_progress_speed, progress_speed_color_fg, progress_speed_color_bg, progress_speed_style, add_eta, eta_color_fg, eta_color_bg, eta_style, add_date_time, date_time_color_fg, date_time_color_bg, date_time_style, add_summary, summary_color_fg, summary_color_bg, summary_style, message_color_fg, message_color_bg, message_style, width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position, interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit, bar_zones, bar_profile, pulse_trail, digits, digits_unlit_color, theme)
 ```
 
 **Arguments**
@@ -337,6 +343,9 @@ subroutine initialize(self, prefix_string, prefix_color_fg, prefix_color_bg, pre
 | `bar_zones` | character(len=*) | in | optional |  |
 | `bar_profile` | character(len=*) | in | optional |  |
 | `pulse_trail` | character(len=*) | in | optional |  |
+| `digits` | character(len=*) | in | optional |  |
+| `digits_unlit_color` | character(len=*) | in | optional |  |
+| `theme` | character(len=*) | in | optional |  |
 
 **Call graph**
 
@@ -350,10 +359,13 @@ flowchart TD
   initialize["initialize"] --> destroy["destroy"]
   initialize["initialize"] --> get_environment["get_environment"]
   initialize["initialize"] --> initialize["initialize"]
+  initialize["initialize"] --> is_color["is_color"]
   initialize["initialize"] --> is_terminal["is_terminal"]
   initialize["initialize"] --> parse_template["parse_template"]
   initialize["initialize"] --> parse_trail["parse_trail"]
   initialize["initialize"] --> parse_zones["parse_zones"]
+  initialize["initialize"] --> pick["pick"]
+  initialize["initialize"] --> set_theme["set_theme"]
   initialize["initialize"] --> ucs4_string["ucs4_string"]
   style initialize fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
@@ -374,7 +386,6 @@ subroutine start(self)
 
 ```mermaid
 flowchart TD
-  start["start"] --> add_scale_bar["add_scale_bar"]
   start["start"] --> resolve_fields["resolve_fields"]
   start["start"] --> update["update"]
   style start fill:#3e63dd,stroke:#99b,stroke-width:2px
@@ -537,6 +548,7 @@ flowchart TD
   build_frame["build_frame"] --> count_text["count_text"]
   build_frame["build_frame"] --> done_text["done_text"]
   build_frame["build_frame"] --> hms["hms"]
+  build_frame["build_frame"] --> numeral["numeral"]
   build_frame["build_frame"] --> progress_state["progress_state"]
   build_frame["build_frame"] --> render["render"]
   build_frame["build_frame"] --> styled["styled"]
@@ -983,6 +995,32 @@ flowchart TD
   style lit_cells fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
+### numeral
+
+**Returns**: character(kind=[UCS4](/api/src/lib/forbear_kinds), len=:)
+
+```fortran
+function numeral(self, token, text, plain) result(output)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `self` | class([bar_object](/api/src/lib/forbear_bar_object#bar-object)) | in |  |  |
+| `token` | type([token_object](/api/src/lib/forbear_bar_object#token-object)) | inout |  |  |
+| `text` | character(len=*) | in |  |  |
+| `plain` | logical | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  build_frame["build_frame"] --> numeral["numeral"]
+  numeral["numeral"] --> styled["styled"]
+  style numeral fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
 ### scanner_body
 
 **Attributes**: pure
@@ -1178,6 +1216,31 @@ flowchart TD
   style done_text fill:#3e63dd,stroke:#99b,stroke-width:2px
 ```
 
+### pick
+
+**Attributes**: pure
+
+**Returns**: `character(len=:)`
+
+```fortran
+function pick(value, default) result(chosen)
+```
+
+**Arguments**
+
+| Name | Type | Intent | Attributes | Description |
+|------|------|--------|------------|-------------|
+| `value` | character(len=*) | in | optional |  |
+| `default` | character(len=*) | in |  |  |
+
+**Call graph**
+
+```mermaid
+flowchart TD
+  initialize["initialize"] --> pick["pick"]
+  style pick fill:#3e63dd,stroke:#99b,stroke-width:2px
+```
+
 ### pulse_phase
 
 **Attributes**: pure
@@ -1276,6 +1339,7 @@ function styled(token, text, plain) result(output)
 ```mermaid
 flowchart TD
   build_frame["build_frame"] --> styled["styled"]
+  numeral["numeral"] --> styled["styled"]
   styled["styled"] --> render["render"]
   styled["styled"] --> ucs4_string["ucs4_string"]
   style styled fill:#3e63dd,stroke:#99b,stroke-width:2px

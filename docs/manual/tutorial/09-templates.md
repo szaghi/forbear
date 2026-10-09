@@ -20,8 +20,9 @@ At the end:
   only: `{percent}` is `nnn%`, `{count}` is `25/50`, `{eta}` is `hh:mm:ss`; the spacing is the template's.
 - After a colon, a field takes colours and a style: `{percent:yellow}`, `{eta:white,on_blue,bold_on}`. The bar takes its
   width instead, `{bar:30}`; its colours stay the keywords of the filled and empty parts.
-- A mistake stops the program, in `initialize`, with a message that names it: an unknown field, colour or style, an
-  unclosed brace. A field of the program is looked up in `start`, so that `add_field` can come in between.
+- A mistake stops the program with a message that names it: an unknown colour or style, an unclosed brace, in
+  `initialize`; a field that is neither forbear's nor added by the program, in `start`, so that `add_field` can come in
+  between.
 
 ## A field of your own
 

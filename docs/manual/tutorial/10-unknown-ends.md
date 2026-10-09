@@ -44,4 +44,4 @@ For a livelier pulse, `pulse_trail` gives it a one-cell head and a fading trail,
 Reference: [finish](/guide/bar#finish).
 :::
 
-That is the end of the tutorial: the [cookbook](../cookbook) has short recipes for everyday tasks.
+Next: [11. A 1980s dashboard](./11-dashboard).

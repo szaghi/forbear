@@ -37,4 +37,4 @@ Spinners next to the bar and alone; a bare percentage; one object for several ba
 Reference: [Spinners](/guide/spinners).
 :::
 
-Next: [6. Sharing the terminal](./06-terminal).
+Next: [6. Talking while the bar runs](./06-terminal).
