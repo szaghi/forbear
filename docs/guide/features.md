@@ -17,6 +17,7 @@ Every feature of forbear, where the tutorial teaches it and where the reference 
 | Colours and styles | `<element>_color_fg`, `_color_bg`, `_style` | [3](/manual/tutorial/03-colours) | [Colours and styles](./styling) |
 | 24-bit colours | `'#rrggbb'` for any colour keyword | [3](/manual/tutorial/03-colours) | [24-bit colours](./styling#_24-bit-colours) |
 | Colour zones | `bar_zones` | — | [Zones](./styling#zones) |
+| Rising ramp | `bar_profile='ramp'` | — | [Profiles](./bar#profiles) |
 | Smooth bar | `partial_blocks` | [2](/manual/tutorial/02-look#a-smooth-bar) | [The line](./bar#the-line) |
 | Progress in percent | `add_progress_percent` | [4](/manual/tutorial/04-reports) | [initialize](./bar#initialize) |
 | Progress count | `add_progress_count` | [4](/manual/tutorial/04-reports) | [initialize](./bar#initialize) |

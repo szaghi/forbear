@@ -118,7 +118,10 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
 - **Colour zones**: `bar_zones='limit:colour …'` (`parse_zones`) fills `zone_limit(:)`/`zone_char(:)`, copies of
   `filled_char` with another fg. Every lit cell of `bar_body` goes through `lit_cells` (runs of one zone), the partial
   block and the indeterminate pulse included; `cell_zone` gives a cell the first zone whose limit reaches its end edge.
-  Colours may be FACE 24-bit `#rrggbb`; `scripts/ansi_screen.py` keeps `38;2;r;g;b` whole (its zeros are no resets).
+  `bar_profile='ramp'` (`profile`, `PROFILE_RAMP`) gives each cell its own `RAMP_BLOCKS(ramp_level(cell, width))`,
+  lit (`lit_cells`) or unlit (`unlit_cells`: `empty_char` colours, `black_intense` by default, blank in a log); it
+  rejects `partial_blocks`. Colours may be FACE 24-bit `#rrggbb`; `scripts/ansi_screen.py` keeps `38;2;r;g;b` whole
+  (its zeros are no resets).
 - **Modes**, resolved once in `initialize`: interactive comes from the `interactive` keyword, else
   `FORBEAR_INTERACTIVE`, else `is_terminal(output_unit)`. That calls C `isatty` through `iso_c_binding`, and only
   `output_unit`→fd 1 and `error_unit`→fd 2 can be terminals. `FORBEAR_DISABLE` (≠0) forces disabled. A

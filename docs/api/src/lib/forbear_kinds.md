@@ -45,7 +45,9 @@ flowchart TD
   draw["draw"] --> ucs4_string["ucs4_string"]
   finish["finish"] --> ucs4_string["ucs4_string"]
   initialize["initialize"] --> ucs4_string["ucs4_string"]
+  lit_cells["lit_cells"] --> ucs4_string["ucs4_string"]
   styled["styled"] --> ucs4_string["ucs4_string"]
+  unlit_cells["unlit_cells"] --> ucs4_string["ucs4_string"]
   update["update"] --> ucs4_string["ucs4_string"]
   write_message["write_message"] --> ucs4_string["ucs4_string"]
   style ucs4_string fill:#3e63dd,stroke:#99b,stroke-width:2px

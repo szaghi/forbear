@@ -66,6 +66,7 @@ setting not passed takes its default, whatever the bar had before.
 | `min_value` | `real(real64)` | 0 | Start of the range. |
 | `max_value` | `real(real64)` | 1 | End of the range. |
 | `partial_blocks` | `logical` | `.false.` | Draw the done part with full and partial blocks, eight steps per character. |
+| `bar_profile` | `character(*)` | `'flat'` | The glyph of each cell: `'flat'`, the filled and empty strings; `'ramp'`, blocks rising along the body. See [Profiles](#profiles). |
 | `bar_zones` | `character(*)` | none | Colour each filled cell by its position: `limit:colour` items, e.g. `'0.7:green 0.9:yellow 1:red'`. See [Zones](./styling#zones). |
 | `min_interval` | `real(real64)` | 0.1 | Minimum time between two drawings on a terminal, in seconds; `FORBEAR_MIN_INTERVAL` replaces the default. |
 | `log_interval` | `real(real64)` | 0 | In a log, also write a line when this many seconds have passed since the last one; 0 for none. `FORBEAR_LOG_INTERVAL` replaces the default. On a terminal it does nothing. |
@@ -92,6 +93,21 @@ and a partial block for the eighths of the next character, in the foreground of 
 `empty_char`. With [`bar_zones`](./styling#zones), each filled cell, the partial one included, takes the foreground of
 its zone. The filled and empty strings are repeated as they are: with more than one character each, the bar is
 wider than `width`. With `width=0` the bar body is empty and the line is the rest: a spinner or a percentage alone.
+
+### Profiles
+
+`bar_profile='ramp'` draws every cell of the body as a block rising from `▁` (one eighth high) in the first cell to `█`
+in the last, as the bar graph of a dashboard tachometer. Done cells are lit, in the colours of `filled_char` (or of
+their [zone](./styling#zones)); remaining cells keep their blocks, unlit, in the colours of `empty_char`, whose
+foreground is `black_intense` unless `empty_char_color_fg` is given. The filled and empty strings are not used. A log
+has no colours, so its remaining cells are blank: `▁▃  ` for 4 cells half done. `partial_blocks` draws blocks of
+its own: together with a ramp, it stops the program; so does a profile that is not `flat` or `ramp`.
+
+<<< @/examples/snippets/ramp-init.f90
+
+At 80%:
+
+<<< @/examples/output/ramp.ansi{ansi}
 
 The prefix and the suffix can change while the bar runs: assign `bar%prefix%string` or `bar%suffix%string` (any
 string, as `prefix_string`), and the next drawing shows it, in the colours set by `initialize` (or by the template).

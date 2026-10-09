@@ -18,6 +18,11 @@ character(len=1), parameter :: LF  = achar(10) !< Line feed.
 ! UTF-8 encoded, as every literal of the sources: written byte by byte, the terminal shows the characters
 character(len=*), parameter :: FULL_BLOCK = '█'                                          !< Full block.
 character(len=*), parameter :: PARTIAL_BLOCKS(1:7) = ['▏', '▎', '▍', '▌', '▋', '▊', '▉'] !< Blocks of 1/8 to 7/8.
+character(len=*), parameter :: RAMP_BLOCKS(1:8) = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'] !< Blocks of 1/8 to 8/8 high.
+
+! profiles of the bar body: the glyph of each cell
+integer(I4P), parameter :: PROFILE_FLAT = 0 !< The filled and empty strings, the same in every cell.
+integer(I4P), parameter :: PROFILE_RAMP = 1 !< Blocks rising from 1/8 to the full height, lit or unlit by colour.
 
 ! kinds of the tokens of a template: text, or one of the fields
 integer(I4P), parameter :: TOKEN_TEXT    = 0  !< Literal text.
@@ -92,6 +97,7 @@ type :: bar_object
    logical                           :: add_date_time        !< Add date and time.
    logical                           :: add_summary          !< Add a summary line at the end.
    logical                           :: partial_blocks       !< Draw the bar with partial blocks, 8 steps per character.
+   integer(I4P)                      :: profile              !< Profile of the body: PROFILE_FLAT, PROFILE_RAMP.
    logical                           :: indeterminate        !< The total is unknown: `current` counts what is done.
    logical                           :: is_interactive_      !< Flag set when the bar is drawn on a terminal.
    logical                           :: is_disabled_         !< Flag set when the bar draws nothing.
@@ -135,6 +141,7 @@ type :: bar_object
       procedure, pass(self), private :: build_frame    !< Build the frame of the current progress.
       procedure, pass(self), private :: cell_zone      !< Return the colour zone of a cell of the body.
       procedure, pass(self), private :: lit_cells      !< Return filled cells of the body, in the colours of their zones.
+      procedure, pass(self), private :: unlit_cells    !< Return empty cells of the body.
       procedure, pass(self), private :: parse_zones    !< Build the colour zones of the body.
       procedure, pass(self), private :: default_layout !< Build the layout the keywords describe.
       procedure, pass(self), private :: parse_template !< Build the layout of a template.
@@ -195,6 +202,7 @@ contains
    self%add_date_time = .false.
    self%add_summary = .false.
    self%partial_blocks = .false.
+   self%profile = PROFILE_FLAT
    self%indeterminate = .false.
    self%is_interactive_ = .false.
    self%is_disabled_ = .false.
@@ -236,7 +244,7 @@ contains
                          message_color_fg, message_color_bg, message_style,                                                  &
                          width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position,          &
                          interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit,   &
-                         bar_zones)
+                         bar_zones, bar_profile)
    !< Initialize bar.
    !<
    !< Every setting not passed takes its default. The display mode is resolved here: `interactive` if passed, else the
@@ -245,7 +253,9 @@ contains
    !< `FORBEAR_LOG_INTERVAL` replace the defaults of `min_interval` and `log_interval`. With `indeterminate`, the total
    !< is unknown: `current` counts what is done, from `min_value`, and the bar ends with `finish`; it has no percent, ETA
    !< or scale (asking for them stops the program). `bar_zones` colours each filled cell of the body by its position, as
-   !< `limit:colour` items separated by blanks, e.g. `'0.7:#2EF5C0 0.88:#FFB000 1:#FF3B30'`.
+   !< `limit:colour` items separated by blanks, e.g. `'0.7:#2EF5C0 0.88:#FFB000 1:#FF3B30'`. `bar_profile='ramp'` draws
+   !< every cell as a block rising along the body, lit in the filled colours, unlit in the empty ones (`black_intense`
+   !< if not given), blank in a log; the filled and empty strings are not used, and `partial_blocks` stops the program.
    class(bar_object), intent(inout)         :: self                      !< Bar.
    class(*),          intent(in), optional  :: prefix_string             !< Prefix string.
    character(len=*),  intent(in), optional  :: prefix_color_fg           !< Prefix foreground color.
@@ -322,9 +332,11 @@ contains
    real(R8P),         intent(in), optional  :: log_interval              !< Maximum time between two lines of a log.
    integer(I4P),      intent(in), optional  :: output_unit               !< Output unit to display bar
    character(len=*),  intent(in), optional  :: bar_zones                 !< Colour zones of the body, `limit:colour …`.
+   character(len=*),  intent(in), optional  :: bar_profile               !< Profile of the body: `flat`, `ramp`.
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
    character(len=:),            allocatable :: env                       !< Value of an environment variable.
+   character(len=:),            allocatable :: empty_color_fg_           !< Foreground of the empty char, local variable.
    real(R8P)                                :: env_real                  !< Real value of an environment variable.
    integer(I4P)                             :: iostat                    !< Status of a read.
    logical                                  :: is_partial                !< Draw with partial blocks.
@@ -346,13 +358,35 @@ contains
    endif
 
    call self%destroy
+   if (present(bar_profile)) then
+      select case(bar_profile)
+      case('flat') ; self%profile = PROFILE_FLAT
+      case('ramp') ; self%profile = PROFILE_RAMP
+      case default
+         write(stderr, '(A)') 'forbear: unknown bar_profile "'//bar_profile//'", flat or ramp, '// &
+                              'see https://szaghi.github.io/forbear/guide/bar#initialize'
+         error stop 'forbear: unknown bar_profile'
+      endselect
+   endif
+   if (self%profile == PROFILE_RAMP .and. is_partial) then
+      write(stderr, '(A)') 'forbear: bar_profile="ramp" draws its own blocks, without partial_blocks, '// &
+                           'see https://szaghi.github.io/forbear/guide/bar#initialize'
+      error stop 'forbear: bar_profile="ramp" with partial_blocks'
+   endif
+   if (present(empty_char_color_fg)) then
+      empty_color_fg_ = empty_char_color_fg
+   elseif (self%profile == PROFILE_RAMP) then
+      empty_color_fg_ = 'black_intense' ! the unlit cells must look unlit
+   else
+      empty_color_fg_ = ''
+   endif
    call self%prefix%initialize(string=prefix_string, color_fg=prefix_color_fg, color_bg=prefix_color_bg, style=prefix_style)
    call self%suffix%initialize(string=suffix_string, color_fg=suffix_color_fg, color_bg=suffix_color_bg, style=suffix_style)
    call self%bracket_left%initialize(string=bracket_left_string, color_fg=bracket_left_color_fg, color_bg=bracket_left_color_bg,&
                                      style=bracket_left_style)
    call self%bracket_right%initialize(string=bracket_right_string, color_fg=bracket_right_color_fg,&
                                       color_bg=bracket_right_color_bg, style=bracket_right_style)
-   call self%empty_char%initialize(string=empty_char_string_, color_fg=empty_char_color_fg, color_bg=empty_char_color_bg,&
+   call self%empty_char%initialize(string=empty_char_string_, color_fg=empty_color_fg_, color_bg=empty_char_color_bg,&
                                    style=empty_char_style)
    call self%filled_char%initialize(string=filled_char_string_, color_fg=filled_char_color_fg, color_bg=filled_char_color_bg,&
                                     style=filled_char_style)
@@ -744,14 +778,14 @@ contains
       if (self%is_complete_) then
          body = self%lit_cells(1_I4P, self%width, plain)
       elseif (plain) then
-         body = repeat(render(self%empty_char, plain), self%width)
+         body = self%unlit_cells(1_I4P, self%width, plain)
       else
          block = min(self%width, max(1_I4P, self%width / 4_I4P))
          travel = self%width - block
          k = 0 ; if (travel > 0) k = mod(self%pulse_ - 1_I4P, 2_I4P * travel)
          if (k > travel) k = 2_I4P * travel - k
-         body = repeat(render(self%empty_char, plain), k)//self%lit_cells(k + 1_I4P, k + block, plain)// &
-                repeat(render(self%empty_char, plain), travel - k)
+         body = self%unlit_cells(1_I4P, k, plain)//self%lit_cells(k + 1_I4P, k + block, plain)// &
+                self%unlit_cells(k + block + 1_I4P, self%width, plain)
       endif
    elseif (self%partial_blocks) then
       cells = fraction * self%width
@@ -770,10 +804,10 @@ contains
          body = body//render(glyph, plain)
          rest = rest - 1
       endif
-      body = body//repeat(render(self%empty_char, plain), rest)
+      body = body//self%unlit_cells(self%width - rest + 1_I4P, self%width, plain)
    else
       full = nint(progress / 100._R8P * self%width)
-      body = self%lit_cells(1_I4P, full, plain)//repeat(render(self%empty_char, plain), self%width - full)
+      body = self%lit_cells(1_I4P, full, plain)//self%unlit_cells(full + 1_I4P, self%width, plain)
    endif
    endfunction bar_body
 
@@ -803,8 +837,22 @@ contains
    integer(I4P)                             :: zone  !< Zone of a run of cells.
    integer(I4P)                             :: c     !< First cell of a run.
    integer(I4P)                             :: r     !< Last cell of a run.
+   type(element_object)                     :: glyph !< A cell of a ramp.
 
    cells = UCS4_''
+   if (self%profile == PROFILE_RAMP) then ! a glyph of its own in every cell
+      do c=first, last
+         zone = self%cell_zone(c)
+         if (zone > 0) then
+            glyph = self%zone_char(zone)
+         else
+            glyph = self%filled_char
+         endif
+         glyph%string = ucs4_string(input=RAMP_BLOCKS(ramp_level(c, self%width)))
+         cells = cells//render(glyph, plain)
+      enddo
+      return
+   endif
    c = first
    do while (c <= last)
       zone = self%cell_zone(c)
@@ -821,6 +869,30 @@ contains
       c = r + 1_I4P
    enddo
    endfunction lit_cells
+
+   pure function unlit_cells(self, first, last, plain) result(cells)
+   !< Return the empty cells `first` to `last` of the body; those of a ramp keep their blocks, unlit, or are blank in a log.
+   class(bar_object), intent(in)            :: self  !< Bar.
+   integer(I4P),      intent(in)            :: first !< First cell.
+   integer(I4P),      intent(in)            :: last  !< Last cell.
+   logical,           intent(in)            :: plain !< Write without colors.
+   character(len=:, kind=UCS4), allocatable :: cells !< Rendered cells.
+   type(element_object)                     :: glyph !< A cell of a ramp.
+   integer(I4P)                             :: c     !< Counter.
+
+   if (self%profile /= PROFILE_RAMP) then
+      cells = repeat(render(self%empty_char, plain), max(0_I4P, last - first + 1_I4P))
+   elseif (plain) then ! without colours, an unlit block would look lit
+      cells = repeat(UCS4_' ', max(0_I4P, last - first + 1_I4P))
+   else
+      cells = UCS4_''
+      glyph = self%empty_char
+      do c=first, last
+         glyph%string = ucs4_string(input=RAMP_BLOCKS(ramp_level(c, self%width)))
+         cells = cells//render(glyph, plain)
+      enddo
+   endif
+   endfunction unlit_cells
 
    pure subroutine measure(self, current, fraction, progress)
    !< Return the progress of a current value: the fraction of the range done, clamped to [0, 1], and the percent,
@@ -1825,6 +1897,16 @@ contains
       text = trim(adjustl(compact_real(done, 6_I4P)))
    endif
    endfunction done_text
+
+   pure function ramp_level(cell, width) result(level)
+   !< Return the height, in eighths, of a cell of a ramp: from 1 in the first cell to 8 in the last.
+   integer(I4P), intent(in) :: cell  !< Cell, from 1 to the width.
+   integer(I4P), intent(in) :: width !< Width of the body.
+   integer(I4P)             :: level !< Height, in eighths.
+
+   level = 8
+   if (width > 1) level = 1_I4P + (7_I4P * (cell - 1_I4P)) / (width - 1_I4P)
+   endfunction ramp_level
 
    pure function display_width(string) result(width)
    !< Return the columns a string takes on a terminal: its characters, UTF-8 continuation bytes excluded.
