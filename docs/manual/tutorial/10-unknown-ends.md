@@ -36,6 +36,9 @@ After `finish`, updates do nothing until the next `start`, as after 100%; on a b
 In a log, an indeterminate bar writes two lines, at the start and at the end: there is no 10% to wait for. A
 determinate bar finished early writes one last line, unless its last line already shows where it stopped.
 
+For a livelier pulse, `pulse_trail` gives it a one-cell head and a fading trail, as a scanner: see
+[Pulse trail](/guide/bar#pulse-trail).
+
 ::: tip What you learned
 `indeterminate` bars, ended by `finish`; `finish` for a loop left before its end.
 Reference: [finish](/guide/bar#finish).

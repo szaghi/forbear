@@ -81,6 +81,7 @@ type :: bar_object
    type(element_object), allocatable :: spinner(:)           !< Spinner.
    real(R8P),            allocatable :: zone_limit(:)        !< Upper limits of the colour zones of the body, in (0, 1].
    type(element_object), allocatable :: zone_char(:)         !< Filled char, in the colour of each zone.
+   type(element_object), allocatable :: trail_char(:)        !< Filled char, in the colour of each step of the pulse trail.
    integer(I4P)                      :: width                !< With of the bar.
    real(R8P)                         :: min_value            !< Minimum value.
    real(R8P)                         :: max_value            !< Maximum value.
@@ -143,6 +144,8 @@ type :: bar_object
       procedure, pass(self), private :: lit_cells      !< Return filled cells of the body, in the colours of their zones.
       procedure, pass(self), private :: unlit_cells    !< Return empty cells of the body.
       procedure, pass(self), private :: parse_zones    !< Build the colour zones of the body.
+      procedure, pass(self), private :: parse_trail    !< Build the trail of the pulse of an indeterminate body.
+      procedure, pass(self), private :: scanner_body   !< Return the body of an indeterminate bar with a pulse trail.
       procedure, pass(self), private :: default_layout !< Build the layout the keywords describe.
       procedure, pass(self), private :: parse_template !< Build the layout of a template.
       procedure, pass(self), private :: measure        !< Return the progress of a current value.
@@ -185,6 +188,7 @@ contains
    endif
    if (allocated(self%zone_limit)) deallocate(self%zone_limit)
    if (allocated(self%zone_char)) deallocate(self%zone_char)
+   if (allocated(self%trail_char)) deallocate(self%trail_char)
    self%width = 32
    self%min_value = 0._R8P
    self%max_value = 1._R8P
@@ -244,7 +248,7 @@ contains
                          message_color_fg, message_color_bg, message_style,                                                  &
                          width, min_value, max_value, frequency, min_interval, smoothing, partial_blocks, position,          &
                          interactive, disabled, hide_cursor, template, indeterminate, log_interval, output_unit,   &
-                         bar_zones, bar_profile)
+                         bar_zones, bar_profile, pulse_trail)
    !< Initialize bar.
    !<
    !< Every setting not passed takes its default. The display mode is resolved here: `interactive` if passed, else the
@@ -256,6 +260,8 @@ contains
    !< `limit:colour` items separated by blanks, e.g. `'0.7:#2EF5C0 0.88:#FFB000 1:#FF3B30'`. `bar_profile='ramp'` draws
    !< every cell as a block rising along the body, lit in the filled colours, unlit in the empty ones (`black_intense`
    !< if not given), blank in a log; the filled and empty strings are not used, and `partial_blocks` stops the program.
+   !< `pulse_trail` (indeterminate only) makes the pulse a one-cell head with a trail of the positions it left, one colour
+   !< per step back, brightest first, e.g. `'#C0281E #7A1912 #4A0F0B'`: a scanner.
    class(bar_object), intent(inout)         :: self                      !< Bar.
    class(*),          intent(in), optional  :: prefix_string             !< Prefix string.
    character(len=*),  intent(in), optional  :: prefix_color_fg           !< Prefix foreground color.
@@ -333,6 +339,7 @@ contains
    integer(I4P),      intent(in), optional  :: output_unit               !< Output unit to display bar
    character(len=*),  intent(in), optional  :: bar_zones                 !< Colour zones of the body, `limit:colour …`.
    character(len=*),  intent(in), optional  :: bar_profile               !< Profile of the body: `flat`, `ramp`.
+   character(len=*),  intent(in), optional  :: pulse_trail               !< Colours of the trail of the pulse, `colour …`.
    character(len=:, kind=UCS4), allocatable :: empty_char_string_        !< Characters used for empty bar, local variable.
    character(len=:, kind=UCS4), allocatable :: filled_char_string_       !< Characters used for filled bar, local variable.
    character(len=:),            allocatable :: env                       !< Value of an environment variable.
@@ -391,6 +398,7 @@ contains
    call self%filled_char%initialize(string=filled_char_string_, color_fg=filled_char_color_fg, color_bg=filled_char_color_bg,&
                                     style=filled_char_style)
    if (present(bar_zones)) call self%parse_zones(bar_zones)
+   if (present(pulse_trail)) call self%parse_trail(pulse_trail)
    call self%create_spinner(string=spinner_string, color_fg=spinner_color_fg, color_bg=spinner_color_bg, style=spinner_style)
    if (present(add_scale_bar)) self%add_scale_bar = add_scale_bar
    call self%scale_bar%initialize(color_fg=scale_bar_color_fg, color_bg=scale_bar_color_bg, style=scale_bar_style)
@@ -458,6 +466,10 @@ contains
                               'see https://szaghi.github.io/forbear/guide/bar#initialize'
          error stop 'forbear: indeterminate bar with a percent, an ETA or a scale'
       endif
+   elseif (allocated(self%trail_char)) then
+      write(stderr, '(A)') 'forbear: pulse_trail is for an indeterminate bar, '// &
+                           'see https://szaghi.github.io/forbear/guide/bar#pulse-trail'
+      error stop 'forbear: pulse_trail without indeterminate'
    endif
    if (self%add_scale_bar .and. self%width < 22) error stop 'error: for adding scale bar the bar width must be at least 22 chars'
    endsubroutine initialize
@@ -779,11 +791,12 @@ contains
          body = self%lit_cells(1_I4P, self%width, plain)
       elseif (plain) then
          body = self%unlit_cells(1_I4P, self%width, plain)
+      elseif (allocated(self%trail_char)) then
+         body = self%scanner_body(plain)
       else
          block = min(self%width, max(1_I4P, self%width / 4_I4P))
          travel = self%width - block
-         k = 0 ; if (travel > 0) k = mod(self%pulse_ - 1_I4P, 2_I4P * travel)
-         if (k > travel) k = 2_I4P * travel - k
+         k = pulse_phase(self%pulse_, travel)
          body = self%unlit_cells(1_I4P, k, plain)//self%lit_cells(k + 1_I4P, k + block, plain)// &
                 self%unlit_cells(k + block + 1_I4P, self%width, plain)
       endif
@@ -869,6 +882,36 @@ contains
       c = r + 1_I4P
    enddo
    endfunction lit_cells
+
+   pure function scanner_body(self, plain) result(body)
+   !< Return the body of an indeterminate bar with a pulse trail: a one-cell head going back and forth, and behind it the
+   !< cells it left on the last drawings, one trail colour per drawing back; where they meet, the brightest is drawn.
+   class(bar_object), intent(in)            :: self               !< Bar.
+   logical,           intent(in)            :: plain              !< Write without colors.
+   character(len=:, kind=UCS4), allocatable :: body               !< Body of the bar.
+   integer(I4P)                             :: step(1:self%width) !< Drawings back the head was in a cell; -1 never.
+   type(element_object)                     :: glyph              !< A cell of the trail.
+   integer(I4P)                             :: d                  !< Drawings back.
+   integer(I4P)                             :: c                  !< Cell.
+
+   step = -1
+   do d=size(self%trail_char, dim=1), 0, -1 ! from the oldest position to the head: a later one is brighter
+      if (self%pulse_ - d < 1_I4P) cycle
+      step(pulse_phase(self%pulse_ - d, self%width - 1_I4P) + 1_I4P) = d
+   enddo
+   body = UCS4_''
+   do c=1, self%width
+      if (step(c) < 0) then
+         body = body//self%unlit_cells(c, c, plain)
+      elseif (step(c) == 0) then
+         body = body//self%lit_cells(c, c, plain)
+      else
+         glyph = self%trail_char(step(c))
+         if (self%profile == PROFILE_RAMP) glyph%string = ucs4_string(input=RAMP_BLOCKS(ramp_level(c, self%width)))
+         body = body//render(glyph, plain)
+      endif
+   enddo
+   endfunction scanner_body
 
    pure function unlit_cells(self, first, last, plain) result(cells)
    !< Return the empty cells `first` to `last` of the body; those of a ramp keep their blocks, unlit, or are blank in a log.
@@ -1210,6 +1253,43 @@ contains
       colon = index(item, ':')
       endsubroutine next_item
    endsubroutine parse_zones
+
+   subroutine parse_trail(self, trail)
+   !< Build the trail of the pulse from colours separated by blanks, a name or `#rrggbb` each, brightest first.
+   class(bar_object), intent(inout) :: self  !< Bar.
+   character(len=*),  intent(in)    :: trail !< Colours.
+   character(len=:), allocatable    :: rest  !< Colours still to parse.
+   character(len=:), allocatable    :: item  !< A colour.
+   integer(I4P)                     :: n     !< Number of colours.
+   integer(I4P)                     :: pass  !< First pass: check and count; second: build.
+
+   do pass=1, 2 ! allocated once: see parse_zones
+      rest = trim(adjustl(trail))
+      n = 0
+      do while (len(rest) > 0)
+         if (index(rest, ' ') > 0) then
+            item = rest(:index(rest, ' ') - 1)
+            rest = trim(adjustl(rest(index(rest, ' ') + 1:)))
+         else
+            item = rest
+            rest = ''
+         endif
+         n = n + 1
+         if (pass == 1) then
+            if (.not.is_color(item)) then
+               write(stderr, '(A)') 'forbear: an unknown colour "'//item//'" in pulse_trail "'//trail//'", '// &
+                                    'see https://szaghi.github.io/forbear/guide/bar#pulse-trail'
+               error stop 'forbear: wrong pulse_trail'
+            endif
+         else
+            self%trail_char(n) = self%filled_char
+            self%trail_char(n)%color_fg = item
+         endif
+      enddo
+      if (n == 0) return
+      if (pass == 1) allocate(self%trail_char(n))
+   enddo
+   endsubroutine parse_trail
 
    subroutine resolve_fields(self)
    !< Find the fields of the program that the template names: a name with no field stops the program.
@@ -1897,6 +1977,17 @@ contains
       text = trim(adjustl(compact_real(done, 6_I4P)))
    endif
    endfunction done_text
+
+   pure function pulse_phase(drawing, travel) result(phase)
+   !< Return the offset of the pulse at a drawing of an indeterminate body: one cell per drawing, back and forth.
+   integer(I4P), intent(in) :: drawing !< Drawing, from 1.
+   integer(I4P), intent(in) :: travel  !< Positions of the pulse, after the first.
+   integer(I4P)             :: phase   !< Offset of the pulse, from 0 to travel.
+
+   phase = 0
+   if (travel > 0) phase = mod(drawing - 1_I4P, 2_I4P * travel)
+   if (phase > travel) phase = 2_I4P * travel - phase
+   endfunction pulse_phase
 
    pure function ramp_level(cell, width) result(level)
    !< Return the height, in eighths, of a cell of a ramp: from 1 in the first cell to 8 in the last.

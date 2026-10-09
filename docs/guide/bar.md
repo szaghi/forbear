@@ -67,6 +67,7 @@ setting not passed takes its default, whatever the bar had before.
 | `max_value` | `real(real64)` | 1 | End of the range. |
 | `partial_blocks` | `logical` | `.false.` | Draw the done part with full and partial blocks, eight steps per character. |
 | `bar_profile` | `character(*)` | `'flat'` | The glyph of each cell: `'flat'`, the filled and empty strings; `'ramp'`, blocks rising along the body. See [Profiles](#profiles). |
+| `pulse_trail` | `character(*)` | none | With `indeterminate`: the moving block becomes a one-cell head with a trail of fading colours, e.g. `'red_intense red black_intense'`. See [Pulse trail](#pulse-trail). |
 | `bar_zones` | `character(*)` | none | Colour each filled cell by its position: `limit:colour` items, e.g. `'0.7:green 0.9:yellow 1:red'`. See [Zones](./styling#zones). |
 | `min_interval` | `real(real64)` | 0.1 | Minimum time between two drawings on a terminal, in seconds; `FORBEAR_MIN_INTERVAL` replaces the default. |
 | `log_interval` | `real(real64)` | 0 | In a log, also write a line when this many seconds have passed since the last one; 0 for none. `FORBEAR_LOG_INTERVAL` replaces the default. On a terminal it does nothing. |
@@ -108,6 +109,24 @@ its own: together with a ramp, it stops the program; so does a profile that is n
 At 80%:
 
 <<< @/examples/output/ramp.ansi{ansi}
+
+### Pulse trail
+
+The body of an [indeterminate](#initialize) bar is a block going back and forth, one cell per drawing.
+`pulse_trail` turns it into a scanner: a head of one cell, in the colours of `filled_char` (or of its
+[zone](./styling#zones)), and behind it the cells where the head was on the last drawings, one colour per drawing
+back, from the first colour of the list (the brightest, as a rule) to the last. The colours are names or `#rrggbb`,
+separated by blanks; they replace the foreground of `filled_char`. At each end the head turns back over its own trail,
+as a real scanner does; where two drawings meet in a cell, the later one is drawn. The 17 named colours give two or
+three shades of one hue (`'red_intense red black_intense'`); `#rrggbb` gives as many as wanted. A log draws no pulse,
+so the trail changes nothing there. On a bar that is not indeterminate, or with an unknown colour, `pulse_trail` stops
+the program.
+
+<<< @/examples/snippets/scanner-init.f90
+
+On the way back:
+
+<<< @/examples/output/scanner.ansi{ansi}
 
 The prefix and the suffix can change while the bar runs: assign `bar%prefix%string` or `bar%suffix%string` (any
 string, as `prefix_string`), and the next drawing shows it, in the colours set by `initialize` (or by the template).

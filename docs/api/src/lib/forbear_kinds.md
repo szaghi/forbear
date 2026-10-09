@@ -46,6 +46,7 @@ flowchart TD
   finish["finish"] --> ucs4_string["ucs4_string"]
   initialize["initialize"] --> ucs4_string["ucs4_string"]
   lit_cells["lit_cells"] --> ucs4_string["ucs4_string"]
+  scanner_body["scanner_body"] --> ucs4_string["ucs4_string"]
   styled["styled"] --> ucs4_string["ucs4_string"]
   unlit_cells["unlit_cells"] --> ucs4_string["ucs4_string"]
   update["update"] --> ucs4_string["ucs4_string"]

@@ -53,7 +53,7 @@ features:
     linkText: Batch jobs and logs
   - icon: 🎨
     title: Smooth, coloured, Unicode
-    details: "Eighth-of-a-cell partial blocks, 17 colours, 24-bit #rrggbb and 16 styles for every element, colour zones and rising ramps along the bar, any Unicode string, 40 spinners."
+    details: "Eighth-of-a-cell partial blocks, 17 colours, 24-bit #rrggbb and 16 styles for every element, colour zones, rising ramps and a scanner pulse, any Unicode string, 40 spinners."
     link: /guide/styling
     linkText: Colours and styles
 ---

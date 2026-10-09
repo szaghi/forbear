@@ -120,7 +120,9 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   block and the indeterminate pulse included; `cell_zone` gives a cell the first zone whose limit reaches its end edge.
   `bar_profile='ramp'` (`profile`, `PROFILE_RAMP`) gives each cell its own `RAMP_BLOCKS(ramp_level(cell, width))`,
   lit (`lit_cells`) or unlit (`unlit_cells`: `empty_char` colours, `black_intense` by default, blank in a log); it
-  rejects `partial_blocks`. Colours may be FACE 24-bit `#rrggbb`; `scripts/ansi_screen.py` keeps `38;2;r;g;b` whole
+  rejects `partial_blocks`. `pulse_trail` (indeterminate only, `parse_trail`, `trail_char(:)`) makes `scanner_body`
+  draw a one-cell head plus the cells of the last drawings (`pulse_phase(pulse_ - d, width - 1)`), oldest first so
+  that later ones win. Colours may be FACE 24-bit `#rrggbb`; `scripts/ansi_screen.py` keeps `38;2;r;g;b` whole
   (its zeros are no resets).
 - **Modes**, resolved once in `initialize`: interactive comes from the `interactive` keyword, else
   `FORBEAR_INTERACTIVE`, else `is_terminal(output_unit)`. That calls C `isatty` through `iso_c_binding`, and only

@@ -29,7 +29,7 @@
 </tr>
 <tr>
 <td width="50%"><b>📜 Batch jobs and logs</b><br><sub>Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log, and a line every ten minutes with <code>FORBEAR_LOG_INTERVAL=600</code>. <code>FORBEAR_DISABLE=1</code> turns every bar off; <code>disabled=(rank /= 0)</code> under MPI. <a href="https://szaghi.github.io/forbear/manual/tutorial/08-logs">Batch jobs and logs</a></sub></td>
-<td width="50%"><b>🎨 Smooth, coloured, Unicode</b><br><sub>Eighth-of-a-cell partial blocks, 17 colours, 24-bit <code>#rrggbb</code> and 16 styles for every element through <a href="https://github.com/szaghi/FACE">FACE</a>, colour zones and rising ramps along the bar, any Unicode string, 40 spinners. <a href="https://szaghi.github.io/forbear/guide/spinners">Spinners</a></sub></td>
+<td width="50%"><b>🎨 Smooth, coloured, Unicode</b><br><sub>Eighth-of-a-cell partial blocks, 17 colours, 24-bit <code>#rrggbb</code> and 16 styles for every element through <a href="https://github.com/szaghi/FACE">FACE</a>, colour zones, rising ramps and a scanner pulse, any Unicode string, 40 spinners. <a href="https://szaghi.github.io/forbear/guide/spinners">Spinners</a></sub></td>
 </tr>
 <tr>
 <td width="50%"><b>🛠️ Standard Fortran, small</b><br><sub>Fortran 2008, four modules and one small dependency (FACE, ANSI colours) fetched by <code>fobis fetch</code> or fpm. <a href="https://szaghi.github.io/forbear/guide/install">Installation</a></sub></td>

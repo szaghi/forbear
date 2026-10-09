@@ -78,9 +78,10 @@ of its line.
 
 A colour or style name that is not in [the lists](./styling) (or a malformed `#rrggbb`), wrong
 [`bar_zones`](./styling#zones), an unknown [`bar_profile`](./bar#profiles) or a ramp with `partial_blocks`, a
-`spinner_string` that is not the key of a [spinner](./spinners), a wrong [template](./templates): `initialize` stops the
-program (`error stop`), after a message on standard error that names the mistake. Before forbear 1.6 the names were ignored without a message, and a typo left an
-element without its colour.
+[`pulse_trail`](./bar#pulse-trail) on a bar that is not indeterminate, a `spinner_string` that is not the key of a
+[spinner](./spinners), a wrong [template](./templates): `initialize` stops the program (`error stop`), after a message
+on standard error that names the mistake. Before forbear 1.6 the names were ignored without a message, and a typo left
+an element without its colour.
 
 ## Other output while the bar runs
 
