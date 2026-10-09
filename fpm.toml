@@ -2,7 +2,7 @@ name = "forbear"
 author = "Stefano Zaghi"
 copyright  = "Copyright (c) 2017 Stefano Zaghi"
 license = "multi-licensing system: GPLv3, BSD2, BSD3, and MIT"
-description = "Fortran (progress) B(e)ar envinronment"
+description = "Fortran (progress) B(e)ar environment"
 homepage = "https://github.com/szaghi/forbear"
 
 [dependencies]
