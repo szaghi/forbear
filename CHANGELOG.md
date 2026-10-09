@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 Versions follow [Semantic Versioning](https://semver.org/).
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.9.0] — 2026-10-09
+### Added
+- **bar**: Add bar_zones, colouring each filled cell by its position
+
+- **bar**: Add bar_profile='ramp', blocks rising along the body
+
+- **bar**: Add pulse_trail, a scanner pulse for indeterminate bars
+
+- **bar**: Add seven-segment digits and dashboard themes
+
+
 ## [1.8.0] — 2026-10-08
 ### Added
 - **bar**: Add suspend, resume and log_interval
