@@ -139,10 +139,12 @@ Add to your `fpm.toml`:
 
 ```toml
 [dependencies]
-forbear = { git = "https://github.com/szaghi/forbear", tag = "v1.8.0" }
+forbear = { git = "https://github.com/szaghi/forbear", branch = "master" }
 ```
 
-v1.2.0 and older releases have no `fpm.toml`; the features of this documentation need v1.8.0 or later.
+This follows `master`, which always has the features of this documentation. For a fixed version, use
+`tag = "vX.Y.Z"` with a [release](https://github.com/szaghi/forbear/releases) (v1.3.0 or later: older ones have no
+`fpm.toml`).
 
 A Fortran 2008 compiler is required: tested on every push with gfortran 13 to 15 (and the 16 trunk), Intel ifx 2025.3
 and NVIDIA nvfortran 26.1 (see [Installation](https://szaghi.github.io/forbear/guide/install)).
