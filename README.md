@@ -1,5 +1,10 @@
 <div align="center">
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/public/logo-dark.svg">
+  <img src="docs/public/logo.svg" alt="forbear" width="200">
+</picture>
+
 # forbear
 #### Fortran (progress) B(e)ar environment
 
@@ -123,7 +128,7 @@ Clone, fetch FACE, and build:
 
 ```bash
 git clone https://github.com/szaghi/forbear && cd forbear
-fobis fetch                           # FACE into src/third_party, pinned by its fobos.lock
+fobis fetch                           # FACE master into src/third_party
 fobis build --mode static-gnu         # static/libforbear.a, modules in static/mod
 ```
 

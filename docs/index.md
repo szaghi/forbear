@@ -6,7 +6,8 @@ hero:
   text: Progress bars for Fortran
   tagline: "Bars, spinners, ETA and messages for long-running Fortran programs: one object, three calls, pure Fortran 2008. On a terminal it animates; in a batch log it writes clean lines."
   image:
-    src: /logo.svg
+    light: /logo.svg
+    dark: /logo-dark.svg
     alt: forbear
   actions:
     - theme: brand
@@ -26,32 +27,56 @@ hero:
       link: https://github.com/szaghi/forbear
 
 features:
-  - icon: 📊
+  - icon:
+      light: /icons/layout.svg
+      dark: /icons/layout-dark.svg
+      width: 48
+      height: 48
     title: Your layout, your fields
     details: "One template lays the line out, '{bar:30} {percent:yellow} ETA {eta}'; a field of your own shows the residual of your solver, or anything else."
     link: /manual/tutorial/09-templates
     linkText: Layout templates
-  - icon: ⏱️
+  - icon:
+      light: /icons/eta.svg
+      dark: /icons/eta-dark.svg
+      width: 48
+      height: 48
     title: ETA, speed, count, summary
     details: "A smoothed speed and the time to the end, the count of steps done, start and end time, a closing line with duration and throughput."
     link: /manual/tutorial/04-reports
     linkText: What the bar reports
-  - icon: 💬
+  - icon:
+      light: /icons/talk.svg
+      dark: /icons/talk-dark.svg
+      width: 48
+      height: 48
     title: Talk while it runs
     details: "bar%write prints a line above the running bar, update(message=) shows the residual of the step at its end, suspend and resume let a library print freely: no broken lines."
     link: /manual/tutorial/06-terminal
     linkText: Talking while the bar runs
-  - icon: 🪆
+  - icon:
+      light: /icons/nested.svg
+      dark: /icons/nested-dark.svg
+      width: 48
+      height: 48
     title: Nested and open-ended loops
     details: "One bar per loop level, each on its own line; a bar for a solver that runs until it converges; finish for a loop left early."
     link: /manual/tutorial/07-nested
     linkText: Nested loops
-  - icon: 📜
+  - icon:
+      light: /icons/logs.svg
+      dark: /icons/logs-dark.svg
+      width: 48
+      height: 48
     title: Batch jobs and logs
     details: "Not on a terminal, the bar writes a plain line every 10%: no carriage returns, no escape codes in your SLURM log; a line every ten minutes, if asked. One variable turns it off."
     link: /manual/tutorial/08-logs
     linkText: Batch jobs and logs
-  - icon: 🎨
+  - icon:
+      light: /icons/colour.svg
+      dark: /icons/colour-dark.svg
+      width: 48
+      height: 48
     title: Smooth, coloured, Unicode
     details: "Eighth-of-a-cell partial blocks, 17 colours, 24-bit #rrggbb and 16 styles for every element, colour zones, rising ramps, a scanner pulse, seven-segment digits and dashboard themes, any Unicode string, 40 spinners."
     link: /guide/styling

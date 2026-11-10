@@ -19,7 +19,7 @@ title: Installation
 
 ```bash
 git clone https://github.com/szaghi/forbear && cd forbear
-fobis fetch                         # FACE into src/third_party, at the commit pinned by its fobos.lock
+fobis fetch                         # FACE master into src/third_party
 fobis build --mode static-gnu       # static/libforbear.a, modules in static/mod
 fobis build --mode shared-gnu       # shared/libforbear.so
 fobis build --mode tests-gnu        # the test programs into exe/
@@ -28,7 +28,7 @@ fobis build --mode tests-intel      # the same with Intel ifx, tests-nvf with NV
 fobis build --lmodes                # every mode (GNU, Intel ifx, NVIDIA nvfortran; debug variants)
 ```
 
-`fobis fetch --update` moves FACE to its latest commit and updates `src/third_party/fobos.lock`.
+An existing clone of FACE stays where it is: `fobis fetch --update` moves it to the latest master.
 
 The library archive contains FACE too, so a program needs only `libforbear.a` and the module directory:
 

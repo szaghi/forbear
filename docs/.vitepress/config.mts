@@ -59,7 +59,15 @@ export default withMermaid({
   title: 'forbear',
   description: 'Fortran (progress) B(e)ar environment',
   base: '/forbear/',
-  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/forbear/logo.svg' }]],
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/forbear/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/forbear/favicon-32.png' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/forbear/favicon-16.png' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/forbear/apple-touch-icon.png' }],
+    ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+    ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
+    ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@800&family=Inter:wght@400;500;600;700&display=swap' }],
+  ],
 
   markdown: {
     math: true,
@@ -73,7 +81,7 @@ export default withMermaid({
   },
 
   themeConfig: {
-    logo: '/logo.svg',
+    logo: { light: '/logo-nav.svg', dark: '/logo-nav-dark.svg', alt: 'forbear' },
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Start here', link: '/guide/', activeMatch: '^/guide/(index|install)' },
@@ -132,6 +140,20 @@ export default withMermaid({
     // dies. es2022 needs no lowering and is within VitePress's browser floor.
     build: {
       target: 'es2022',
+    },
+    // The dev server pre-bundles dependencies in a separate esbuild pass, whose
+    // target defaults to es2020 too: without this, `vitepress dev` fails the
+    // same way (minisearch, mark.js, @vueuse) while `vitepress build` works.
+    // Pre-bundle mermaid itself in dev. vitepress-plugin-mermaid pre-bundles
+    // only the CommonJS dependencies mermaid used to have (dayjs, debug,
+    // cytoscape...) and serves mermaid raw, so a newer one breaks the dev site:
+    // mermaid 11.17 imports fastdom (CommonJS), the browser finds no default
+    // export, and the page is blank. Bundling mermaid converts all of them.
+    optimizeDeps: {
+      include: ['mermaid'],
+      esbuildOptions: {
+        target: 'es2022',
+      },
     },
   },
 })
