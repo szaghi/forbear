@@ -81,12 +81,14 @@ a minute, because each `march_*` step waits 40 ms, so that the GIFs are watchabl
 ## Dependencies
 
 - **FACE** (ANSI colours, `colorize`) is the only dependency. `fobis fetch` puts it in `src/third_party/FACE`, as the
-  `fobos` `[dependencies]` section declares, and checks it out at the commit pinned in `src/third_party/fobos.lock`.
-  Run `fobis fetch` on a fresh clone before any build; `fobis fetch --update` moves the pin. In `src/third_party`,
-  only `.gitignore`, `.deps_config.ini` and `fobos.lock` are tracked. The `.deps_config.ini` makes the CI
-  `FoBiS.py fetch` steps run, and `install.sh` fetches whenever `fobos` has `[dependencies]`. `$EXDIRS` excludes
-  FACE's own tests from the build. fpm resolves FACE separately from `fpm.toml`, so it is not pinned to the same
-  commit.
+  `fobos` `[dependencies]` section declares. The spec has no `branch`/`tag`/`rev`, so FACE tracks its default branch:
+  every fresh clone (CI, `install.sh`, a new checkout) builds against FACE master. Run `fobis fetch` on a fresh clone
+  before any build; an existing clone stays where it is until `fobis fetch --update`. `fobis fetch` always writes
+  `src/third_party/fobos.lock`, but only `--frozen` (never used here) enforces it: the lock is a local record, not
+  tracked, as in the other repos. Never pin a dependency. In `src/third_party`, only `.gitignore` and
+  `.deps_config.ini` are tracked. The `.deps_config.ini` makes the CI `FoBiS.py fetch` steps run, and `install.sh`
+  fetches whenever `fobos` has `[dependencies]`. `$EXDIRS` excludes FACE's own tests from the build. fpm resolves
+  FACE from `fpm.toml`, also unpinned.
 - The `UCS4_SUPPORTED` / `ASCII_SUPPORTED` preprocessor macros are set only in the GNU templates. The Intel and NVIDIA
   modes compile without them, so `ASCII` and `UCS4` both fall back to the default character kind. As a result, every
   `select type` over string kinds (`forbear_kinds.F90`, `forbear_element_object.F90`) has `#ifdef`'d branches. Keep
