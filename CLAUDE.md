@@ -195,8 +195,10 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   fail) with `tests-gnu-debug`; ifx 2025.3 and nvfortran 26.1 via `fortran-lang/setup-fortran` with
   `tests-intel-debug`/`tests-nvf-debug`; `fpm test`; and the docs-examples job, which reruns `docs_examples.sh` and
   fails if `docs/examples` changed.
-- CI (`.github/workflows/ci.yml`) runs `FoBiS.py fetch` (gated on `src/third_party/.deps_config.ini`), then the
-  coverage action. That action runs `fobis rule --ex makecoverage-analysis`, which removes FACE's coverage data and
+- CI (`.github/workflows/ci.yml`) runs in the container `ghcr.io/szaghi/fortran-toolchains:gnu-16.2` (gfortran 16.2,
+  FoBiS, formal; as the build job of `docs.yml`, both set by `[scaffold] toolchain_image` in `fobos`), so its coverage is
+  gfortran 16.2's; `matrix.yml` keeps the runner compilers. It runs `FoBiS.py fetch` (gated on
+  `src/third_party/.deps_config.ini`), then the coverage action. That action runs `fobis rule --ex makecoverage-analysis`, which removes FACE's coverage data and
   calls `scripts/compute-coverage.sh` to write `docs/public/coverage.json` (`{"pct":"…"}`). That file is a generated
   artifact: do not commit it. The release tarball does not contain FACE; `install.sh` fetches it.
 - The docs mirror FLAP's layout. "Start here" and the reference live in `docs/guide/`, the tutorial
