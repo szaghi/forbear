@@ -1,5 +1,8 @@
 [scaffold]
-toolchain_image = ghcr.io/szaghi/fortran-toolchains:gnu-16.2
+toolchain     = linux-gnu
+docs_examples = docs/examples
+fpm           = true
+matrix        = linux-gnu linux-oneapi linux-nvhpc
 
 [dependencies]
 deps_dir = src/third_party

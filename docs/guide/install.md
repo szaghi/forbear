@@ -7,7 +7,7 @@ title: Installation
 ## Requirements
 
 - A **Fortran 2008** compiler with the C preprocessor (the sources are `.F90`). forbear is tested on every push with
-  gfortran 13, 14 and 15 (and the gfortran 16 trunk), Intel ifx 2025.3 and NVIDIA nvfortran 26.1, with FoBiS, and with
+  gfortran 13, 14 and 16, Intel ifx 2026.2 and NVIDIA nvfortran 26.9, with FoBiS, and with
   fpm; it also builds and passes its tests with gfortran 11 and 12 and nvfortran 26.5.
 - [FACE](https://github.com/szaghi/FACE) (ANSI colours), fetched into `src/third_party` by every build system.
 - A terminal that understands ANSI escape sequences and the carriage return: see [Behaviour and
