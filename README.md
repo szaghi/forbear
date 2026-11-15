@@ -151,7 +151,7 @@ This follows `master`, which always has the features of this documentation. For 
 `tag = "vX.Y.Z"` with a [release](https://github.com/szaghi/forbear/releases) (v1.3.0 or later: older ones have no
 `fpm.toml`).
 
-A Fortran 2008 compiler is required: tested on every push with gfortran 13, 14 and 16, Intel ifx 2026.2
+A Fortran 2008 compiler is required: tested on every push with gfortran 16.2, Intel ifx 2026.2
 and NVIDIA nvfortran 26.9 (see [Installation](https://szaghi.github.io/forbear/guide/install)).
 
 ## Authors

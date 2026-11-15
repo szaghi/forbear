@@ -197,8 +197,7 @@ forbear (facade) ── bar_object (forbear_bar_object.F90) ── element_objec
   `fpm.yml` (`fpm = true`) and `docs-examples.yml` (`docs_examples = docs/examples`: `docs_examples.sh` must leave it
   unchanged) run; `matrix.yml` (`matrix = linux-gnu linux-oneapi linux-nvhpc`) runs the project's
   `scripts/ci/matrix.sh` (`tests-<family>-debug`, then `scripts/run_tests.sh`) with gfortran 16.2, ifx 2026.2 and
-  nvfortran 26.9 in their images. The project-owned `compilers.yml` runs the tests with Ubuntu 24.04's gfortran 13.3
-  and 14.2 on the runner. ci.yml's coverage runs `fobis rule --ex makecoverage-analysis`, which removes FACE's coverage
+  nvfortran 26.9 in their images (no compatibility floor: fortran-toolchains #2 rule 3). ci.yml's coverage runs `fobis rule --ex makecoverage-analysis`, which removes FACE's coverage
   data and calls `scripts/compute-coverage.sh` to write `docs/public/coverage.json` (`{"pct":"…"}`). That file is a
   generated artifact: do not commit it. The release tarball does not contain FACE; `install.sh` fetches it.
 - The docs mirror FLAP's layout. "Start here" and the reference live in `docs/guide/`, the tutorial
