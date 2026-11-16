@@ -122,6 +122,20 @@ documentation.
 
 ## Install
 
+### One-line install
+
+```bash
+curl -fsSL https://github.com/szaghi/forbear/releases/latest/download/install.sh | bash
+```
+
+It installs the latest release into `~/.local` with the build system you choose among those forbear ships
+(`--build fobis|fpm`: a menu asks when you do not say), the compiler you name (`--fc`, `--gnu`, `--intel`), one install
+per compiler (`lib/forbear/<compiler>-<version>/`, `include/forbear/<compiler>-<version>/`), and makes it usable through
+pkg-config (`pkg-config --cflags --libs forbear`, with `PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig`). The release
+carries FACE. Pass options after `bash -s --`, e.g. `... | bash -s -- --build fpm --prefix /opt/forbear`; `--help`
+lists them all, `--uninstall` removes the install. The installer is FoBiS's
+([One-line installer](https://szaghi.github.io/FoBiS/cookbook/installer)).
+
 ### FoBiS
 
 Clone, fetch FACE, and build:
